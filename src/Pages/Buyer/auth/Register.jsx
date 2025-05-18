@@ -20,7 +20,7 @@ const Register = () => {
             <form className="bg-white p-4 rounded-3 shadow-lg w-75">
                 <div style={{ width: '60%', margin: '0 auto' }}>
                     <div className="text-center mb-3">
-                        <img src="/assets/BuyersImg/images/logo.png" alt="Logo" className="img-fluid mb-3" style={{ width: '120px', height: 'auto' }} />
+                        <img src="/assets/BuyersImg/images/logo.png" alt="Logo" className="img-fluid mb-3 d-block mx-auto" style={{ maxWidth: '120px', height: 'auto' }} />
                         <h1 className="h1 bold">Get Started now</h1>
                         <p className="lg">Create an account to Sell Your Farming Products</p>
 
@@ -138,7 +138,7 @@ const Register = () => {
                         <div className="text-center small d-flex align-items-center justify-content-center gap-2 mt-2">
                             <span>Or login with</span>
                             <img
-                                src="/assets/images/google-logo.png"
+                                src="/assets/BuyersImg/images/google-logo.png"
                                 alt="Google"
                                 style={{ width: '20px', height: '20px' }}
                             />

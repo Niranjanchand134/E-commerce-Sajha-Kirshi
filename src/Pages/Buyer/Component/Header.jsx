@@ -1,11 +1,12 @@
 import './style.css';
-import { useNavigate, NavLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { UserOutlined, LogoutOutlined, FormOutlined } from '@ant-design/icons';
-import { Dropdown, Menu, Space } from 'antd'; // ✅ IMPORT Menu
-import React from 'react';
+import { Dropdown, Menu, Space } from 'antd';
+import React, { useState } from 'react';
 
 const Header = () => {
   const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogoutClick = () => {
     localStorage.removeItem("username");
@@ -43,45 +44,48 @@ const Header = () => {
   );
 
   return (
-    <>
-      <nav className="sticky top-0 bg-white p-[20px]">
-        <div className="flex justify-around text-regal-blue">
-          <div className="w-32">
-            <img src="/assets/BuyersImg/images/logo.png" alt="logo" />
-          </div>
-          <div className="flex items-center">
-            <ul className="grid grid-flow-col gap-4 text-gray-700">
-              <li className="hover:text-black active">Home</li>
-              <li>About</li>
-              <li>Services</li>
-              <li>Contact</li>
-              <li onClick={() => navigate('/Buyer-login')}>Login</li>
-              <li onClick={() => navigate('/Buyer-register')}>SignUp</li>
-            </ul>
-          </div>
-          <div className="grid grid-flow-col gap-4 items-center">
-            <div>
-              <i className="fa-solid fa-magnifying-glass"></i>
-            </div>
-            <div>
-              <i className="fa-solid fa-cart-shopping"></i>
-            </div>
-            <div>
-              <i className="fa-solid fa-bell"></i>
-            </div>
-            <div>
-              <Dropdown overlay={menu} trigger={["hover"]}>
-                <a onClick={(e) => e.preventDefault()}>
-                  <Space>
-                    <UserOutlined />
-                  </Space>
-                </a>
-              </Dropdown>
-            </div>
-          </div>
+    <nav className="sticky top-0 bg-white p-2 shadow-md z-50">
+      <div className="max-w-7xl mx-auto flex justify-around items-center">
+        {/* Logo */}
+        <div className="w-28">
+          <img src="/assets/BuyersImg/images/logo.png" alt="logo" className="w-full" />
         </div>
-      </nav>
-    </>
+
+        {/* Hamburger for mobile */}
+        <div className="lg:hidden">
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-2xl">
+            <i className="fas fa-bars"></i>
+          </button>
+        </div>
+
+        {/* Navigation Links */}
+        <div className={`lg:flex lg:items-center lg:space-x-6 ${isMenuOpen ? "block" : "hidden"} absolute lg:static top-16 left-0 w-full lg:w-auto bg-white px-4 lg:px-0 py-2 lg:py-0`}>
+          <ul className="flex flex-col lg:flex-row space-y-3 lg:space-y-0 lg:space-x-6 text-gray-700 text-center">
+            <li className="hover:text-black cursor-pointer">Home</li>
+            <li className="hover:text-black cursor-pointer">About</li>
+            <li className="hover:text-black cursor-pointer" onClick={() => navigate('/Buyer-shop')}>Services</li>
+            <li className="hover:text-black cursor-pointer">Contact</li>
+            <li className="hover:text-black cursor-pointer" onClick={() => navigate('/Buyer-login')}>Login</li>
+            <li className="hover:text-black cursor-pointer" onClick={() => navigate('/Buyer-register')}>SignUp</li>
+          </ul>
+        </div>
+
+        {/* Right Icons */}
+        <div className="hidden lg:flex items-center space-x-4 text-xl text-gray-700">
+          <i className="fa-solid fa-magnifying-glass hover:text-black cursor-pointer"></i>
+          <i className="fa-solid fa-cart-shopping hover:text-black cursor-pointer"></i>
+          <i className="fa-solid fa-bell hover:text-black cursor-pointer"></i>
+
+          <Dropdown overlay={menu} trigger={["hover"]}>
+            <a onClick={(e) => e.preventDefault()} className="hover:text-black">
+              <Space>
+                <UserOutlined />
+              </Space>
+            </a>
+          </Dropdown>
+        </div>
+      </div>
+    </nav>
   );
 };
 
