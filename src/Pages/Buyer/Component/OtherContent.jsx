@@ -50,9 +50,9 @@ const OtherContent = () => {
                         backgroundPosition: "center",
                     }}
                     >
-                    <div className="bg-opacity-40 bottom-0 content-end rounded text-end text-white">
+                    <div className="bg-opacity-40 bottom-0 content-end text-end text-white">
                         <i className="fa-solid fa-share-nodes bg-green-500 rounded text-white p-2"></i>
-                        <button className="bg-white px-6 py-2 text-black rounded-3 shadow">Kevin Smith</button>
+                        <button className="bg-white px-6 py-2 text-black rounded-l-lg shadow">Kevin Smith</button>
                     </div>
                 </div>
 
@@ -80,9 +80,9 @@ const OtherContent = () => {
                         backgroundPosition: "center",
                     }}
                     >
-                    <div className="bg-opacity-40 bottom-0 content-end rounded text-end text-white">
+                    <div className="bg-opacity-40 bottom-0 content-end text-end text-white">
                         <i className="fa-solid fa-share-nodes bg-green-500 rounded text-white p-2"></i>
-                        <button className="bg-white px-6 py-2 text-black rounded-3 shadow">David Martin</button>
+                        <button className="bg-white px-6 py-2 text-black rounded-l-lg shadow">David Martin</button>
                     </div>
                 </div>
             </div>
