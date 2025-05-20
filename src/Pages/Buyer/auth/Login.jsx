@@ -1,13 +1,51 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { greeting, loginDetails } from '../../../services/authService';
 
 const Login = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState("");
+    const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const [form, setForm] = useState({
+        email: "",
+        password: ""
+    })
+
+    const handleChange = (event)=>{
+        let errorMsg = "";
+        const{name, value} = event.target;
+        console.log(value);
+        setForm({...form, [name]:value})
+        if (name === "email" && !validateEmail(value)){
+            errorMsg ="Enter a valid email";
+
+        }
+        setError(errorMsg);
+
+    }
+    const handleSubmit = (event)=>{
+
+        // event.preventDefault();
+        console.log("submited")
+        loginDetails(form.email, form.password).then((response)=>{
+            const token = response;
+            if (token === null){
+                console.log("Invalid email and password!")
+            }
+            localStorage.setItem("token",token);
+        })
+
+    }
+
+    useEffect(()=>{
+        const response = greeting();
+        console.log("here is the response",response);
+    },[]);
 
     return (
         <div className="img-fluid d-flex justify-content-center align-items-center"
@@ -47,6 +85,9 @@ const Login = () => {
                         <input
                             type="email"
                             id="email"
+                            name='email'
+                            value={form.email}
+                            onChange={handleChange}
                             className="form-control form-control-sm shadow-sm"
                             placeholder="Hello@gmail.com"
                         />
@@ -57,6 +98,9 @@ const Login = () => {
                         <input
                             type={showPassword ? 'text' : 'password'}
                             id="Password"
+                            name='password'
+                            value={form.password}
+                            onChange={handleChange}
                             className="form-control form-control-sm shadow-sm pe-5"
                             placeholder="**********"
                         />
@@ -85,7 +129,7 @@ const Login = () => {
                     </div>
 
                     <div className="d-grid gap-2">
-                        <button className="btn btn-primary btn-sm" type="button">Sign Up</button>
+                        <button onClick={handleSubmit} className="btn btn-primary btn-sm" type="button">Sign Up</button>
                         <div className="text-center small d-flex align-items-center justify-content-center gap-2 mt-2">
                             <span>Or login with</span>
                             <img
