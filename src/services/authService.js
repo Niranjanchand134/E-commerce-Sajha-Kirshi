@@ -9,6 +9,11 @@ export const loginDetails = async (email, password) =>{
     return response.data;
 }
 
+export const RegiterUser = async (data) =>{
+    const response = await axios.post("http://localhost:8080/registers", data);
+    return response.data;
+}
+
 export const greeting = async () => {
   const response = await axios.get("http://localhost:8080/");
 
