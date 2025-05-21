@@ -9,18 +9,98 @@ const Register = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [form, setForm] = useState({
+        name: "",
+        contact: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+    });
+    const [errors, setErrors] = useState({});
+
+    // Mock registered emails for demonstration
+    const [registeredEmails, setRegisteredEmails] = useState([
+        "test@example.com",
+        "user@example.com"
+    ]);
+
+    const validateEmail = (email) =>
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    const validateContact = (contact) =>
+        /^98\d{8}$/.test(contact); // Nepali mobile number pattern
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm({ ...form, [name]: value });
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!form.name.trim()) newErrors.name = "Name is required";
+
+        if (!form.contact.trim()) newErrors.contact = "Contact is required";
+        else if (!validateContact(form.contact))
+            newErrors.contact = "Enter a valid Nepali mobile number";
+
+        if (!form.email.trim()) newErrors.email = "Email is required";
+        else if (!validateEmail(form.email))
+            newErrors.email = "Enter a valid email address";
+
+        if (!form.password) newErrors.password = "Password is required";
+        else if (form.password.length < 6)
+            newErrors.password = "Password must be at least 6 characters";
+
+        if (!form.confirmPassword)
+            newErrors.confirmPassword = "Please confirm your password";
+        else if (form.password !== form.confirmPassword)
+            newErrors.confirmPassword = "Passwords do not match";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) return;
+
+        // Check if email already exists
+        if (registeredEmails.includes(form.email)) {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                email: "Email is already registered"
+            }));
+            return;
+        }
+
+        // Simulate registering the user by adding the email to the registered list
+        setRegisteredEmails(prev => [...prev, form.email]);
+
+        alert("Registration Successful!");
+        navigate("/Buyer-login");
+    };
 
     return (
-        <div className="img-fluid d-flex justify-content-center align-items-center" style={{
-            backgroundImage: "url('/assets/BuyersImg/images/Background-img.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'no-repeat',
-            minHeight: '100vh',
-        }}>
-            <form className="bg-white p-4 rounded-3 shadow-lg w-75">
+        <div
+            className="img-fluid d-flex justify-content-center align-items-center"
+            style={{
+                backgroundImage: "url('/assets/BuyersImg/images/Background-img.png')",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                minHeight: '100vh',
+            }}
+        >
+            <form className="bg-white p-4 rounded-3 shadow-lg w-75" onSubmit={handleSubmit}>
                 <div style={{ width: '60%', margin: '0 auto' }}>
                     <div className="text-center mb-3">
-                        <img src="/assets/BuyersImg/images/logo.png" alt="Logo" className="img-fluid mb-3 d-block mx-auto" style={{ maxWidth: '120px', height: 'auto' }} />
+                        <img
+                            src="/assets/BuyersImg/images/logo.png"
+                            alt="Logo"
+                            className="img-fluid mb-3 d-block mx-auto"
+                            style={{ maxWidth: '120px', height: 'auto' }}
+                        />
                         <h1 className="h1 bold">Get Started now</h1>
                         <p className="lg">Create an account to Sell Your Farming Products</p>
 
@@ -32,46 +112,66 @@ const Register = () => {
                             >
                                 Log In
                             </button>
-                            <button
-                                type="button"
-                                className="btn btn-success btn-sm w-50"
-                            >
+                            <button type="button" className="btn btn-success btn-sm w-50">
                                 Sign Up
                             </button>
                         </div>
                     </div>
 
-                    <div className='container text-center' style={{ width: '100%' }}>
+                    <div className="container text-start" style={{ width: '100%' }}>
                         <div className="row row-cols-2">
+                            <div className="mb-2 col">
+                                <label htmlFor="name" className="form-label d-flex small">Enter your Full Name</label>
+                                <input
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    className={`form-control form-control-sm shadow-sm ${errors.name && 'is-invalid'}`}
+                                    placeholder="Enter your Name"
+                                    value={form.name}
+                                    onChange={handleChange}
+                                />
+                                {errors.name && <small className="text-danger">{errors.name}</small>}
+                            </div>
+
+                            <div className="mb-3 col">
+                                <label htmlFor="contact" className="form-label d-flex small">Enter your Contact</label>
+                                <input
+                                    type="text"
+                                    id="contact"
+                                    name="contact"
+                                    className={`form-control form-control-sm shadow-sm ${errors.contact && 'is-invalid'}`}
+                                    placeholder="9800000000"
+                                    value={form.contact}
+                                    onChange={handleChange}
+                                />
+                                {errors.contact && <small className="text-danger">{errors.contact}</small>}
+                            </div>
 
                             <div className="mb-2 col">
-                                <label htmlFor="emailId" className="form-label d-flex justify-content-center small">Enter your Email id</label>
+                                <label htmlFor="emailId" className="form-label d-flex small">Enter your Email</label>
                                 <input
                                     type="email"
                                     id="emailId"
-                                    className="form-control form-control-sm shadow-sm"
+                                    name="email"
+                                    className={`form-control form-control-sm shadow-sm ${errors.email && 'is-invalid'}`}
                                     placeholder="Hello@gmail.com"
+                                    value={form.email}
+                                    onChange={handleChange}
                                 />
+                                {errors.email && <small className="text-danger">{errors.email}</small>}
                             </div>
 
-                            <div className="mb-2 col">
-                                <label htmlFor="location" className="form-label d-flex justify-content-center small">Enter your location</label>
-                                <input
-                                    type="text"
-                                    id="location"
-                                    className="form-control form-control-sm shadow-sm"
-                                    placeholder="Ktm"
-                                />
-                            </div>
-
-                            {/* Password Field */}
                             <div className="mb-3 col position-relative">
-                                <label htmlFor="Password" className="form-label d-flex justify-content-center small">Enter your Password</label>
+                                <label htmlFor="Password" className="form-label d-flex small">Enter your Password</label>
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     id="Password"
-                                    className="form-control form-control-sm shadow-sm pe-5"
+                                    name="password"
+                                    className={`form-control form-control-sm shadow-sm pe-5 ${errors.password && 'is-invalid'}`}
                                     placeholder="**********"
+                                    value={form.password}
+                                    onChange={handleChange}
                                 />
                                 <span
                                     onClick={() => setShowPassword(!showPassword)}
@@ -87,26 +187,19 @@ const Register = () => {
                                 >
                                     {showPassword ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
                                 </span>
+                                {errors.password && <small className="text-danger">{errors.password}</small>}
                             </div>
 
-                            <div className="mb-3 col">
-                                <label htmlFor="contact" className="form-label d-flex justify-content-center small">Enter your Contact</label>
-                                <input
-                                    type="number"
-                                    id="contact"
-                                    className="form-control form-control-sm shadow-sm"
-                                    placeholder="9800000000"
-                                />
-                            </div>
-
-                            {/* Confirm Password Field */}
                             <div className="mb-3 col position-relative">
-                                <label htmlFor="confirmPassword" className="form-label d-flex justify-content-center small">Confirm your Password</label>
+                                <label htmlFor="confirmPassword" className="form-label d-flex small">Confirm your Password</label>
                                 <input
                                     type={showConfirmPassword ? 'text' : 'password'}
                                     id="confirmPassword"
-                                    className="form-control form-control-sm shadow-sm pe-5"
+                                    name="confirmPassword"
+                                    className={`form-control form-control-sm shadow-sm pe-5 ${errors.confirmPassword && 'is-invalid'}`}
                                     placeholder="**********"
+                                    value={form.confirmPassword}
+                                    onChange={handleChange}
                                 />
                                 <span
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -122,19 +215,18 @@ const Register = () => {
                                 >
                                     {showConfirmPassword ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
                                 </span>
+                                {errors.confirmPassword && <small className="text-danger">{errors.confirmPassword}</small>}
                             </div>
                         </div>
                     </div>
 
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                        <div className="form-check">
-                            <input type="checkbox" id="Remember" className="form-check-input" />
-                            <label htmlFor="Remember" className="form-check-label small">Remember Me</label>
-                        </div>
+                    <div className="form-check mb-3">
+                        <input type="checkbox" id="Remember" className="form-check-input" />
+                        <label htmlFor="Remember" className="form-check-label small">Remember Me</label>
                     </div>
 
                     <div className="d-grid gap-2">
-                        <button className="btn btn-primary btn-sm" type="button">Log In</button>
+                        <button className="btn btn-primary btn-sm" type="submit">Sign Up</button>
                         <div className="text-center small d-flex align-items-center justify-content-center gap-2 mt-2">
                             <span>Or login with</span>
                             <img
@@ -148,6 +240,6 @@ const Register = () => {
             </form>
         </div>
     );
-}
+};
 
 export default Register;

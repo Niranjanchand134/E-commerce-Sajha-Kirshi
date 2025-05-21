@@ -40,7 +40,7 @@ const OtherContent = () => {
                 <p className="text-[#EEC044]">Customer’s</p>
                 <h2 className="font-bold">Meet Our Farmers</h2>
             </div>
-            <div class="grid grid-cols-3 pr-60 pl-60 justify-between gap-4">
+            <div class="grid grid-cols-3 pr-60 pl-60 justify-around flex gap-4">
                 <div className="rounded-2xl"
                     style={{
                         height: "275px",

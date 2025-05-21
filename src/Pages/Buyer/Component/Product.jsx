@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { RightOutlined } from '@ant-design/icons';
 
 const Product = () => {
   return (
@@ -11,7 +12,7 @@ const Product = () => {
 
         <div className="flex justify-around items-center flex-wrap mb-4 px-4">
           <h2>Listings</h2>
-          <Link to="#" className="m-2">View All</Link>
+          <Link to="buyer-shop" className="m-2 text-black">View All <RightOutlined /></Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:px-60">

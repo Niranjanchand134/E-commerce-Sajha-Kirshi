@@ -1,66 +1,28 @@
+import React from 'react';
 import Footer from "./Footer";
 import Header from "./Header";
 import { Layout,Input, Select, Menu, Pagination  } from 'antd';
-import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
+import {UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons';
+import { NavLink } from 'react-router-dom';
 
 const { Sider, Content } = Layout;
 const { Search } = Input;
 
-const items = [
-  {
-    key: 'sub1',
-    icon: <MailOutlined />,
-    label: 'Navigation One',
-    children: [
-      {
-        key: '1-1',
-        label: 'Item 1',
-        type: 'group',
-        children: [
-          { key: '1', label: 'Option 1' },
-          { key: '2', label: 'Option 2' },
-        ],
-      },
-      {
-        key: '1-2',
-        label: 'Item 2',
-        type: 'group',
-        children: [
-          { key: '3', label: 'Option 3' },
-          { key: '4', label: 'Option 4' },
-        ],
-      },
-    ],
-  },
-  {
-    key: 'sub2',
-    icon: <AppstoreOutlined />,
-    label: 'Navigation Two',
-    children: [
-      { key: '5', label: 'Option 5' },
-      { key: '6', label: 'Option 6' },
-      {
-        key: 'sub3',
-        label: 'Submenu',
-        children: [
-          { key: '7', label: 'Option 7' },
-          { key: '8', label: 'Option 8' },
-        ],
-      },
-    ],
-  },
-  {
-    key: 'sub4',
-    label: 'Navigation Three',
-    icon: <SettingOutlined />,
-    children: [
-      { key: '9', label: 'Option 9' },
-      { key: '10', label: 'Option 10' },
-      { key: '11', label: 'Option 11' },
-      { key: '12', label: 'Option 12' },
-    ],
-  },
-];
+const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, index) => {
+  const key = String(index + 1);
+  return {
+    key: `sub${key}`,
+    icon: React.createElement(icon),
+    label: `subnav ${key}`,
+    children: Array.from({ length: 4 }).map((_, j) => {
+      const subKey = index * 4 + j + 1;
+      return {
+        key: subKey,
+        label: `option${subKey}`,
+      };
+    }),
+  };
+});
 const onClick = e => {
   console.log('click', e);
 };
@@ -73,13 +35,7 @@ const handleChange = value => {
 const onSearch = (value, _e, info) =>
   console.log(info === null || info === void 0 ? void 0 : info.source, value);
 
-const contentStyle = {
-  textAlign: 'center',
-  minHeight: 120,
-  lineHeight: '120px',
-  color: '#fff',
-  backgroundColor: '#0958d9',
-};
+
 
 const siderStyle = {
   textAlign: 'center',
@@ -111,7 +67,7 @@ const Shop = () => {
             <div style={{ width: 160 }} className="pe-8">
                 <Select
                 showSearch
-                placeholder="Select a person"
+                placeholder="Location"
                 style={{ width: '100%' }}
                 filterOption={(input, option) => {
                     var _a;
@@ -150,17 +106,36 @@ const Shop = () => {
                 />
             </div>
         </div>
-
-
         
-
         <div className="p-4">
           <Layout style={layoutStyle}>
             <Sider width="26%" style={siderStyle}>
-              <h2>categories</h2>
-              <Menu onClick={onClick} style={{ width: 256 }} mode="vertical" items={items} />
+              <h2 className='text-left'>categories</h2>
+              <Menu
+                mode="inline"
+                defaultSelectedKeys={['1']}
+                defaultOpenKeys={['sub1']}
+                style={{ height: '100%', borderRight: 0 }}
+                items={items2}
+              />
             </Sider>
-            <Content style={contentStyle}>Content</Content>
+            <Content style={{ padding: '16px', width: '100%', background: "white" }}>
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 w-full ">
+                  <NavLink to={'/Buyer-shopdetail'} className="rounded text-black no-underline transition-shadow duration-300 hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]">
+                    <img src="/assets/BuyersImg/Products/Onion.png" alt="Onion" />
+                    <div className="flex justify-between">
+                      <div className="p-2">
+                        <h5>Onions</h5>
+                        <p className='text-green-500 text-lg'>Rs 20.00</p>
+                      </div>
+                      <div className="text-right">
+                        <p className='mt-2'>Farm Name</p>
+                        <p>Godawari-5-Lalitpur</p>
+                      </div>
+                    </div>
+                  </NavLink>
+                </div>
+            </Content>
           </Layout>
           <Pagination align="center" defaultCurrent={1} total={50} style={{ marginTop: 16 }}/>
         </div>

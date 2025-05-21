@@ -9,99 +9,126 @@ import { greeting, loginDetails } from '../../../services/authService';
 const Login = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState("");
+    const [error, setError] = useState(""); // global error message
+    const [form, setForm] = useState({ email: "", password: "" });
+    const [errors, setErrors] = useState({ email: "", password: "" }); // field-level errors
+
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const [form, setForm] = useState({
-        email: "",
-        password: ""
-    })
 
-    const handleChange = (event)=>{
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setForm({ ...form, [name]: value });
+
         let errorMsg = "";
-        const{name, value} = event.target;
-        console.log(value);
-        setForm({...form, [name]:value})
-        if (name === "email" && !validateEmail(value)){
-            errorMsg ="Enter a valid email";
 
+        if (name === "email") {
+            if (!value) errorMsg = "Email is required";
+            else if (!validateEmail(value)) errorMsg = "Enter a valid email";
         }
-        setError(errorMsg);
 
-    }
-    const handleSubmit = (event)=>{
+        if (name === "password") {
+            if (!value) errorMsg = "Password is required";
+            else if (value.length < 6) errorMsg = "Password must be at least 6 characters";
+        }
 
-        // event.preventDefault();
-        console.log("submited")
-        loginDetails(form.email, form.password).then((response)=>{
-            const token = response;
-            if (token === null){
-                console.log("Invalid email and password!")
+        setErrors({ ...errors, [name]: errorMsg });
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        let valid = true;
+        const newErrors = { email: "", password: "" };
+
+        if (!form.email) {
+            newErrors.email = "Email is required";
+            valid = false;
+        } else if (!validateEmail(form.email)) {
+            newErrors.email = "Enter a valid email";
+            valid = false;
+        }
+
+        if (!form.password) {
+            newErrors.password = "Password is required";
+            valid = false;
+        } else if (form.password.length < 6) {
+            newErrors.password = "Password must be at least 6 characters";
+            valid = false;
+        }
+
+        setErrors(newErrors);
+
+        if (!valid) return;
+
+        try {
+            const token = await loginDetails(form.email, form.password);
+            if (!token) {
+                setError("Invalid email or password!");
+                return;
             }
-            localStorage.setItem("token",token);
-        })
+            localStorage.setItem("token", token);
+            navigate("/dashboard"); // Change to your protected route
+        } catch (err) {
+            setError("Something went wrong. Please try again later.");
+        }
+    };
 
-    }
-
-    useEffect(()=>{
+    useEffect(() => {
         const response = greeting();
-        console.log("here is the response",response);
-    },[]);
+        console.log("here is the response", response);
+    }, []);
 
     return (
         <div className="img-fluid d-flex justify-content-center align-items-center"
             style={{
                 backgroundImage: "url('/assets/BuyersImg/images/Background-img.png')",
                 backgroundSize: 'cover',
-                backgroundPosition: 'no-repeat',
+                backgroundPosition: 'center',
                 minHeight: '100vh',
             }}
         >
-            <form className="bg-white p-4 rounded-3 shadow-lg w-75">
+            <form className="bg-white p-4 rounded-3 shadow-lg w-75" onSubmit={handleSubmit}>
                 <div style={{ width: '65%', margin: '0 auto' }}>
-                    <div className="text-center  mb-3">
+                    <div className="text-center mb-3">
                         <img src="/assets/BuyersImg/images/logo.png" alt="Logo" className="img-fluid mb-3 d-block mx-auto" style={{ width: '120px', height: 'auto' }} />
                         <h1 className="h1 bold">Get Started now</h1>
                         <p className="lg">Create an account or log in to explore our site.</p>
 
                         <div className="d-flex justify-content-center gap-2 mb-3">
-                            <button
-                                type="button"
-                                className="btn btn-success btn-sm w-50"
-                            >
+                            <button type="button" className="btn btn-success btn-sm w-50">
                                 Log In
                             </button>
-                            <button
-                                type="button"
-                                className="btn btn-outline-success btn-sm w-50"
-                                onClick={() => navigate('/Buyer-register')}
-                            >
+                            <button type="button" className="btn btn-outline-success btn-sm w-50" onClick={() => navigate('/Buyer-register')}>
                                 Sign Up
                             </button>
                         </div>
                     </div>
 
+                    {error && <div className="text-danger text-center mb-3">{error}</div>}
+
                     <div className="mb-3">
-                        <label htmlFor="email" className="form-label d-flex justify-content-center small">Enter your Email</label>
+                        <label htmlFor="email" className="form-label d-flex small">Enter your Email</label>
                         <input
                             type="email"
                             id="email"
-                            name='email'
+                            name="email"
                             value={form.email}
                             onChange={handleChange}
-                            className="form-control form-control-sm shadow-sm"
+                            className={`form-control form-control-sm shadow-sm ${errors.email && 'is-invalid'}`}
                             placeholder="Hello@gmail.com"
                         />
+                        {errors.email && <small className="text-danger">{errors.email}</small>}
                     </div>
 
                     <div className="mb-3 position-relative">
-                        <label htmlFor="Password" className="form-label d-flex justify-content-center small">Enter your Password</label>
+                        <label htmlFor="Password" className="form-label d-flex small">Enter your Password</label>
                         <input
                             type={showPassword ? 'text' : 'password'}
                             id="Password"
-                            name='password'
+                            name="password"
                             value={form.password}
                             onChange={handleChange}
-                            className="form-control form-control-sm shadow-sm pe-5"
+                            className={`form-control form-control-sm shadow-sm pe-5 ${errors.password && 'is-invalid'}`}
                             placeholder="**********"
                         />
                         <span
@@ -118,6 +145,7 @@ const Login = () => {
                         >
                             {showPassword ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
                         </span>
+                        {errors.password && <small className="text-danger">{errors.password}</small>}
                     </div>
 
                     <div className="d-flex justify-content-between align-items-center mb-3">
@@ -129,14 +157,10 @@ const Login = () => {
                     </div>
 
                     <div className="d-grid gap-2">
-                        <button onClick={handleSubmit} className="btn btn-primary btn-sm" type="button">Sign Up</button>
+                        <button className="btn btn-primary btn-sm" type="submit">Login</button>
                         <div className="text-center small d-flex align-items-center justify-content-center gap-2 mt-2">
                             <span>Or login with</span>
-                            <img
-                                src="/assets/BuyersImg/images/google-logo.png"
-                                alt="Google"
-                                style={{ width: '20px', height: '20px' }}
-                            />
+                            <img src="/assets/BuyersImg/images/google-logo.png" alt="Google" style={{ width: '20px', height: '20px' }} />
                         </div>
                     </div>
                 </div>
