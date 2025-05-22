@@ -5,7 +5,7 @@ const Footer = () => {
         <div className="max-w-screen-xl mx-auto pl-40 pr-40  grid grid-cols-1 md:grid-cols-4 gap-">
           {/* Shop Categories */}
           <div>
-            <img src="/assets/BuyersImg/images/logo2.png" alt="Logo" className="mb-2" />
+            <img src="/assets/BuyersImg/images/logo2.png" alt="Logo" className="mb-2 w-48" />
             <p className="text-gray-400 mb-4">
               There are many variations of passages of lorem ipsum available, but the majority suffered.
             </p>
