@@ -49,23 +49,16 @@ const Header = () => {
  const joinus = {
   items: [
     {
-      label: "Become a Seller",
+      label: "Farmer Register",
       key: "seller",
-      onClick: () => navigate("/seller-register"),
+      onClick: () => navigate("/Farmer-register"),
     },
     {
       label: "Join as a Delivery Partner",
       key: "delivery",
       onClick: () => navigate("/delivery-register"),
     },
-  ],
-  onClick: ({ key }) => {
-    if (key === "seller") {
-      navigate("/seller-register");
-    } else if (key === "delivery") {
-      navigate("/delivery-register");
-    }
-  },
+  ]
 };
 
 
