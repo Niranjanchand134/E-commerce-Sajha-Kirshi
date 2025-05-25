@@ -57,6 +57,7 @@ const FarmerRegister = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+
         if (!validateForm()) return;
 
         if (registeredEmails.includes(form.email)) {

@@ -6,21 +6,26 @@ import Register from "./Pages/Buyer/auth/Register";
 import Shop from "./Pages/Buyer/Component/Shop";
 import ShopDetail from "./Pages/Buyer/Component/ShopDetail";
 import FarmerRegister from "./Pages/Buyer/auth/FarmerRegister";
+import { ToastContainer } from "react-toastify";
+import { AuthProvider } from "./Context/AuthContext";
 
 
 
 const App = () => {
-  return(
+  return (
+    <AuthProvider>
       <BrowserRouter>
+        <ToastContainer />
         <Routes>
-          <Route path='/' element={<Landing />}/>
-          <Route path='Buyer-shop' element={<Shop/>}/>
-          <Route path='Buyer-shopdetail' element={<ShopDetail/>}/>
-          <Route path='Buyer-login' element={<Login/>}/>
-          <Route path='Buyer-register' element={<Register/>}/>
-          <Route path='Farmer-register' element={<FarmerRegister/>}/>
+          <Route path="/" element={<Landing />} />
+          <Route path="Buyer-shop" element={<Shop />} />
+          <Route path="Buyer-shopdetail" element={<ShopDetail />} />
+          <Route path="Buyer-login" element={<Login />} />
+          <Route path="Buyer-register" element={<Register />} />
+          <Route path="Farmer-register" element={<FarmerRegister />} />
         </Routes>
       </BrowserRouter>
+    </AuthProvider>
   );
 }
 

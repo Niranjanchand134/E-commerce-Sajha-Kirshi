@@ -4,6 +4,8 @@ import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { UserRegister } from '../../../services/authService';
+import { ErrorMessageToast, SuccesfulMessageToast } from '../../../utils/Tostify.util';
 
 const Register = () => {
     const navigate = useNavigate();
@@ -11,10 +13,17 @@ const Register = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [form, setForm] = useState({
         name: "",
-        contact: "",
+        number: "",
         email: "",
         password: "",
         confirmPassword: ""
+    });
+
+    const [formData, setFormData] = useState({
+      name: "",
+      number: "",
+      email: "",
+      password: "",
     });
     const [errors, setErrors] = useState({});
 
@@ -33,6 +42,7 @@ const Register = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm({ ...form, [name]: value });
+        setFormData({...formData, [name]:value});
     };
 
     const validateForm = () => {
@@ -40,9 +50,9 @@ const Register = () => {
 
         if (!form.name.trim()) newErrors.name = "Name is required";
 
-        if (!form.contact.trim()) newErrors.contact = "Contact is required";
-        else if (!validateContact(form.contact))
-            newErrors.contact = "Enter a valid Nepali mobile number";
+        // if (!form.number.trim()) newErrors.contact = "Contact is required";
+        // else if (!validateContact(form.contact))
+        //     newErrors.contact = "Enter a valid Nepali mobile number";
 
         if (!form.email.trim()) newErrors.email = "Email is required";
         else if (!validateEmail(form.email))
@@ -61,25 +71,41 @@ const Register = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateForm()) return;
+        if (!validateForm()){
+            return;
+        } 
 
-        // Check if email already exists
-        if (registeredEmails.includes(form.email)) {
-            setErrors(prevErrors => ({
-                ...prevErrors,
-                email: "Email is already registered"
-            }));
+        try{
+          const response = await UserRegister(formData);
+
+          SuccesfulMessageToast("Register Successfully!")
+
+          navigate("/Buyer-login")
+
+        }catch (err) {
+            setErrors(err.message);
+            ErrorMessageToast(err.message);
             return;
         }
 
-        // Simulate registering the user by adding the email to the registered list
-        setRegisteredEmails(prev => [...prev, form.email]);
 
-        alert("Registration Successful!");
-        navigate("/Buyer-login");
+        // Check if email already exists
+        // if (registeredEmails.includes(form.email)) {
+        //     setErrors(prevErrors => ({
+        //         ...prevErrors,
+        //         email: "Email is already registered"
+        //     }));
+        //     return;
+        // }
+
+        // Simulate registering the user by adding the email to the registered list
+        // setRegisteredEmails(prev => [...prev, form.email]);
+
+        // alert("Registration Successful!");
+        // navigate("/Buyer-login");
     };
 
     return (
@@ -135,14 +161,14 @@ const Register = () => {
                             </div>
 
                             <div className="mb-3 col">
-                                <label htmlFor="contact" className="form-label d-flex small">Enter your Contact</label>
+                                <label htmlFor="contact" className="form-label d-flex small">Enter your Phone Number</label>
                                 <input
                                     type="text"
                                     id="contact"
-                                    name="contact"
+                                    name="number"
                                     className={`form-control form-control-sm shadow-sm ${errors.contact && 'is-invalid'}`}
                                     placeholder="9800000000"
-                                    value={form.contact}
+                                    value={form.number}
                                     onChange={handleChange}
                                 />
                                 {errors.contact && <small className="text-danger">{errors.contact}</small>}
@@ -226,7 +252,7 @@ const Register = () => {
                     </div>
 
                     <div className="d-grid gap-2">
-                        <button className="btn btn-primary btn-sm" type="submit">Sign Up</button>
+                        <button onClick={handleSubmit} className="btn btn-primary btn-sm" type="submit">Sign Up</button>
                         <div className="text-center small d-flex align-items-center justify-content-center gap-2 mt-2">
                             <span>Or login with</span>
                             <img
