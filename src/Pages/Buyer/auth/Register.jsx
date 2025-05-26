@@ -21,7 +21,7 @@ const Register = () => {
     // Mock registered emails for demonstration
     const [registeredEmails, setRegisteredEmails] = useState([
         "test@example.com",
-        "user@example.com"
+        "user@example.com",
     ]);
 
     const validateEmail = (email) =>

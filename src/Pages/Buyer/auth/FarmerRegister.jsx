@@ -78,7 +78,7 @@ const FarmerRegister = () => {
             <Header />
             <div className="text-center p-3">
                 <h2 className="font-bold">Farmer Register</h2>
-                <p>Discover Fresh and Healthy products directly from the farmers.</p>
+                <p>Create an account to Sell Your Farming Products</p>
             </div>
             <form className='d-flex justify-content-center align-items-center bg-light' onSubmit={handleSubmit}>
                 <div style={{ width: '60%', margin: '0 auto' }}>

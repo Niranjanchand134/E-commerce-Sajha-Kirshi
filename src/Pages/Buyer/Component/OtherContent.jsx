@@ -40,50 +40,37 @@ const OtherContent = () => {
                 <p className="text-[#EEC044]">Customer’s</p>
                 <h2 className="font-bold">Meet Our Farmers</h2>
             </div>
-            <div class="grid grid-cols-3 pr-60 pl-60 justify-around flex gap-4">
-                <div className="rounded-2xl"
-                    style={{
+            <div className="px-60 sm:px-6 md:px-10 lg:px-20 xl:px-60">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[
+                    { name: "Kevin Smith", img: "/assets/BuyersImg/Contentimg/person1.png" },
+                    { name: "Jessica Brown", img: "/assets/BuyersImg/Contentimg/person2.png" },
+                    { name: "David Martin", img: "/assets/BuyersImg/Contentimg/person3.png" }
+                    ].map((person, idx) => (
+                    <div
+                        key={idx}
+                        className="relative rounded-2xl overflow-hidden"
+                        style={{
                         height: "275px",
-                        width: "100%",
-                        backgroundImage: "url('/assets/BuyersImg/Contentimg/person1.png')",
+                        backgroundImage: `url('${person.img}')`,
                         backgroundSize: "cover",
                         backgroundPosition: "center",
-                    }}
+                        }}
                     >
-                    <div className="bg-opacity-40 bottom-0 content-end text-end text-white">
-                        <i className="fa-solid fa-share-nodes bg-green-500 rounded text-white p-2"></i>
-                        <button className="bg-white px-6 py-2 text-black rounded-l-lg shadow">Kevin Smith</button>
-                    </div>
-                </div>
+                        {/* Bottom bar with button */}
+                        <div className="absolute bottom-0 right-0 left-0 p-2 flex justify-end items-end bg-gradient-to-t from-black/60 to-transparent">
+                        <div className="relative inline-block">
+                            {/* Icon overlapping the left of button */}
+                            <i className="fa-solid fa-share-nodes bg-green-500 text-white p-2 rounded absolute -left-5 top-1/2 transform -translate-y-1/2 z-10"></i>
 
-                <div className="rounded-2xl"
-                    style={{
-                        height: "275px",
-                        width: "100%",
-                        backgroundImage: "url('/assets/BuyersImg/Contentimg/person2.png')",
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                    }}
-                    >
-                    <div className="bottom-0 content-end text-end text-white">
-                        <i className="fa-solid fa-share-nodes bg-green-500 rounded text-white p-2"></i>
-                        <button className="bg-white px-6 py-2 text-black rounded-l-lg shadow">Jessica Brown</button>
+                            {/* Button */}
+                            <button className="bg-white px-6 py-2 text-black rounded-l-lg shadow pl-8">
+                            {person.name}
+                            </button>
+                        </div>
+                        </div>
                     </div>
-                </div>
-
-                <div className="rounded-2xl"
-                    style={{
-                        height: "275px",
-                        width: "100%",
-                        backgroundImage: "url('/assets/BuyersImg/Contentimg/person3.png')",
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                    }}
-                    >
-                    <div className="bg-opacity-40 bottom-0 content-end text-end text-white">
-                        <i className="fa-solid fa-share-nodes bg-green-500 rounded text-white p-2"></i>
-                        <button className="bg-white px-6 py-2 text-black rounded-l-lg shadow">David Martin</button>
-                    </div>
+                    ))}
                 </div>
             </div>
         </div>

@@ -8,7 +8,12 @@ module.exports = {
     "./src/pages/Buyer/Component/scroll.jsx",
     "./src/pages/Buyer/Component/shop.jsx",
     "./src/pages/Buyer/Component/ShopDetail.jsx",
+    "./src/pages/Buyer/Component/OtherContent.jsx",
     "./src/pages/Buyer/auth/FarmerRegister.jsx",
+
+    "./src/pages/Farmer/FarmerHomePage.jsx",
+    "./src/pages/Farmer/Component/FarmerSidebar.jsx",
+    "./src/pages/Farmer/Parts/FarmerDashboard.jsx",
   ],
   theme: {
     extend: {},
