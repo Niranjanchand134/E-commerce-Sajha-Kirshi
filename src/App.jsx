@@ -38,13 +38,7 @@ const App = () => {
               <Route path='Farmeraddproduct' element={<FarmerAddProduct/>}/>
               <Route path='Farmerdashboard' element={<FarmerDashboard/>}/>
           </Route>
-
-          <Route path="/" element={<Landing />} />
-          <Route path="Buyer-shop" element={<Shop />} />
-          <Route path="Buyer-shopdetail" element={<ShopDetail />} />
-          <Route path="Buyer-login" element={<Login />} />
-          <Route path="Buyer-register" element={<Register />} />
-          <Route path="Farmer-register" element={<FarmerRegister />} />
+          
         </Routes>
       </BrowserRouter>
     </AuthProvider>
