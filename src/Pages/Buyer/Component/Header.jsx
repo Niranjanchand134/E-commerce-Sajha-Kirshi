@@ -3,10 +3,12 @@ import { useNavigate, NavLink } from 'react-router-dom';
 import { UserOutlined, LogoutOutlined, FormOutlined } from '@ant-design/icons';
 import { Dropdown, Menu, Space } from 'antd';
 import React, { useState } from 'react';
+import { useAuth } from '../../../Context/AuthContext';
 
 
 const Header = () => {
   const navigate = useNavigate();
+  const {user, logout} = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isLogin = localStorage.getItem("is_login") === "1"; // Check login status
   const username = localStorage.getItem("username"); // Get username from localStorage
@@ -96,7 +98,7 @@ const Header = () => {
           <i className="fa-solid fa-bell hover:text-black cursor-pointer"></i>
 
         <div className="buttons d-flex align-items-center text-center gap-3">
-          {isLogin ? (
+          {user !== null ? (
               <Dropdown overlay={menu} trigger={["hover"]}>
                 <a onClick={(e) => e.preventDefault()}>
                   <Space>

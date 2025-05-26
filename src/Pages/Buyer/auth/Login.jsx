@@ -5,6 +5,7 @@ import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { greeting, loginDetails } from '../../../services/authService';
+import { ErrorMessageToast, SuccesfulMessageToast, WarningMessageToast } from '../../../utils/Tostify.util';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -62,14 +63,12 @@ const Login = () => {
 
         try {
             const token = await loginDetails(form.email, form.password);
-            if (!token) {
-                setError("Invalid email or password!");
-                return;
-            }
+                
             localStorage.setItem("token", token);
-            navigate("/dashboard"); // Change to your protected route
+            SuccesfulMessageToast("Successfully Login.")
+            navigate("/"); // Change to your protected route
         } catch (err) {
-            setError("Something went wrong. Please try again later.");
+            WarningMessageToast(err.message);
         }
     };
 
