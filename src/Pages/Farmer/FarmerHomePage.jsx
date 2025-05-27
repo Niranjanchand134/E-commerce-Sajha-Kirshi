@@ -14,22 +14,23 @@ const FarmerHomePage = () => {
   } = theme.useToken();
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ height: '100vh', overflow: 'hidden' }}>
       <FarmerSidebar collapsed={collapsed} />
 
-      <Layout>
+      <Layout style={{ overflow: 'hidden' }}>
         <FarmerHeader collapsed={collapsed} setCollapsed={setCollapsed} />
 
         <Content
           style={{
             margin: '24px 16px',
             padding: 24,
-            minHeight: 280,
+            overflowY: 'auto',     // Makes Content scrollable
+            height: 'calc(100vh - 64px)', // Assuming header height is 64px
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
           }}
         >
-          <Outlet/>
+          <Outlet />
         </Content>
       </Layout>
     </Layout>

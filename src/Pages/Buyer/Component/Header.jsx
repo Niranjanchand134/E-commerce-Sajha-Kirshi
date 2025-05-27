@@ -58,7 +58,7 @@ const Header = () => {
     {
       label: "Join as a Delivery Partner",
       key: "delivery",
-      onClick: () => navigate("/Farmerlayout"),
+      onClick: () => navigate("/Farmerlayout/Farmerdashboard"),
     },
   ]
 };

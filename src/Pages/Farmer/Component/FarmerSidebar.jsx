@@ -61,6 +61,7 @@ const FarmerSidebar = ({ collapsed }) => {
             key: '2',
             icon: <ProductOutlined />,
             label: 'My Products',
+            onClick: () => navigate('/Farmerlayout/Farmerproducts'),
           },
           {
             key: '3',
