@@ -19,6 +19,7 @@ If you are developing a production application, we recommend using TypeScript wi
 
 #used at framework for css style sheet
 - npm i ant-design
+- npm install antd-style
 - npm i tailwind.css
 - npm i bootstrap
 - npm i swiper
