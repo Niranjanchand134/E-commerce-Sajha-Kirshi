@@ -16,7 +16,7 @@ const { Sider } = Layout;
 const FarmerSidebar = ({ collapsed }) => {
   const navigate = useNavigate();
   return (
-    <Sider trigger={null} collapsible collapsed={collapsed}>
+    <Sider trigger={null} collapsible collapsed={collapsed} theme="light">
       {/* Logo Section */}
       <div className="flex flex-col items-center justify-center mt-2">
         {collapsed ? (
@@ -27,14 +27,14 @@ const FarmerSidebar = ({ collapsed }) => {
           />
         ) : (
           <img
-            src="/assets/BuyersImg/images/logo2.png"
+            src="/assets/BuyersImg/images/logo.png"
             alt="logo2"
             className="w-32 mb-2 transition-all duration-300"
           />
         )}
       </div>
 
-      <div className="flex items-center justify-center my-3 transition-all duration-300 cursor-pointer text-green-500 hover:text-white">
+      <div className="flex items-center justify-center my-3 transition-all duration-300 cursor-pointer text-green-500 hover:text-green-500">
         {collapsed ? (
           <i className="fa-solid fa-user-circle text-2xl"></i>
         ) : (
@@ -47,7 +47,7 @@ const FarmerSidebar = ({ collapsed }) => {
 
       {/* Menu Items */}
       <Menu
-        theme="dark"
+        theme="light"
         mode="inline"
         defaultSelectedKeys={['1']}
         items={[
