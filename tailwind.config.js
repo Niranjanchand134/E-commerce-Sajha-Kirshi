@@ -14,6 +14,8 @@ module.exports = {
     "./src/pages/Farmer/FarmerHomePage.jsx",
     "./src/pages/Farmer/Component/FarmerSidebar.jsx",
     "./src/pages/Farmer/Parts/FarmerDashboard.jsx",
+    "./src/pages/Farmer/Parts/FarmerProducts.jsx",
+    "./src/pages/Farmer/Parts/FarmerAddProduct.jsx",
   ],
   theme: {
     extend: {},
