@@ -1,20 +1,17 @@
-
-
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({children})=>{
+export const AuthProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState(() => {
     return localStorage.getItem("token");
   });
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem("token");
-    console.log("here is the saved token,",token)
+    console.log("here is the saved token,", token);
     return token ? decodeToken(token) : null;
   });
 
@@ -22,9 +19,8 @@ export const AuthProvider = ({children})=>{
   function decodeToken(token) {
     try {
       const decoded = jwtDecode(token);
-      console.log("here decoded email",decoded);
+      console.log("here decoded email", decoded);
       return {
-        
         email: decoded.sub || decoded.email,
         name: decoded.name,
         role: decoded.role,
@@ -35,7 +31,6 @@ export const AuthProvider = ({children})=>{
       return null;
     }
   }
-
 
   useEffect(() => {
     if (authToken) {
@@ -62,4 +57,4 @@ export const AuthProvider = ({children})=>{
       {children}
     </AuthContext.Provider>
   );
-}
+};
