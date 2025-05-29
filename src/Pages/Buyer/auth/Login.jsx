@@ -73,7 +73,7 @@ const Login = () => {
     };
 
     useEffect(() => {
-        const response = greeting();
+        const response = greeting();    
         console.log("here is the response", response);
     }, []);
 
