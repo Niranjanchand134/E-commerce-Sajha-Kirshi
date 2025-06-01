@@ -10,8 +10,7 @@ const Header = () => {
   const navigate = useNavigate();
   const {user, logout} = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isLogin = localStorage.getItem("is_login") === "1"; // Check login status
-  const username = localStorage.getItem("username"); // Get username from localStorage
+  
 
   const handleLogoutClick = () => {
     logout();

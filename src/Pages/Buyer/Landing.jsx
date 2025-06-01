@@ -3,8 +3,12 @@ import Footer from "./Component/Footer";
 import Header from "./Component/Header";
 import OtherContent from "./Component/OtherContent";
 import Product from "./Component/Product";
+import { useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 const Landing = () => {
+  const navigate = useNavigate();
   const categories = [
     { name: "Apple", image: "/assets/BuyersImg/images/apple.png" },
     { name: "Potato", image: "/assets/BuyersImg/images/potato.png" },
@@ -14,6 +18,26 @@ const Landing = () => {
     { name: "Lemon", image: "/assets/BuyersImg/images/lemon.png" },
     { name: "Corn", image: "/assets/BuyersImg/images/corn.png" },
   ];
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    try {
+      const decoded = jwtDecode(storedToken);
+      const role = decoded.role;
+
+      if (role === "user" && window.location.pathname !== "/") {
+        navigate("/");
+      } else if (
+        role === "farmer" &&
+        window.location.pathname !== "/Farmerlayout/Farmerdashboard"
+      ) {
+        navigate("/Farmerlayout/Farmerdashboard");
+      }
+    } catch (err) {
+      // Do nothing if token is invalid
+    }
+  }, []);
+  
 
   return (
     <>
