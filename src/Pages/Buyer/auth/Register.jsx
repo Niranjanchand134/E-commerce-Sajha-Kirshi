@@ -24,6 +24,7 @@ const Register = () => {
       number: "",
       email: "",
       password: "",
+      role: "user"
     });
     const [errors, setErrors] = useState({});
 

@@ -11,12 +11,11 @@ export const AuthProvider = ({ children }) => {
   });
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem("token");
-    console.log("here is the saved token,", token);
     return token ? decodeToken(token) : null;
   });
 
   // Decode token to extract user info
-  function decodeToken(token) {
+  function decodeToken(token) { 
     try {
       const decoded = jwtDecode(token);
       console.log("here decoded email", decoded);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 
@@ -6,6 +6,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { greeting, loginDetails } from '../../../services/authService';
 import { ErrorMessageToast, SuccesfulMessageToast, WarningMessageToast } from '../../../utils/Tostify.util';
+import { useAuth } from '../../../Context/AuthContext';
+import { jwtDecode } from 'jwt-decode';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -13,6 +15,8 @@ const Login = () => {
     const [error, setError] = useState(""); // global error message
     const [form, setForm] = useState({ email: "", password: "" });
     const [errors, setErrors] = useState({ email: "", password: "" }); // field-level errors
+
+    const {user, login} = useAuth();
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -63,10 +67,28 @@ const Login = () => {
 
         try {
             const token = await loginDetails(form.email, form.password);
+
+            login(token);
+            SuccesfulMessageToast("Successfully Login.");
                 
-            localStorage.setItem("token", token);
-            SuccesfulMessageToast("Successfully Login.")
-            navigate("/"); // Change to your protected route
+            setTimeout(() => {
+
+                const storedToken = localStorage.getItem("token");
+                const decoded = jwtDecode(storedToken);
+                const role = decoded.role;
+
+                if(role === "user"){
+                    navigate("/")
+                }
+                if(role === "farmer"){
+                    navigate("/Farmerlayout/Farmerdashboard");
+                }
+
+                window.location.reload();
+                
+            }, 2000);
+           
+            
         } catch (err) {
             WarningMessageToast(err.message);
         }

@@ -3,6 +3,9 @@ import Header from "../Component/Header";
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import Password from 'antd/es/input/Password';
+import { UserRegister } from '../../../services/authService';
+import { ErrorMessageToast, SuccesfulMessageToast } from '../../../utils/Tostify.util';
 
 const FarmerRegister = () => {
     const navigate = useNavigate();
@@ -10,27 +13,33 @@ const FarmerRegister = () => {
     const [errors, setErrors] = useState({});
     const [form, setForm] = useState({
         name: "",
-        contact: "",
+        number: "",
         email: "",
-        district: "",
-        municipality: "",
-        wardnumber: ""
+        password: "",
+        confirmPassword: ""
+    });
+    const [submitData, setSubmitData] = useState({
+      name: "",
+      number: "",
+      email: "",
+      password: "",
+      role: "farmer",
     });
 
-    const [registeredEmails, setRegisteredEmails] = useState([
-        "test@example.com",
-        "user@example.com"
-    ]);
+   
 
     const validateEmail = (email) =>
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-    const validateContact = (contact) =>
-        /^98\d{8}$/.test(contact); // Nepali mobile number pattern
+    const validatenumber = (number) =>
+        /^98\d{8}$/.test(number); // Nepali mobile number pattern
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        
         setForm({ ...form, [name]: value });
+        setSubmitData({...submitData, [name]: value});
+        console.log(form);
     };
 
     const validateForm = () => {
@@ -38,40 +47,34 @@ const FarmerRegister = () => {
 
         if (!form.name.trim()) newErrors.name = "Name is required";
 
-        if (!form.contact.trim()) newErrors.contact = "Contact is required";
-        else if (!validateContact(form.contact))
-            newErrors.contact = "Enter a valid Nepali mobile number";
+        if (!form.number.trim()) newErrors.number = "number is required";
+        else if (!validatenumber(form.number))
+            newErrors.number = "Enter a valid Nepali mobile number";
 
         if (!form.email.trim()) newErrors.email = "Email is required";
         else if (!validateEmail(form.email))
             newErrors.email = "Enter a valid email address";
 
-        if (!form.district.trim()) newErrors.district = "District is required";
-        if (!form.municipality.trim()) newErrors.municipality = "Municipality is required";
-        if (!form.wardnumber.trim()) newErrors.wardnumber = "Ward Number is required";
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = async (e) => {
+      e.preventDefault();
 
+      if (!validateForm()) return;
 
-        if (!validateForm()) return;
+      try {
+        const response = await UserRegister(submitData);
 
-        if (registeredEmails.includes(form.email)) {
-            setErrors(prevErrors => ({
-                ...prevErrors,
-                email: "Email is already registered"
-            }));
-            return;
-        }
+        SuccesfulMessageToast("Register Successfully!");
 
-        setRegisteredEmails(prev => [...prev, form.email]);
-
-        alert("Registration Successful!");
         navigate("/Buyer-login");
+      } catch (err) {
+        setErrors(err.message);
+        ErrorMessageToast(err.message);
+        return;
+      }
     };
 
     return (
@@ -109,22 +112,22 @@ const FarmerRegister = () => {
                 </div>
 
                 <div className="mb-3 col">
-                  <label htmlFor="contact" className="form-label d-flex small">
+                  <label htmlFor="number" className="form-label d-flex small">
                     Enter your Password
                   </label>
                   <input
                     type="text"
-                    id="contact"
-                    name="contact"
+                    id="number"
+                    name="password"
                     className={`form-control form-control-sm shadow-sm ${
-                      errors.contact && "is-invalid"
+                      errors.password && "is-invalid"
                     }`}
-                    placeholder="9800000000"
-                    value={form.contact}
+                    placeholder="Enter your password"
+                    value={form.password}
                     onChange={handleChange}
                   />
-                  {errors.contact && (
-                    <small className="text-danger">{errors.contact}</small>
+                  {errors.password && (
+                    <small className="text-danger">{errors.password}</small>
                   )}
                 </div>
 
@@ -155,16 +158,16 @@ const FarmerRegister = () => {
                   <input
                     type="text"
                     id="district"
-                    name="district"
+                    name="confirmPassword"
                     className={`form-control form-control-sm shadow-sm ${
-                      errors.district && "is-invalid"
+                      errors.confirmPassword && "is-invalid"
                     }`}
-                    placeholder="Darchula"
-                    value={form.district}
+                    placeholder="Confirm your password"
+                    value={form.confirmPassword}
                     onChange={handleChange}
                   />
-                  {errors.district && (
-                    <small className="text-danger">{errors.district}</small>
+                  {errors.password && (
+                    <small className="text-danger">{errors.password}</small>
                   )}
                 </div>
 
@@ -176,18 +179,18 @@ const FarmerRegister = () => {
                     Enter your Phone Number
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     id="municipality"
-                    name="municipality"
+                    name="number"
                     className={`form-control form-control-sm shadow-sm ${
-                      errors.municipality && "is-invalid"
+                      errors.number && "is-invalid"
                     }`}
-                    placeholder="Municipality / Rural Municipality"
-                    value={form.municipality}
+                    placeholder="Enter your number"
+                    value={form.number}
                     onChange={handleChange}
                   />
-                  {errors.municipality && (
-                    <small className="text-danger">{errors.municipality}</small>
+                  {errors.number && (
+                    <small className="text-danger">{errors.number}</small>
                   )}
                 </div>
               </div>
