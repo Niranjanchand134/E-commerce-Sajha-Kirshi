@@ -73,6 +73,7 @@ const FarmerSidebar = ({ collapsed }) => {
             key: '4',
             icon: <WechatWorkOutlined />,
             label: 'Chat',
+            onClick: () => navigate('/Farmerlayout/Farmerchatbox'),
           },
           {
             key: '5',
@@ -83,6 +84,7 @@ const FarmerSidebar = ({ collapsed }) => {
             key: '6',
             icon: <ProfileOutlined />,
             label: 'KYC Status',
+            onClick: () => navigate('/Farmerlayout/FarmerKYCHome'),
           },
           {
             key: '7',

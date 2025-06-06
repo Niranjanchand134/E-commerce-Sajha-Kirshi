@@ -23,3 +23,6 @@ If you are developing a production application, we recommend using TypeScript wi
 - npm i tailwind.css
 - npm i bootstrap
 - npm i swiper
+- npm install formik (for validation)
+- npm install react-icons
+
