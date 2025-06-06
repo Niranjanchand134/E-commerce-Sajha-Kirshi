@@ -16,6 +16,10 @@ import FarmerDashboard from "./Pages/Farmer/Parts/FarmerDashboard";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./Context/AuthContext";
 import FarmerProducts from "./Pages/Farmer/Parts/FarmerProducts";
+import KYChome from "./Pages/Buyer/Component/KYChome";
+import KYCform from "./Pages/Buyer/Component/KYCform";
+import FarmerChatbox from "./Pages/Farmer/Parts/FarmerChatbox";
+import FarmerKYChome from "./Pages/Farmer/Parts/FarmerKYChome";
 
 
 
@@ -32,6 +36,8 @@ const App = () => {
           <Route path='Buyer-login' element={<Login/>}/>
           <Route path='Buyer-register' element={<Register/>}/>
           <Route path='Farmer-register' element={<FarmerRegister/>}/>
+          <Route path='KYC' element={<KYChome/>}/>
+          <Route path='KYC-Form' element={<KYCform/>}/>
 
           {/* Farmer page */}
           <Route path='Farmerlayout' element={<FarmerLayout/>}>
@@ -39,6 +45,8 @@ const App = () => {
               <Route path='Farmerdashboard' element={<FarmerDashboard/>}/>
               <Route path='Farmerproducts' element={<FarmerProducts/>}/>
               <Route path='Farmeraddproduct' element={<FarmerAddProduct/>}/>
+              <Route path='Farmerchatbox' element={<FarmerChatbox/>}/>
+              <Route path='FarmerKYCHome' element={<FarmerKYChome/>}/>
           </Route>
           
         </Routes>

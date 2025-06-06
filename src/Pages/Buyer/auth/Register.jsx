@@ -50,10 +50,6 @@ const Register = () => {
 
         if (!form.name.trim()) newErrors.name = "Name is required";
 
-        // if (!form.number.trim()) newErrors.contact = "Contact is required";
-        // else if (!validateContact(form.contact))
-        //     newErrors.contact = "Enter a valid Nepali mobile number";
-
         if (!form.email.trim()) newErrors.email = "Email is required";
         else if (!validateEmail(form.email))
             newErrors.email = "Enter a valid email address";

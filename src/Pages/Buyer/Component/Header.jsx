@@ -106,6 +106,7 @@ const Header = () => {
               Services
             </li>
             <li className="hover:text-black cursor-pointer">Contact</li>
+            <li className="hover:text-black cursor-pointer" onClick={() => navigate('/KYC')}>KYC Form</li>
             {/* <li className="hover:text-black cursor-pointer" onClick={() => navigate('/Buyer-login')}>Login</li>
             <li className="hover:text-black cursor-pointer" onClick={() => navigate('/Buyer-register')}>SignUp</li> */}
           </ul>
