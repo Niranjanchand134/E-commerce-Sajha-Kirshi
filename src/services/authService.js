@@ -36,8 +36,6 @@ export const UserRegister = async (data) => {
   }
 };
 
-
-
 export const greeting = async () => {
   const response = await axios.get("http://localhost:8080/");
 
@@ -45,3 +43,29 @@ export const greeting = async () => {
 
   return response.data;
 };
+
+export const addProduct = async (data) =>{
+  const token = localStorage.getItem("token"); // or use authToken if passed
+  console.log("token",token)
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/api/products/add",
+      data
+    );
+    console.log("cors header", response);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error(
+        "Server responded with:",
+        error.response.status,
+        error.response.data
+      );
+      throw new Error(error.response.data?.message || "Unauthorized");
+    } else {
+      console.error("Error with request:", error.message);
+      throw new Error("Request failed. Please try again later.");
+    }
+  }
+ 
+}
