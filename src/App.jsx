@@ -16,7 +16,6 @@ import FarmerDashboard from "./Pages/Farmer/Parts/FarmerDashboard";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./Context/AuthContext";
 import FarmerProducts from "./Pages/Farmer/Parts/FarmerProducts";
-import ProtectedRoute from "./components/ProtectedRoute";
 
 
 
@@ -27,21 +26,19 @@ const App = () => {
         <ToastContainer />
         <Routes>
           {/* Buyer page */}
-          <Route path="/" element={<Landing />} />
-          <Route path="Buyer-shop" element={<Shop />} />
-          <Route path="Buyer-shopdetail" element={<ShopDetail />} />
-          <Route path="Buyer-login" element={<Login />} />
-          <Route path="Buyer-register" element={<Register />} />
-          <Route path="Farmer-register" element={<FarmerRegister />} />
+          <Route path='/' element={<Landing />}/>
+          <Route path='Buyer-shop' element={<Shop/>}/>
+          <Route path='Buyer-shopdetail' element={<ShopDetail/>}/>
+          <Route path='Buyer-login' element={<Login/>}/>
+          <Route path='Buyer-register' element={<Register/>}/>
+          <Route path='Farmer-register' element={<FarmerRegister/>}/>
 
           {/* Farmer page */}
-          <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
-            <Route path="Farmerlayout" element={<FarmerLayout />}>
-              <Route path="Farmer" element={<FarmerHomePage />} />
-              <Route path="Farmerdashboard" element={<FarmerDashboard />} />
-              <Route path="Farmerproducts" element={<FarmerProducts />} />
-              <Route path="Farmeraddproduct" element={<FarmerAddProduct />} />
-            </Route>
+          <Route path='Farmerlayout' element={<FarmerLayout/>}>
+              <Route path='Farmer' element={<FarmerHomePage/>}/>
+              <Route path='Farmerdashboard' element={<FarmerDashboard/>}/>
+              <Route path='Farmerproducts' element={<FarmerProducts/>}/>
+              <Route path='Farmeraddproduct' element={<FarmerAddProduct/>}/>
           </Route>
         </Routes>
       </BrowserRouter>

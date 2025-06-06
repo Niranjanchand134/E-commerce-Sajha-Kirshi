@@ -1,9 +1,9 @@
 const Footer = () => {
   return (
     <>
-      <footer className="bg-[#24231D] text-white py-10 md:flex md:justify-around md:items-center">
-        <div className="max-w-screen-xl mx-auto pl-40 pr-40  grid grid-cols-1 md:grid-cols-4 gap-">
-          {/* Shop Categories */}
+      <footer className="bg-[#24231D] text-white py-6 px-4 md:px-40">
+        <div className="mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Shop Categories - No changes */}
           <div>
             <img src="/assets/BuyersImg/images/logo2.png" alt="Logo" className="mb-2 w-48" />
             <p className="text-gray-400 mb-4">
@@ -17,7 +17,7 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Customer Service */}
+          {/* Customer Service - No changes */}
           <div>
             <h5 className="text-lg font-semibold mb-3 pl-8">Customer Service</h5>
             <img src="/assets/BuyersImg/images/underline.png" className="h-8 pl-8" alt="underline" />
@@ -31,9 +31,9 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Company */}
+          {/* News - No changes */}
           <div>
-            <h5 className="text-lg font-semibold mb-3 ">News</h5>
+            <h5 className="text-lg font-semibold mb-3">News</h5>
             <img src="/assets/BuyersImg/images/underline.png" className="h-8" alt="underline" />
             <ul className="space-y">
               <li className="text-white">Bringing Food Production Back To Cities</li>
@@ -43,7 +43,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Newsletter Signup */}
+          {/* Contact - No changes */}
           <div>
             <h5 className="text-lg font-semibold mb-3 pl-8">Contact</h5>
             <img src="/assets/BuyersImg/images/underline.png" className="h-8 pl-8" alt="Leaf" />
@@ -53,7 +53,7 @@ const Footer = () => {
               <li className="flex items-center gap-2"><i class="fa-solid fa-location-dot"/>80 broklyn golden street line Kumaripati, Lalitpur</li>
             </ul>
             <form className="flex pl-8">
-              <input type="email" placeholder="Enter your email" className="px-3 py-2 rounded-l-lg text-black" />
+              <input type="email" placeholder="Enter your email" className="px-2 py-2 rounded-l-lg text-black" />
               <button type="submit" className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-r-lg transition duration-300">
                 <i class="fa-solid fa-paper-plane"></i>
               </button>
@@ -62,7 +62,7 @@ const Footer = () => {
         </div>
       </footer>
 
-      <div className="bg-[#1F1E17] text-gray-400 text-sm text-center md:flex md:justify-around md:items-center px-4 md:px-16">
+      <div className="bg-[#1F1E17] text-gray-400 text-sm text-center px-4 md:flex md:justify-around md:items-center">
         <p>© All Copyright 2024 by @ Niranjan Chand</p>
         <p>Terms of Use | Privacy Policy</p>
       </div>
