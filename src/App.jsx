@@ -16,6 +16,8 @@ import FarmerDashboard from "./Pages/Farmer/Parts/FarmerDashboard";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./Context/AuthContext";
 import FarmerProducts from "./Pages/Farmer/Parts/FarmerProducts";
+import FarmerKYChome from "./Pages/Farmer/Parts/FarmerKYChome";
+import FarmerChatbox from "./Pages/Farmer/Parts/FarmerChatbox";
 
 
 
@@ -32,17 +34,17 @@ const App = () => {
           <Route path='Buyer-login' element={<Login/>}/>
           <Route path='Buyer-register' element={<Register/>}/>
           <Route path='Farmer-register' element={<FarmerRegister/>}/>
-          <Route path='KYC' element={<KYChome/>}/>
-          <Route path='KYC-Form' element={<KYCform/>}/>
+          {/* <Route path='KYC' element={<KYChome/>}/> */}
+          {/* <Route path='KYC-Form' element={<KYCform/>}/> */}
 
           {/* Farmer page */}
-          <Route path='/Farmerlayout' element={<FarmerLayout/>}>
-              <Route path='/Farmer' element={<FarmerHomePage/>}/>
-              <Route path='/Farmerdashboard' element={<FarmerDashboard/>}/>
-              <Route path='/Farmerproducts' element={<FarmerProducts/>}/>
-              <Route path='/Farmeraddproduct' element={<FarmerAddProduct/>}/>
-              <Route path='/Farmerchatbox' element={<FarmerChatbox/>}/>
-              <Route path='/FarmerKYCHome' element={<FarmerKYChome/>}/>
+          <Route path='Farmerlayout' element={<FarmerLayout/>}>
+              <Route path='Farmer' element={<FarmerHomePage/>}/>
+              <Route path='Farmerdashboard' element={<FarmerDashboard/>}/>
+              <Route path='Farmerproducts' element={<FarmerProducts/>}/>
+              <Route path='Farmeraddproduct' element={<FarmerAddProduct/>}/>
+              <Route path='Farmerchatbox' element={<FarmerChatbox/>}/>
+              <Route path='FarmerKYCHome' element={<FarmerKYChome/>}/>
           </Route>
         </Routes>
       </BrowserRouter>

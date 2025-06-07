@@ -49,7 +49,7 @@ export const addProduct = async (data) =>{
   console.log("token",token)
   try {
     const response = await axios.post(
-      "http://localhost:8080/api/products/add",
+      "http://localhost:8080/api/products/addProduct",
       data
     );
     console.log("cors header", response);
