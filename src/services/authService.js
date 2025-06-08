@@ -49,8 +49,14 @@ export const addProduct = async (data) =>{
   console.log("token",token)
   try {
     const response = await axios.post(
-      "http://localhost:8080/api/products/addProduct",
-      data
+      "http://localhost:8080/farmer/addProduct",
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
     );
     console.log("cors header", response);
     return response.data;
@@ -68,4 +74,32 @@ export const addProduct = async (data) =>{
     }
   }
  
+}
+
+export const getAllProduct = async () =>{
+  const token = localStorage.getItem("token");
+  console.log("LLLLLLLLLLLLLLLLLLLLLLLLL")
+  try {
+    const response = await axios.get(
+      "http://localhost:8080/api/getAll",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("cors header", response);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error(
+        "Server responded with:",
+        error.response.status,
+        error.response.data
+      );
+      throw new Error(error.response.data?.message || "Unauthorized");
+    }
+  }
+
 }

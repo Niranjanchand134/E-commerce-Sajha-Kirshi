@@ -16,7 +16,7 @@ const FarmerAddProduct = () => {
   const fileInputRef = useRef(null);
   const [imageUpload, setImageUpload] = useState([]);
   const [formData, setFormData] = useState({
-    user: user.id, // or use a nested object if needed like { id: "", name: "" }
+    // user: user.id, // or use a nested object if needed like { id: "", name: "" }
     date: "2025-10-22", // You can use new Date().toISOString().slice(0, 10) for default
     status: "pending",
     name: "",
@@ -27,7 +27,7 @@ const FarmerAddProduct = () => {
     price: 0,
     minimumOrderQuantity: 0,
     discountPrice: 0,
-    deliveryOption: "",
+    deliveryOption: [],
     deliveryTime: "",
     imagePaths: ["/image/upload/v1749143827/iw3cpmd4p32rapegdanw.jpg"],
     available: true,
@@ -92,25 +92,31 @@ const FarmerAddProduct = () => {
         body: uploadData,
       }).then((res) => res.json())
     );
-
+  
     try {
       const results = await Promise.all(uploadPromises);
       const urls = results.map((result) => result.url);
       console.log("Uploaded URLs:", urls);
-      // Do something with the URLs
-
+  
       const finalData = {
         ...formData,
-        // imagePaths: urls, // attach uploaded image URLs
+        deliveryOption: Array.isArray(formData.deliveryOption)
+          ? formData.deliveryOption
+          : [formData.deliveryOption],
+        imagePaths: urls, // Include uploaded image URLs
       };
+      
+      // Remove the user field from formData since it will be set from JWT token
+      // delete finalData.user;
+      
       console.log("here is the product data: ", finalData);
-
+  
       const response = await addProduct(finalData);
       console.log("Product saved:", response);
     } catch (error) {
       console.error("Error uploading images:", error);
     }
-  };
+  }
 
   return (
     <>
