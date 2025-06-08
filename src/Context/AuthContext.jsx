@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
   function decodeToken(token) { 
     try {
       const decoded = jwtDecode(token);
-      console.log("here decoded email", decoded);
+      // console.log("here decoded email", decoded);
       return {
         email: decoded.sub || decoded.email,
         name: decoded.name,

@@ -2,6 +2,7 @@ import { Space, Table, Button, Dropdown, Menu } from 'antd';
 import { createStyles } from "antd-style";
 import { FormOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
+import { getAllProduct } from '../../../services/authService';
 
 const useStyle = createStyles(({ css, token }) => {
   const { antCls } = token;
@@ -48,118 +49,131 @@ const StatusCell = ({ initialStatus }) => {
   );
 };
 
-const sampleData = Array.from({ length: 10 }).map((_, i) => ({
-  key: i,
-  product: `Tomato ${i}`,
-  image: 'https://source.washu.edu/app/uploads/2015/11/Tomato250-1.jpg',
-  address: `London, Park Lane no. ${i}`,
-  category: i % 2 === 0 ? 'Vegetables' : 'Fruits',
-  price: Math.floor(Math.random() * 100) + 10,
-  quantity: Math.floor(Math.random() * 50) + 1,
-  lastUpdated: Date.now() - Math.floor(Math.random() * 1000000000),
-  status: statusOptions[i % statusOptions.length],
-}));
 
 const FarmerProducts = () => {
   const { styles } = useStyle();
-
-  const [categoryFilter, setCategoryFilter] = useState('All');
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredData, setFilteredData] = useState(sampleData);
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    let data = sampleData;
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const productData = await getAllProduct(); // Add await here
+        setFilteredData(productData);
+        setError(null);
+      } catch (err) {
+        console.log("Error fetching products:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (categoryFilter !== 'All') {
-      data = data.filter(item => item.category === categoryFilter);
-    }
+    fetchProducts();
+  }, []);
 
-    if (statusFilter !== 'All') {
-      data = data.filter(item => item.status === statusFilter);
-    }
+ 
 
-    if (searchTerm.trim() !== '') {
-      data = data.filter(item =>
-        item.product.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    setFilteredData(data);
-  }, [categoryFilter, statusFilter, searchTerm]);
 
   const columns = [
     {
-      title: 'Image',
+      title: "Image",
       width: 100,
-      dataIndex: 'image',
-      key: 'image',
-      fixed: 'left',
-      render: (imageUrl) => (
-        <img
-          src={imageUrl}
-          alt="product"
-          style={{
-            width: 60,
-            height: 60,
-            objectFit: 'cover',
-            borderRadius: 4,
-          }}
-        />
-      ),
+      dataIndex: "imagePaths",
+      key: "image",
+      fixed: "left",
+      render: (imagePaths) => {
+        const firstImage =
+          Array.isArray(imagePaths) && imagePaths.length > 0
+            ? imagePaths[0]
+            : "https://via.placeholder.com/60x60?text=No+Image";
+
+        return (
+          <img
+            src={firstImage}
+            alt="product"
+            style={{
+              width: 60,
+              height: 60,
+              objectFit: "cover",
+              borderRadius: 4,
+            }}
+            onError={(e) => {
+              e.target.src = "https://via.placeholder.com/60x60?text=No+Image";
+            }}
+          />
+        );
+      },
     },
     {
-      title: 'Product Name',
+      title: "Product Name",
       width: 140,
-      dataIndex: 'product',
-      key: 'product',
-      fixed: 'left',
+      dataIndex: "name",
+      key: "product",
+      fixed: "left",
     },
     {
-      title: 'Category',
-      dataIndex: 'category',
-      key: 'category',
+      title: "Category",
+      dataIndex: "category",
+      key: "category",
       width: 120,
       sorter: (a, b) => a.category.localeCompare(b.category),
     },
     {
-      title: 'Price per Unit',
-      dataIndex: 'price',
-      key: 'price',
+      title: "Price per Unit",
+      dataIndex: "price",
+      key: "price",
       width: 150,
-      render: (price) => `Rs ${price.toFixed(2)} /kg`,
+      render: (price) => `Rs ${price ? price.toFixed(2) : "0.00"} /kg`,
     },
     {
-      title: 'Available Quantity',
-      dataIndex: 'quantity',
-      key: 'quantity',
+      title: "Available Quantity",
+      dataIndex: "quantity",
+      key: "quantity",
       width: 160,
-      render: (qty) => `${qty} kg`,
+      render: (qty) => `${qty || 0} kg`,
     },
     {
-      title: 'Last Updated',
-      dataIndex: 'lastUpdated',
-      key: 'lastUpdated',
+      title: "Last Updated",
+      dataIndex: "lastUpdated",
+      key: "lastUpdated",
       width: 160,
-      render: (timestamp) => new Date(timestamp).toLocaleString(),
+      render: (timestamp) => {
+        if (!timestamp) return "N/A";
+        return new Date(timestamp).toLocaleString();
+      },
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
       width: 140,
       sorter: (a, b) => a.status.localeCompare(b.status),
       render: (status) => <StatusCell initialStatus={status} />,
     },
     {
-      title: 'Action',
-      key: 'operation',
-      fixed: 'right',
+      title: "Action",
+      key: "operation",
+      fixed: "right",
       width: 100,
-      render: () => (
+      render: (_, record) => (
         <Space>
-          <Button type="link" icon={<FormOutlined />} />
-          <Button type="link" icon={<DeleteOutlined />} danger />
+          <Button
+            type="link"
+            icon={<FormOutlined />}
+            onClick={() => console.log("Edit:", record.originalData)}
+          />
+          <Button
+            type="link"
+            icon={<DeleteOutlined />}
+            danger
+            onClick={() => console.log("Delete:", record.originalData)}
+          />
         </Space>
       ),
     },
@@ -170,7 +184,9 @@ const FarmerProducts = () => {
       <div className="flex items-center gap-4 ml-4 mb-4 bg-white flex-wrap">
         {/* Category Dropdown */}
         <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">Category</label>
+          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">
+            Category
+          </label>
           <select
             className="border border-gray-300 rounded-full w-32 px-2 py-2 focus:outline-none"
             value={categoryFilter}
@@ -184,7 +200,9 @@ const FarmerProducts = () => {
 
         {/* Status Dropdown */}
         <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">Status</label>
+          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">
+            Status
+          </label>
           <select
             className="border border-gray-300 w-32 rounded-full px-2 py-2 focus:outline-none"
             value={statusFilter}
@@ -213,16 +231,15 @@ const FarmerProducts = () => {
           </div>
         </div>
       </div>
-      <hr/>
+      <hr />
       <div>
         <Table
           className={styles.customTable}
           columns={columns}
           dataSource={filteredData}
-          scroll={{ x: 'max-content', y: 56 * 5 }}
+          scroll={{ x: "max-content", y: 56 * 5 }}
         />
       </div>
-
     </>
   );
 };
