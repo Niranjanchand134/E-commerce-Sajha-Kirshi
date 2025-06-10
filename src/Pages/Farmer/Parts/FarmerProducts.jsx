@@ -3,6 +3,8 @@ import { createStyles } from "antd-style";
 import { FormOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import { getAllProduct } from '../../../services/authService';
+import { categoryChanges, StatusChanges, updateProductById } from '../../../services/farmer/farmerApiService';
+import { SiAnsys } from 'react-icons/si';
 
 const useStyle = createStyles(({ css, token }) => {
   const { antCls } = token;
@@ -22,27 +24,56 @@ const useStyle = createStyles(({ css, token }) => {
   };
 });
 
-const statusOptions = ['Pending', 'Success', 'Approved', 'Declined'];
+const statusOptions = ['Active', 'Pause', 'Inactive'];
 const statusColors = {
-  Pending: 'orange',
-  Success: 'green',
-  Approved: 'blue',
-  Declined: 'red',
+  Active: 'green',
+  Pause: 'orange',
+  Inactive: 'red',
 };
 
-const StatusCell = ({ initialStatus }) => {
+const StatusCell = ({ initialStatus, record, onStatusChange }) => {
   const [status, setStatus] = useState(initialStatus);
-  const handleMenuClick = ({ key }) => setStatus(key);
+  const [loading, setLoading] = useState(false);
+
+  const handleMenuClick =  async({ key }) => {
+    try {
+      setLoading(true);
+      // Call API to update status first
+      await updateProductById(record.id, { status: key });
+      
+      // Only update local state if API call succeeds
+      setStatus(key);
+      onStatusChange(record.id, key);
+    } catch (error) {
+      console.error("Failed to update status:", error);
+      // You might want to show an error message here
+      // message.error(error.message || "Failed to update status");
+    } finally {
+      setLoading(false);
+    } // Call the parent handler with the new status
+  };
+
   const menu = (
     <Menu onClick={handleMenuClick}>
-      {statusOptions.map(option => (
-        <Menu.Item key={option}>{option}</Menu.Item>
+      {statusOptions.map((option) => (
+        <Menu.Item key={option} disabled={loading}>
+          {option}
+        </Menu.Item>
       ))}
     </Menu>
   );
+
   return (
-    <Dropdown overlay={menu} trigger={['click']}>
-      <Button style={{ backgroundColor: statusColors[status], color: 'white', fontWeight: '600' }}>
+    <Dropdown overlay={menu} trigger={["click"]} disabled={loading}>
+      <Button
+        style={{
+          backgroundColor: statusColors[status],
+          color: "white",
+          fontWeight: "600",
+          width: "100%",
+        }}
+        loading={loading}
+      >
         {status}
       </Button>
     </Dropdown>
@@ -76,6 +107,32 @@ const FarmerProducts = () => {
 
     fetchProducts();
   }, []);
+
+
+  const handleCategoryChanges = async (e)=>{
+    const value = e.target.value;
+    setCategoryFilter(value);
+    try{
+      const response = await categoryChanges(value);
+      setFilteredData(response );
+    }catch(error){
+      console.log("error .........");
+
+    }
+   
+
+  }
+
+  const handleStatusChanges = async (e) => {
+    const value = e.target.value;
+    setStatusFilter(value);
+    try {
+      const response = await StatusChanges(value);
+      setFilteredData(response);
+    } catch (error) {
+      console.log("error .........");
+    }
+  };
 
  
 
@@ -154,7 +211,18 @@ const FarmerProducts = () => {
       key: "status",
       width: 140,
       sorter: (a, b) => a.status.localeCompare(b.status),
-      render: (status) => <StatusCell initialStatus={status} />,
+      render: (status, record) => (
+        <StatusCell
+          initialStatus={status}
+          record={record}
+          onStatusChange={(id, newStatus) => {
+            setFilteredData(prev => prev.map(item => 
+              item.id === id ? {...item, status: newStatus} : item
+            ))
+          }
+          }
+        />
+      )
     },
     {
       title: "Action",
@@ -190,13 +258,17 @@ const FarmerProducts = () => {
           <select
             className="border border-gray-300 rounded-full w-32 px-2 py-2 focus:outline-none"
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
+            onChange={handleCategoryChanges}
           >
             <option>All</option>
-            <option>Vegetables</option>
-            <option>Fruits</option>
+            <option value="vegetables">Vegetables</option>
+            <option value="fruits">Fruits</option>
+            <option value="grains">Grains</option>
+            <option value="dairy">Dairy</option>
+            <option value="meat">Meat</option>
           </select>
         </div>
+        
 
         {/* Status Dropdown */}
         <div className="flex flex-col">
@@ -206,12 +278,15 @@ const FarmerProducts = () => {
           <select
             className="border border-gray-300 w-32 rounded-full px-2 py-2 focus:outline-none"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={handleStatusChanges}
           >
             <option>All</option>
-            {statusOptions.map((status, index) => (
+            <option value="Active">Active</option>
+            <option value="Pause">Pause</option>
+            <option value="Inactive">Inactive</option>
+            {/* {statusOptions.map((status, index) => (
               <option key={index}>{status}</option>
-            ))}
+            ))} */}
           </select>
         </div>
 

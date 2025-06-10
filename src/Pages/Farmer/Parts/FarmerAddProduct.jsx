@@ -18,7 +18,7 @@ const FarmerAddProduct = () => {
   const [formData, setFormData] = useState({
     // user: user.id, // or use a nested object if needed like { id: "", name: "" }
     date: "2025-10-22", // You can use new Date().toISOString().slice(0, 10) for default
-    status: "pending",
+    status: "Active",
     name: "",
     category: "",
     description: "",
@@ -195,14 +195,19 @@ const FarmerAddProduct = () => {
                   >
                     Category
                   </label>
-                  <input
-                    type="text"
+                  <select
                     id="Category"
                     name="category"
                     onChange={handleChange}
-                    placeholder="Select Category"
                     className="border-2 p-2 rounded border-gray-500 focus:outline-none focus:border-gray-500"
-                  />
+                  >
+                    <option value="">Select Category</option>
+                    <option value="vegetables">Vegetables</option>
+                    <option value="fruits">Fruits</option>
+                    <option value="grains">Grains</option>
+                    <option value="dairy">Dairy</option>
+                    <option value="meat">Meat</option>
+                  </select>
                 </div>
               </div>
               <div className="flex flex-col w-full">
@@ -254,14 +259,21 @@ const FarmerAddProduct = () => {
                   >
                     Unit of Measurement
                   </label>
-                  <input
-                    type="text"
+                  <select
                     id="unit"
                     name="unitOfMeasurement"
                     onChange={handleChange}
-                    placeholder="Select Unit"
                     className="border-2 p-2 rounded border-gray-500 focus:outline-none focus:border-gray-500"
-                  />
+                  >
+                    <option value="">Select Unit</option>
+                    <option value="kg">Kilogram (kg)</option>
+                    <option value="g">Gram (g)</option>
+                    <option value="l">Liter (l)</option>
+                    <option value="ml">Milliliter (ml)</option>
+                    <option value="piece">Piece</option>
+                    <option value="dozen">Dozen</option>
+                    <option value="packet">Packet</option>
+                  </select>
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -301,7 +313,7 @@ const FarmerAddProduct = () => {
                   htmlFor="Dprice"
                   className="text-sm font-medium text-gray-700 mb-2"
                 >
-                  Discount Price
+                  Discount Persentage
                 </label>
                 <input
                   type="number"
