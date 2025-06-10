@@ -44,6 +44,30 @@ export const greeting = async () => {
   return response.data;
 };
 
+export const checkAuth = async () => {
+  const token = localStorage.getItem("token");
+  console.log("token", token);
+  try {
+    const response = await axios.get("http://localhost:8080/test-auth", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data; // Return the successful response
+  } catch (error) {
+    if (error.response) {
+      console.error(
+        "Server responded with:",
+        error.response.status,
+        error.response.data
+      );
+      throw new Error(error.response.data?.message || "Unauthorized");
+    }
+    throw error; // Re-throw other errors
+  }
+};
+
 export const addProduct = async (data) =>{
   const token = localStorage.getItem("token"); // or use authToken if passed
   console.log("token",token)
@@ -78,7 +102,6 @@ export const addProduct = async (data) =>{
 
 export const getAllProduct = async () =>{
   const token = localStorage.getItem("token");
-  console.log("LLLLLLLLLLLLLLLLLLLLLLLLL")
   try {
     const response = await axios.get(
       "http://localhost:8080/api/getAll",
