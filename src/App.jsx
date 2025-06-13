@@ -5,19 +5,23 @@ import Login from "./Pages/Buyer/auth/Login";
 import Register from "./Pages/Buyer/auth/Register";
 import Shop from "./Pages/Buyer/Component/Shop";
 import ShopDetail from "./Pages/Buyer/Component/ShopDetail";
+import KYChome from "./Pages/Buyer/Component/KYChome";
+import KYCform from "./Pages/Buyer/Component/KYCform";
 
 import FarmerRegister from "./Pages/Buyer/auth/FarmerRegister";
-
 import FarmerHomePage from "./Pages/Farmer/FarmerHomePage";
 import FarmerLayout from "./Pages/Farmer/auth/FarmerLayout";
 import FarmerAddProduct from "./Pages/Farmer/Parts/FarmerAddProduct";
 import FarmerDashboard from "./Pages/Farmer/Parts/FarmerDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./Context/AuthContext";
 import FarmerProducts from "./Pages/Farmer/Parts/FarmerProducts";
-import FarmerKYChome from "./Pages/Farmer/Parts/FarmerKYChome";
+import FarmerKYCform from "./Pages/Farmer/Parts/FarmerKYCform";
 import FarmerChatbox from "./Pages/Farmer/Parts/FarmerChatbox";
+import FarmerKYChome from "./Pages/Farmer/Parts/FarmerKYChome";
+import Farmerorderlist from "./Pages/Farmer/Parts/Farmerorderlist";
 
 
 
@@ -34,8 +38,8 @@ const App = () => {
           <Route path="Buyer-login" element={<Login />} />
           <Route path="Buyer-register" element={<Register />} />
           <Route path="Farmer-register" element={<FarmerRegister />} />
-          {/* <Route path='KYC' element={<KYChome/>}/> */}
-          {/* <Route path='KYC-Form' element={<KYCform/>}/> */}
+          <Route path='KYC' element={<KYChome/>}/> 
+           <Route path='KYC-Form' element={<KYCform/>}/>
 
           {/* Farmer page */}
           <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
@@ -46,8 +50,10 @@ const App = () => {
               <Route path="Farmeraddproduct" element={<FarmerAddProduct />} />
               <Route path="Farmerchatbox" element={<FarmerChatbox />} />
               <Route path="FarmerKYCHome" element={<FarmerKYChome />} />
+              <Route path='FarmerKYCForm' element={<FarmerKYCform/>}/>
+              <Route path='Farmerorderlist' element={<Farmerorderlist/>}/>
             </Route>
-          </Route>
+            </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

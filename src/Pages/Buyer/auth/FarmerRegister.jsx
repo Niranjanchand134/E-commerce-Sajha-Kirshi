@@ -29,8 +29,6 @@ const FarmerRegister = () => {
       role: "farmer",
     });
 
-   
-
     const validateEmail = (email) =>
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 

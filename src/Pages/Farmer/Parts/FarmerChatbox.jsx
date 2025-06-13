@@ -10,7 +10,7 @@ import SockJS from "sockjs-client";
 const ChatBox = () => {
   const [stompClient, setStompClient] = useState(null);
   const [connected, setConnected] = useState(false);
-  const [currentUser, setCurrentUser] = useState("You"); // This should be the logged-in user
+  const [currentUser, setCurrentUser] = useState("You"); 
   const users = [
     {
       name: "Yukesh Stha",
@@ -407,4 +407,4 @@ const ChatBox = () => {
   );
 };
 
-export default ChatBox;
+export default FarmerChatbox;
