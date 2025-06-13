@@ -40,7 +40,7 @@ const FarmerKYChome = () => {
     const navigate = useNavigate();
     
     const handleClick = () => {
-        navigate("/KYC-Form");
+        navigate("/Farmerlayout/FarmerKYCForm");
     };
     return(
         <>
