@@ -3,6 +3,9 @@ import Header from "../Component/Header";
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import Password from 'antd/es/input/Password';
+import { UserRegister } from '../../../services/authService';
+import { ErrorMessageToast, SuccesfulMessageToast } from '../../../utils/Tostify.util';
 
 const FarmerRegister = () => {
     const navigate = useNavigate();

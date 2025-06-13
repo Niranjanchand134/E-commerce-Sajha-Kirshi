@@ -36,8 +36,6 @@ export const UserRegister = async (data) => {
   }
 };
 
-
-
 export const greeting = async () => {
   const response = await axios.get("http://localhost:8080/");
 
@@ -45,3 +43,86 @@ export const greeting = async () => {
 
   return response.data;
 };
+
+export const checkAuth = async () => {
+  const token = localStorage.getItem("token");
+  console.log("token", token);
+  try {
+    const response = await axios.get("http://localhost:8080/test-auth", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data; // Return the successful response
+  } catch (error) {
+    if (error.response) {
+      console.error(
+        "Server responded with:",
+        error.response.status,
+        error.response.data
+      );
+      throw new Error(error.response.data?.message || "Unauthorized");
+    }
+    throw error; // Re-throw other errors
+  }
+};
+
+export const addProduct = async (data) =>{
+  const token = localStorage.getItem("token"); // or use authToken if passed
+  console.log("token",token)
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/farmer/addProduct",
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("cors header", response);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error(
+        "Server responded with:",
+        error.response.status,
+        error.response.data
+      );
+      throw new Error(error.response.data?.message || "Unauthorized");
+    } else {
+      console.error("Error with request:", error.message);
+      throw new Error("Request failed. Please try again later.");
+    }
+  }
+ 
+}
+
+export const getAllProduct = async () =>{
+  const token = localStorage.getItem("token");
+  try {
+    const response = await axios.get(
+      "http://localhost:8080/api/getAll",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("cors header", response);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error(
+        "Server responded with:",
+        error.response.status,
+        error.response.data
+      );
+      throw new Error(error.response.data?.message || "Unauthorized");
+    }
+  }
+
+}

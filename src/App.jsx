@@ -13,15 +13,15 @@ import FarmerHomePage from "./Pages/Farmer/FarmerHomePage";
 import FarmerLayout from "./Pages/Farmer/auth/FarmerLayout";
 import FarmerAddProduct from "./Pages/Farmer/Parts/FarmerAddProduct";
 import FarmerDashboard from "./Pages/Farmer/Parts/FarmerDashboard";
-import FarmerProducts from "./Pages/Farmer/Parts/FarmerProducts";
-import FarmerChatbox from "./Pages/Farmer/Parts/FarmerChatbox"
-import FarmerKYChome from "./Pages/Farmer/Parts/FarmerKYChome";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./Context/AuthContext";
+import FarmerProducts from "./Pages/Farmer/Parts/FarmerProducts";
 import FarmerKYCform from "./Pages/Farmer/Parts/FarmerKYCform";
+import FarmerChatbox from "./Pages/Farmer/Parts/FarmerChatbox";
+import FarmerKYChome from "./Pages/Farmer/Parts/FarmerKYChome";
 import Farmerorderlist from "./Pages/Farmer/Parts/Farmerorderlist";
-
 
 
 
@@ -32,26 +32,28 @@ const App = () => {
         <ToastContainer />
         <Routes>
           {/* Buyer page */}
-          <Route path='/' element={<Landing />}/>
-          <Route path='Buyer-shop' element={<Shop/>}/>
-          <Route path='Buyer-shopdetail' element={<ShopDetail/>}/>
-          <Route path='Buyer-login' element={<Login/>}/>
-          <Route path='Buyer-register' element={<Register/>}/>
-          <Route path='Farmer-register' element={<FarmerRegister/>}/>
-          <Route path='KYC' element={<KYChome/>}/>
-          <Route path='KYC-Form' element={<KYCform/>}/>
+          <Route path="/" element={<Landing />} />
+          <Route path="Buyer-shop" element={<Shop />} />
+          <Route path="Buyer-shopdetail" element={<ShopDetail />} />
+          <Route path="Buyer-login" element={<Login />} />
+          <Route path="Buyer-register" element={<Register />} />
+          <Route path="Farmer-register" element={<FarmerRegister />} />
+          <Route path='KYC' element={<KYChome/>}/> 
+           <Route path='KYC-Form' element={<KYCform/>}/>
 
           {/* Farmer page */}
-          <Route path='Farmerlayout' element={<FarmerLayout/>}>
-              <Route path='Farmer' element={<FarmerHomePage/>}/>
-              <Route path='Farmerdashboard' element={<FarmerDashboard/>}/>
-              <Route path='Farmerproducts' element={<FarmerProducts/>}/>
-              <Route path='Farmeraddproduct' element={<FarmerAddProduct/>}/>
-              <Route path='Farmerchatbox' element={<FarmerChatbox/>}/>
-              <Route path='FarmerKYCHome' element={<FarmerKYChome/>}/>
+          <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
+            <Route path="Farmerlayout" element={<FarmerLayout />}>
+              <Route path="Farmer" element={<FarmerHomePage />} />
+              <Route path="Farmerdashboard" element={<FarmerDashboard />} />
+              <Route path="Farmerproducts" element={<FarmerProducts />} />
+              <Route path="Farmeraddproduct" element={<FarmerAddProduct />} />
+              <Route path="Farmerchatbox" element={<FarmerChatbox />} />
+              <Route path="FarmerKYCHome" element={<FarmerKYChome />} />
               <Route path='FarmerKYCForm' element={<FarmerKYCform/>}/>
               <Route path='Farmerorderlist' element={<Farmerorderlist/>}/>
-          </Route>
+            </Route>
+            </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
