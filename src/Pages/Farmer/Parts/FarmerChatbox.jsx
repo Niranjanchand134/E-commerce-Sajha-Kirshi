@@ -4,7 +4,7 @@ import { IoMdArrowBack } from "react-icons/io";
 import { AiOutlinePlus } from "react-icons/ai";
 import { InfoCircleOutlined, SendOutlined, SearchOutlined  } from "@ant-design/icons";
 
-const ChatBox = () => {
+const FarmerChatbox = () => {
   const users = [
     {
       name: "Yukesh Stha",
@@ -283,4 +283,4 @@ const ChatBox = () => {
   );
 };
 
-export default ChatBox;
+export default FarmerChatbox;

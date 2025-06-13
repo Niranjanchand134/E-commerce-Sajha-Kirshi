@@ -18,6 +18,8 @@ module.exports = {
     "./src/pages/Farmer/Parts/FarmerProducts.jsx",
     "./src/pages/Farmer/Parts/FarmerAddProduct.jsx",
     "./src/pages/Farmer/Parts/FarmerChatbox.jsx",
+    "./src/pages/Farmer/Parts/FarmerKYCform.jsx",
+    "./src/pages/Farmer/Parts/FarmerKYChome.jsx",
   ],
   theme: {
     extend: {},

@@ -79,6 +79,7 @@ const FarmerSidebar = ({ collapsed }) => {
             key: '5',
             icon: <UserSwitchOutlined />,
             label: 'Orders & Sales',
+            onClick: () => navigate('/Farmerlayout/Farmerorderlist'),
           },
           {
             key: '6',
