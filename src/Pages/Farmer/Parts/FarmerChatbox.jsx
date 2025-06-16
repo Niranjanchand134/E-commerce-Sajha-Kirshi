@@ -1,42 +1,51 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, use } from "react";
 import { BiImageAdd } from "react-icons/bi";
 import { IoMdArrowBack } from "react-icons/io";
 import { AiOutlinePlus } from "react-icons/ai";
-import { InfoCircleOutlined, SendOutlined, SearchOutlined  } from "@ant-design/icons";
-import { Client } from "@stomp/stompjs"; 
+import {
+  InfoCircleOutlined,
+  SendOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import SockJS from "sockjs-client";
+import { Stomp } from "@stomp/stompjs";
+import { getChatRoomUserDetails } from "../../../services/farmer/farmerApiService";
+import { useAuth } from "../../../Context/AuthContext";
+import { SuccesfulMessageToast } from "../../../utils/Tostify.util";
 
-
-const ChatBox = () => {
+const FarmerChatbox = () => {
   const [stompClient, setStompClient] = useState(null);
   const [connected, setConnected] = useState(false);
-  const [currentUser, setCurrentUser] = useState("You"); 
-  const users = [
-    {
-      name: "Yukesh Stha",
-      message: "Hi, yes, David have found it, ask our concierge 👀",
-      time: "5 minutes ago",
-      image: "https://i.pravatar.cc/150?img=1",
-    },
-    {
-      name: "Luella Mills",
-      message: "Well, it seems to be working now.",
-      time: "10 minutes ago",
-      image: "https://i.pravatar.cc/150?img=2",
-    },
-    {
-      name: "Ethel Kelly",
-      message: "Please review the tickets",
-      time: "2 hours ago",
-      image: "https://i.pravatar.cc/150?img=3",
-    },
-    {
-      name: "Herman May",
-      message: "Thanks a lot. It was easy to fix it .",
-      time: "4 hours ago",
-      image: "https://i.pravatar.cc/150?img=4",
-    },
-  ];
+  const [currentUser, setCurrentUser] = useState("You");
+  const { user } = useAuth();
+  const [roomId, setRoomId] = useState();
+  const [users, setUsers] = useState([]);
+  // const users = [
+  //   {
+  //     name: "Yukesh Stha",
+  //     message: "Hi, yes, David have found it, ask our concierge 👀",
+  //     time: "5 minutes ago",
+  //     image: "https://i.pravatar.cc/150?img=1",
+  //   },
+  //   {
+  //     name: "Luella Mills",
+  //     message: "Well, it seems to be working now.",
+  //     time: "10 minutes ago",
+  //     image: "https://i.pravatar.cc/150?img=2",
+  //   },
+  //   {
+  //     name: "Ethel Kelly",
+  //     message: "Please review the tickets",
+  //     time: "2 hours ago",
+  //     image: "https://i.pravatar.cc/150?img=3",
+  //   },
+  //   {
+  //     name: "Herman May",
+  //     message: "Thanks a lot. It was easy to fix it .",
+  //     time: "4 hours ago",
+  //     image: "https://i.pravatar.cc/150?img=4",
+  //   },
+  // ];
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -50,65 +59,98 @@ const ChatBox = () => {
   );
 
   useEffect(() => {
-    // Initialize WebSocket connection when component mounts
+    console.log(user.id);
+    console.log(user.name);
+
+    const fetchUserRoom = async () => {
+      try {
+        const usersRoom = await getChatRoomUserDetails(user.id);
+        // console.log("printing the user room", usersRoom);
+
+        // Transform the room data to match the expected user list format
+        if (usersRoom && usersRoom.buyer) {
+          const transformedUser = {
+            id: usersRoom.id,
+            name: usersRoom.buyer.name,
+            buyer: usersRoom.buyer,
+            farmer: usersRoom.farmer,
+            message: usersRoom.lastMessage || "No messages yet",
+            time: usersRoom.lastActivity || "Recently",
+            image: `https://i.pravatar.cc/150?img=${usersRoom.buyer.id}`, // Generate avatar based on buyer ID
+            messages: usersRoom.messages || [],
+            roomData: usersRoom, // Store the full room data for later use
+          };
+
+          setUsers([transformedUser]); // Wrap in array since UI expects array
+        } else {
+          setUsers([]); // Empty array if no room found
+        }
+      } catch (error) {
+        console.error("Error fetching user room:", error);
+        setUsers([]);
+      }
+    };
+
+    fetchUserRoom();
+  }, []);
+
+  useEffect(() => {
     const initializeWebSocket = () => {
-      const token = localStorage.getItem("token");
-      const socket = new SockJS("http://localhost:8080/ws");
-      const client = new Client({
-        webSocketFactory: () => socket,
-        connectHeaders: {
-          Authorization: `Bearer ${token}`,
-        },
-        reconnectDelay: 5000,
-        heartbeatIncoming: 4000,
-        heartbeatOutgoing: 4000,
-        onConnect: () => {
-          setConnected(true);
-          console.log("Connected to WebSocket");
-
-          // Subscribe to public messages
-          client.subscribe("/chatroom/public", (message) => {
-            const receivedMessage = JSON.parse(message.body);
-            handleReceivedMessage(receivedMessage);
-          });
-
-          // Subscribe to private messages
-          client.subscribe(`/user/${currentUser}/private`, (message) => {
-            const receivedMessage = JSON.parse(message.body);
-            handleReceivedMessage(receivedMessage);
-          });
-        },
-        onDisconnect: () => {
-          setConnected(false);
-          console.log("Disconnected from WebSocket");
-        },
+      // const token = localStorage.getItem("token");
+      const client = Stomp.over(function () {
+        return new SockJS("http://localhost:8080/chat"); 
       });
-
-      client.activate();
-      setStompClient(client);
+      // const client = Stomp.over(function () {
+      //   return new WebSocket("ws://localhost:8080/chat/websocket");
+      // });
+      client.debug = (str) => {
+        console.log("STOMP DEBUG:", str);
+      };
+      client.connect(
+        {
+          // Authorization: `Bearer ${token}`,
+        },
+        (frame) => {
+          console.log("Connected to WebSocket:", frame);
+          setStompClient(client); 
+          SuccesfulMessageToast("Connected to chat");
+          
+            client.subscribe(`  /topic/room/2`, (message) => {
+              console.log("Received message:", message);
+              const receivedMessage = JSON.parse(message.body);
+              setMessages((prev) => [...prev, receivedMessage]);
+            });
+        },
+        (error) => {
+          console.error("WebSocket connection error:", error);
+          // Handle reconnection logic here if needed
+        }
+      );
 
       return () => {
-        if (client) {
-          client.deactivate();
+        if (client && client.connected) {
+          console.log("Disconnecting from backend WebSocket...");
+          client.disconnect(() => {
+            console.log("Disconnected successfully from backend WebSocket.");
+          });
         }
       };
     };
+   initializeWebSocket();
+    
+  }, []);
 
-    initializeWebSocket();
-  }, [currentUser]);
-
-
-  const handleReceivedMessage = (message) => {
-    const newMessage = {
-      sender: message.senderName,
-      text: message.message,
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-    setMessages((prev) => [...prev, newMessage]);
-  };
+  // const handleReceivedMessage = (message) => {
+  //   const newMessage = {
+  //     sender: message.senderName,
+  //     text: message.message,
+  //     time: new Date().toLocaleTimeString([], {
+  //       hour: "2-digit",
+  //       minute: "2-digit",
+  //     }),
+  //   };
+  //   setMessages((prev) => [...prev, newMessage]);
+  // };
 
   const handleSendMessage = () => {
     if (inputMessage.trim() === "") return;
@@ -193,6 +235,16 @@ const ChatBox = () => {
     }
   };
 
+  const handleUserRoom = (chatUser) => {
+    if (stompClient && stompClient.connected) {
+      stompClient.disconnect();
+    }
+
+    setRoomId(chatUser.id);
+    console.log("here is the room id ", chatUser.id);
+    setSelectedUser(chatUser);
+  };
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-white font-sans">
       {/* Sidebar */}
@@ -228,35 +280,35 @@ const ChatBox = () => {
 
         {/* User List */}
         <div className="flex-1 overflow-y-auto space-y-4 p-4 pt-0">
-          {filteredUsers.map((user, index) => (
-            <div key={index}>
+          {filteredUsers.map((chatUser, index) => (
+            <div key={chatUser.id || index}>
               <div
                 className="flex items-start space-x-3 p-2 rounded cursor-pointer hover:bg-gray-100"
-                onClick={() => setSelectedUser(user)}
+                onClick={() => handleUserRoom(chatUser)}
                 style={{ minWidth: "0" }}
               >
                 <img
-                  src={user.image}
-                  alt={user.name}
+                  src={chatUser.image}
+                  alt={chatUser.name}
                   className="w-10 h-10 rounded-full object-cover"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center">
                     <span
                       className="font-semibold truncate block max-w-[120px]"
-                      title={user.name}
+                      title={chatUser.name}
                     >
-                      {user.name}
+                      {chatUser.name}
                     </span>
                     <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                      {user.time}
+                      {chatUser.time}
                     </span>
                   </div>
                   <div
                     className="text-sm text-gray-500 truncate"
-                    title={user.message}
+                    title={chatUser.message}
                   >
-                    {user.message}
+                    {chatUser.message}
                   </div>
                 </div>
               </div>

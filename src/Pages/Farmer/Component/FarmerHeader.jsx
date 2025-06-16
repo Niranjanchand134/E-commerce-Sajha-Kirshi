@@ -1,19 +1,59 @@
 import React, { useState } from 'react';
 import { Button, Layout, Dropdown, Menu, theme } from 'antd';
 import {
+  FormOutlined,
+  LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MoreOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
+import { useAuth } from '../../../Context/AuthContext';
 
 const { Header } = Layout;
 
 const FarmerHeader = ({ collapsed, setCollapsed }) => {
+
+  const { user, logout } = useAuth();
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
   const [showSearch, setShowSearch] = useState(false);
+
+  const dropmenu = (
+    <Menu
+      items={[
+        {
+          label: "Manage my ad",
+          key: "manage my ads",
+          icon: <FormOutlined />,
+          onClick: () => navigate("/manageAd"),
+        },
+        {
+          label: "Profile",
+          key: "profile",
+          icon: <UserOutlined />,
+          onClick: () => navigate("/profilePage"),
+        },
+        {
+          label: "Logout",
+          key: "logout",
+          icon: <LogoutOutlined />,
+        },
+      ]}
+      onClick={({ key }) => {
+        if (key === "logout") {
+          handleLogoutClick();
+        }
+      }}
+    />
+  );
+
+  const handleLogoutClick = () => {
+    logout();
+    window.location.reload();
+  };
 
   const menu = (
     <Menu>
@@ -34,7 +74,8 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
       </Menu.Item>
       <Menu.Item key="profile">
         <span>
-          <i className="fa-solid fa-user-circle mr-2"></i>John Doe
+          <i className="fa-solid fa-user-circle mr-2"></i>
+          {user.name}
         </span>
       </Menu.Item>
     </Menu>
@@ -43,12 +84,12 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
   return (
     <Header
       style={{
-        padding: '0 24px',
+        padding: "0 24px",
         background: colorBgContainer,
         borderRadius: borderRadiusLG,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
       }}
     >
       {/* Toggle Button */}
@@ -57,7 +98,7 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
         icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
         onClick={() => setCollapsed(!collapsed)}
         style={{
-          fontSize: '16px',
+          fontSize: "16px",
           width: 64,
           height: 64,
         }}
@@ -89,8 +130,12 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
 
         {/* Profile */}
         <div className="flex items-center text-green-500 space-x-2 gap-2 cursor-pointer hover:text-black">
-          <span className="text-base">John Doe</span>
-          <i className="fa-solid fa-user-circle text-2xl"></i>
+          <Dropdown overlay={dropmenu} trigger={["hover"]}>
+            <a onClick={(e) => e.preventDefault()}>
+              <i className="fa-solid fa-user-circle text-2xl"></i>
+              <span className="text-base">{user.name}</span>
+            </a>
+          </Dropdown>
         </div>
       </div>
 
