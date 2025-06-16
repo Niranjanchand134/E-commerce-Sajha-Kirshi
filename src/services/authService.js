@@ -46,7 +46,7 @@ export const greeting = async () => {
 
 export const checkAuth = async () => {
   const token = localStorage.getItem("token");
-  console.log("token", token);
+  // console.log("token", token);
   try {
     const response = await axios.get("http://localhost:8080/test-auth", {
       headers: {
