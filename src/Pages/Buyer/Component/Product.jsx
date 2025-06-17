@@ -18,49 +18,85 @@ const Product = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:px-60">
           <div className="text-center rounded">
             <img src="/assets/BuyersImg/Products/Onion.png" alt="Onion" />
-            <div className="p-2">
-              <h5>Onions</h5>
-              <p>&20.00</p>
+            <div className="flex justify-between">
+              <div className="p-2">
+                <h5>Onions</h5>
+                <p className='text-green-500 text-lg'>Rs 20.00</p>
+              </div>
+              <div className="text-right">
+                <p className='mt-1'>Farm Name</p>
+                <p>Godawari-5-Lalitpur</p>
+              </div>
             </div>
           </div>
 
           <div className="text-center rounded">
             <img src="/assets/BuyersImg/Products/Carrot.jpg" alt="Carrot" />
-            <div className="p-2">
-              <h5>Carrot</h5>
-              <p>&20.00</p>
+            <div className="flex justify-between">
+              <div className="p-2">
+                <h5>Onions</h5>
+                <p className='text-green-500 text-lg'>Rs 20.00</p>
+              </div>
+              <div className="text-right">
+                <p className='mt-1'>Farm Name</p>
+                <p>Godawari-5-Lalitpur</p>
+              </div>
             </div>
           </div>
 
           <div className="text-center rounded">
             <img src="/assets/BuyersImg/Products/Tomato.png" alt="Tomato" />
-            <div className="p-2">
-              <h5>Tomato</h5>
-              <p>&20.00</p>
+            <div className="flex justify-between">
+              <div className="p-2">
+                <h5>Onions</h5>
+                <p className='text-green-500 text-lg'>Rs 20.00</p>
+              </div>
+              <div className="text-right">
+                <p className='mt-1'>Farm Name</p>
+                <p>Godawari-5-Lalitpur</p>
+              </div>
             </div>
           </div>
 
           <div className="text-center rounded">
             <img src="/assets/BuyersImg/Products/Grapes.png" alt="Grapes" />
-            <div className="p-2">
-              <h5>Grapes</h5>
-              <p>&20.00</p>
+            <div className="flex justify-between">
+              <div className="p-2">
+                <h5>Onions</h5>
+                <p className='text-green-500 text-lg'>Rs 20.00</p>
+              </div>
+              <div className="text-right">
+                <p className='mt-1'>Farm Name</p>
+                <p>Godawari-5-Lalitpur</p>
+              </div>
             </div>
           </div>
 
           <div className="text-center rounded">
             <img src="/assets/BuyersImg/Products/Lasun.png" alt="Garlic" />
-            <div className="p-2">
-              <h5>Garlic</h5>
-              <p>&20.00</p>
+            <div className="flex justify-between">
+              <div className="p-2">
+                <h5>Onions</h5>
+                <p className='text-green-500 text-lg'>Rs 20.00</p>
+              </div>
+              <div className="text-right">
+                <p className='mt-1'>Farm Name</p>
+                <p>Godawari-5-Lalitpur</p>
+              </div>
             </div>
           </div>
 
           <div className="text-center rounded">
             <img src="/assets/BuyersImg/Products/Rayo.png" alt="Mustard Leaves" />
-            <div className="p-2">
-              <h5>Mustard Leaves</h5>
-              <p>&20.00</p>
+            <div className="flex justify-between">
+              <div className="p-2">
+                <h5>Onions</h5>
+                <p className='text-green-500 text-lg'>Rs 20.00</p>
+              </div>
+              <div className="text-right">
+                <p className='mt-1'>Farm Name</p>
+                <p>Godawari-5-Lalitpur</p>
+              </div>
             </div>
           </div>
         </div>

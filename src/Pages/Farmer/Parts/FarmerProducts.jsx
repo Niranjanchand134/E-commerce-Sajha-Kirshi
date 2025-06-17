@@ -1,10 +1,11 @@
+// FarmerProducts.jsx
 import { Space, Table, Button, Dropdown, Menu } from 'antd';
 import { createStyles } from "antd-style";
 import { FormOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAllProduct } from '../../../services/authService';
 import { categoryChanges, StatusChanges, updateProductById } from '../../../services/farmer/farmerApiService';
-import { SiAnsys } from 'react-icons/si';
 
 const useStyle = createStyles(({ css, token }) => {
   const { antCls } = token;
@@ -35,22 +36,17 @@ const StatusCell = ({ initialStatus, record, onStatusChange }) => {
   const [status, setStatus] = useState(initialStatus);
   const [loading, setLoading] = useState(false);
 
-  const handleMenuClick =  async({ key }) => {
+  const handleMenuClick = async ({ key }) => {
     try {
       setLoading(true);
-      // Call API to update status first
       await updateProductById(record.id, { status: key });
-      
-      // Only update local state if API call succeeds
       setStatus(key);
       onStatusChange(record.id, key);
     } catch (error) {
       console.error("Failed to update status:", error);
-      // You might want to show an error message here
-      // message.error(error.message || "Failed to update status");
     } finally {
       setLoading(false);
-    } // Call the parent handler with the new status
+    }
   };
 
   const menu = (
@@ -80,7 +76,6 @@ const StatusCell = ({ initialStatus, record, onStatusChange }) => {
   );
 };
 
-
 const FarmerProducts = () => {
   const { styles } = useStyle();
   const [categoryFilter, setCategoryFilter] = useState("All");
@@ -89,12 +84,13 @@ const FarmerProducts = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const productData = await getAllProduct(); // Add await here
+        const productData = await getAllProduct();
         setFilteredData(productData);
         setError(null);
       } catch (err) {
@@ -108,20 +104,16 @@ const FarmerProducts = () => {
     fetchProducts();
   }, []);
 
-
-  const handleCategoryChanges = async (e)=>{
+  const handleCategoryChanges = async (e) => {
     const value = e.target.value;
     setCategoryFilter(value);
-    try{
+    try {
       const response = await categoryChanges(value);
-      setFilteredData(response );
-    }catch(error){
+      setFilteredData(response);
+    } catch (error) {
       console.log("error .........");
-
     }
-   
-
-  }
+  };
 
   const handleStatusChanges = async (e) => {
     const value = e.target.value;
@@ -133,9 +125,6 @@ const FarmerProducts = () => {
       console.log("error .........");
     }
   };
-
- 
-
 
   const columns = [
     {
@@ -154,12 +143,7 @@ const FarmerProducts = () => {
           <img
             src={firstImage}
             alt="product"
-            style={{
-              width: 60,
-              height: 60,
-              objectFit: "cover",
-              borderRadius: 4,
-            }}
+            style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 4 }}
             onError={(e) => {
               e.target.src = "https://via.placeholder.com/60x60?text=No+Image";
             }}
@@ -216,13 +200,12 @@ const FarmerProducts = () => {
           initialStatus={status}
           record={record}
           onStatusChange={(id, newStatus) => {
-            setFilteredData(prev => prev.map(item => 
-              item.id === id ? {...item, status: newStatus} : item
-            ))
-          }
-          }
+            setFilteredData((prev) =>
+              prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
+            );
+          }}
         />
-      )
+      ),
     },
     {
       title: "Action",
@@ -234,13 +217,13 @@ const FarmerProducts = () => {
           <Button
             type="link"
             icon={<FormOutlined />}
-            onClick={() => console.log("Edit:", record.originalData)}
+            onClick={() => navigate(`/Farmerlayout/Farmereditproduct/${record.id}`, { state: { product: record } })}
           />
           <Button
             type="link"
             icon={<DeleteOutlined />}
             danger
-            onClick={() => console.log("Delete:", record.originalData)}
+            onClick={() => console.log("Delete:", record)}
           />
         </Space>
       ),
@@ -250,11 +233,9 @@ const FarmerProducts = () => {
   return (
     <>
       <div className="flex items-center gap-4 ml-4 mb-4 bg-white flex-wrap">
-        {/* Category Dropdown */}
+        {/* Category Filter */}
         <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">
-            Category
-          </label>
+          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">Category</label>
           <select
             className="border border-gray-300 rounded-full w-32 px-2 py-2 focus:outline-none"
             value={categoryFilter}
@@ -268,13 +249,10 @@ const FarmerProducts = () => {
             <option value="meat">Meat</option>
           </select>
         </div>
-        
 
-        {/* Status Dropdown */}
+        {/* Status Filter */}
         <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">
-            Status
-          </label>
+          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">Status</label>
           <select
             className="border border-gray-300 w-32 rounded-full px-2 py-2 focus:outline-none"
             value={statusFilter}
@@ -284,13 +262,10 @@ const FarmerProducts = () => {
             <option value="Active">Active</option>
             <option value="Pause">Pause</option>
             <option value="Inactive">Inactive</option>
-            {/* {statusOptions.map((status, index) => (
-              <option key={index}>{status}</option>
-            ))} */}
           </select>
         </div>
 
-        {/* Search Input */}
+        {/* Search */}
         <div className="flex flex-col flex-1 min-w-[200px]">
           <div className="flex gap-2">
             <input
@@ -306,13 +281,17 @@ const FarmerProducts = () => {
           </div>
         </div>
       </div>
+
       <hr />
+
       <div>
         <Table
           className={styles.customTable}
           columns={columns}
           dataSource={filteredData}
+          rowKey="id"
           scroll={{ x: "max-content", y: 56 * 5 }}
+          loading={loading}
         />
       </div>
     </>
