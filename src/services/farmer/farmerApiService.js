@@ -79,3 +79,14 @@ export const StatusChanges = async (status) => {
     return []; // Return empty array instead of throwing error
   }
 };
+
+
+export const getChatRoomUserDetails = async (id) =>{
+
+  const response = await axios.get(
+    `http://localhost:8080/api/rooms/getUserRoom/${id}`
+  );
+
+  return response.data;
+
+}

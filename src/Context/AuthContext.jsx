@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
     setTimeout(() => {
       const verifyToken = async () => {
         try {
-          await checkAuth();
+          // await checkAuth();
           // Token is valid, you can optionally update state here
         } catch (error) {
           // Token is invalid or there was an error
