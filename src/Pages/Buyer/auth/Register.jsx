@@ -11,6 +11,7 @@ const Register = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const [form, setForm] = useState({
         name: "",
         number: "",
@@ -20,19 +21,14 @@ const Register = () => {
     });
 
     const [formData, setFormData] = useState({
-      name: "",
-      number: "",
-      email: "",
-      password: "",
-      role: "user"
+        name: "",
+        number: "",
+        email: "",
+        password: "",
+        role: "user"
     });
-    const [errors, setErrors] = useState({});
 
-    // Mock registered emails for demonstration
-    const [registeredEmails, setRegisteredEmails] = useState([
-        "test@example.com",
-        "user@example.com",
-    ]);
+    const [errors, setErrors] = useState({});
 
     const validateEmail = (email) =>
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -43,7 +39,7 @@ const Register = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setForm({ ...form, [name]: value });
-        setFormData({...formData, [name]:value});
+        setFormData({ ...formData, [name]: value });
     };
 
     const validateForm = () => {
@@ -51,18 +47,17 @@ const Register = () => {
 
         if (!form.name.trim()) newErrors.name = "Name is required";
 
+        if (!form.number.trim()) newErrors.contact = "Phone number is required";
+        else if (!validateContact(form.number)) newErrors.contact = "Enter a valid Nepali phone number";
+
         if (!form.email.trim()) newErrors.email = "Email is required";
-        else if (!validateEmail(form.email))
-            newErrors.email = "Enter a valid email address";
+        else if (!validateEmail(form.email)) newErrors.email = "Enter a valid email address";
 
         if (!form.password) newErrors.password = "Password is required";
-        else if (form.password.length < 6)
-            newErrors.password = "Password must be at least 6 characters";
+        else if (form.password.length < 6) newErrors.password = "Password must be at least 6 characters";
 
-        if (!form.confirmPassword)
-            newErrors.confirmPassword = "Please confirm your password";
-        else if (form.password !== form.confirmPassword)
-            newErrors.confirmPassword = "Passwords do not match";
+        if (!form.confirmPassword) newErrors.confirmPassword = "Please confirm your password";
+        else if (form.password !== form.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -71,38 +66,16 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateForm()){
-            return;
-        } 
+        if (!validateForm()) return;
 
-        try{
-          const response = await UserRegister(formData);
-
-          SuccesfulMessageToast("Register Successfully!")
-
-          navigate("/Buyer-login")
-
-        }catch (err) {
-            setErrors(err.message);
+        try {
+            const response = await UserRegister(formData);
+            SuccesfulMessageToast("Register Successfully!");
+            navigate("/Buyer-login");
+        } catch (err) {
+            setErrors({ ...errors, form: err.message });
             ErrorMessageToast(err.message);
-            return;
         }
-
-
-        // Check if email already exists
-        // if (registeredEmails.includes(form.email)) {
-        //     setErrors(prevErrors => ({
-        //         ...prevErrors,
-        //         email: "Email is already registered"
-        //     }));
-        //     return;
-        // }
-
-        // Simulate registering the user by adding the email to the registered list
-        // setRegisteredEmails(prev => [...prev, form.email]);
-
-        // alert("Registration Successful!");
-        // navigate("/Buyer-login");
     };
 
     return (
@@ -126,7 +99,6 @@ const Register = () => {
                         />
                         <h1 className="h1 bold">Get Started now</h1>
                         <p className="lg">Create an account to Sell Your Farming Products</p>
-
                         <div className="d-flex justify-content-center gap-2 mb-3">
                             <button
                                 type="button"
@@ -135,7 +107,7 @@ const Register = () => {
                             >
                                 Log In
                             </button>
-                            <button type="button" className="btn btn-success btn-sm w-50">
+                            <button type="button" className="btn btn-sm w-50" style={{ backgroundColor: "#49A760", color: "white" }}>
                                 Sign Up
                             </button>
                         </div>
@@ -149,10 +121,11 @@ const Register = () => {
                                     type="text"
                                     id="name"
                                     name="name"
-                                    className={`form-control form-control-sm shadow-sm ${errors.name && 'is-invalid'}`}
+                                    className="form-control form-control-sm shadow-sm"
                                     placeholder="Enter your Name"
                                     value={form.name}
                                     onChange={handleChange}
+                                    style={{ height: '38px' }}
                                 />
                                 {errors.name && <small className="text-danger">{errors.name}</small>}
                             </div>
@@ -163,10 +136,11 @@ const Register = () => {
                                     type="text"
                                     id="contact"
                                     name="number"
-                                    className={`form-control form-control-sm shadow-sm ${errors.contact && 'is-invalid'}`}
+                                    className="form-control form-control-sm shadow-sm"
                                     placeholder="9800000000"
                                     value={form.number}
                                     onChange={handleChange}
+                                    style={{ height: '38px' }}
                                 />
                                 {errors.contact && <small className="text-danger">{errors.contact}</small>}
                             </div>
@@ -177,67 +151,76 @@ const Register = () => {
                                     type="email"
                                     id="emailId"
                                     name="email"
-                                    className={`form-control form-control-sm shadow-sm ${errors.email && 'is-invalid'}`}
+                                    className="form-control form-control-sm shadow-sm"
                                     placeholder="Hello@gmail.com"
                                     value={form.email}
                                     onChange={handleChange}
+                                    style={{ height: '38px' }}
                                 />
                                 {errors.email && <small className="text-danger">{errors.email}</small>}
                             </div>
 
-                            <div className="mb-3 col position-relative">
+                            <div className="mb-3 col">
                                 <label htmlFor="Password" className="form-label d-flex small">Enter your Password</label>
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    id="Password"
-                                    name="password"
-                                    className={`form-control form-control-sm shadow-sm pe-5 ${errors.password && 'is-invalid'}`}
-                                    placeholder="**********"
-                                    value={form.password}
-                                    onChange={handleChange}
-                                />
-                                <span
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    style={{
-                                        position: 'absolute',
-                                        top: '75%',
-                                        right: '15px',
-                                        transform: 'translateY(-50%)',
-                                        cursor: 'pointer',
-                                        fontSize: '16px',
-                                        color: '#888'
-                                    }}
-                                >
-                                    {showPassword ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
-                                </span>
+                                <div className="position-relative">
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        id="Password"
+                                        name="password"
+                                        className="form-control form-control-sm shadow-sm pe-5"
+                                        placeholder="**********"
+                                        value={form.password}
+                                        onChange={handleChange}
+                                        style={{ height: '38px' }}
+                                    />
+                                    <span
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '50%',
+                                            right: '15px',
+                                            transform: 'translateY(-50%)',
+                                            cursor: 'pointer',
+                                            fontSize: '16px',
+                                            color: '#888',
+                                            zIndex: 1
+                                        }}
+                                    >
+                                        {showPassword ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
+                                    </span>
+                                </div>
                                 {errors.password && <small className="text-danger">{errors.password}</small>}
                             </div>
 
-                            <div className="mb-3 col position-relative">
+                            <div className="mb-3 col">
                                 <label htmlFor="confirmPassword" className="form-label d-flex small">Confirm your Password</label>
-                                <input
-                                    type={showConfirmPassword ? 'text' : 'password'}
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    className={`form-control form-control-sm shadow-sm pe-5 ${errors.confirmPassword && 'is-invalid'}`}
-                                    placeholder="**********"
-                                    value={form.confirmPassword}
-                                    onChange={handleChange}
-                                />
-                                <span
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    style={{
-                                        position: 'absolute',
-                                        top: '75%',
-                                        right: '15px',
-                                        transform: 'translateY(-50%)',
-                                        cursor: 'pointer',
-                                        fontSize: '16px',
-                                        color: '#888'
-                                    }}
-                                >
-                                    {showConfirmPassword ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
-                                </span>
+                                <div className="position-relative">
+                                    <input
+                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        className="form-control form-control-sm shadow-sm pe-5"
+                                        placeholder="**********"
+                                        value={form.confirmPassword}
+                                        onChange={handleChange}
+                                        style={{ height: '38px' }}
+                                    />
+                                    <span
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '50%',
+                                            right: '15px',
+                                            transform: 'translateY(-50%)',
+                                            cursor: 'pointer',
+                                            fontSize: '16px',
+                                            color: '#888',
+                                            zIndex: 1
+                                        }}
+                                    >
+                                        {showConfirmPassword ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
+                                    </span>
+                                </div>
                                 {errors.confirmPassword && <small className="text-danger">{errors.confirmPassword}</small>}
                             </div>
                         </div>
@@ -249,7 +232,7 @@ const Register = () => {
                     </div>
 
                     <div className="d-grid gap-2">
-                        <button onClick={handleSubmit} className="btn btn-primary btn-sm" type="submit">Sign Up</button>
+                        <button className="btn btn-sm" style={{ backgroundColor: "#49A760", color: "white" }} type="submit">Sign Up</button>
                         <div className="text-center small d-flex align-items-center justify-content-center gap-2 mt-2">
                             <span>Or login with</span>
                             <img
