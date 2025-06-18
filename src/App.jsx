@@ -43,7 +43,7 @@ const App = () => {
           <Route path='KYC-Form' element={<KYCform/>}/>
 
           {/* Farmer page */}
-          {/* <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}> */}
+          <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
             <Route path="Farmerlayout" element={<FarmerLayout />}>
               <Route path="Farmer" element={<FarmerHomePage />} />
               <Route path="Farmerdashboard" element={<FarmerDashboard />} />
@@ -55,7 +55,7 @@ const App = () => {
               <Route path='Farmerorderlist' element={<Farmerorderlist/>}/>
               <Route path='Farmereditproduct' element={<FarmerEditProduct/>}/>
             </Route>
-          {/* </Route> */}
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

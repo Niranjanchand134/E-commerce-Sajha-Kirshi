@@ -169,7 +169,7 @@ const Login = () => {
               </p>
 
               <div className="d-flex justify-content-center gap-2 mb-3">
-                <button type="button" className="btn btn-success btn-sm w-50">
+                <button type="button" className="btn btn-sm w-50" style={{ backgroundColor: "#49A760", color: "white" }}>
                   Log In
                 </button>
                 <button
@@ -257,7 +257,7 @@ const Login = () => {
             </div>
 
             <div className="d-grid gap-2">
-              <button className="btn btn-primary btn-sm" type="submit">
+              <button className="btn btn-sm" style={{ backgroundColor: "#49A760", color: "white" }} type="submit">
                 Login
               </button>
               <div className="flex justify-center space-x-4">
