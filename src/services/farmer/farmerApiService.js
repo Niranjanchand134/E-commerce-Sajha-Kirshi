@@ -90,3 +90,20 @@ export const getChatRoomUserDetails = async (id) =>{
   return response.data;
 
 }
+
+export const fillFarmerKyc = async (data) =>{
+
+  const token = localStorage.getItem("token");
+  const response = await axios.post(
+    "http://localhost:8080/api/farmer/farmerKyc",
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return response.data
+}

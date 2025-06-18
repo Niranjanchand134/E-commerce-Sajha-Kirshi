@@ -96,36 +96,47 @@ const FarmerChatbox = () => {
 
   useEffect(() => {
     const initializeWebSocket = () => {
-      // const token = localStorage.getItem("token");
-      const client = Stomp.over(function () {
-        return new SockJS("http://localhost:8080/chat"); 
-      });
+      const token = localStorage.getItem("token");
+      const socket = new SockJS("http://localhost:8080/chat");
+      const client = Stomp.over(socket);
       // const client = Stomp.over(function () {
       //   return new WebSocket("ws://localhost:8080/chat/websocket");
       // });
       client.debug = (str) => {
         console.log("STOMP DEBUG:", str);
       };
-      client.connect(
-        {
-          // Authorization: `Bearer ${token}`,
-        },
-        (frame) => {
-          console.log("Connected to WebSocket:", frame);
-          setStompClient(client); 
-          SuccesfulMessageToast("Connected to chat");
+
+      client.connect({}, onConnected )
+
+      function onConnected (){
+        setStompClient(client);
+        SuccesfulMessageToast("Connected to chat");
+        client.subscribe(`  /topic/room/2`, (message) => {
+          console.log("Received message:", message);
+          const receivedMessage = JSON.parse(message.body);
+          setMessages((prev) => [...prev, receivedMessage]);
+        });
+      }
+      // client.connect(
+      //   {
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   (frame) => {
+      //     console.log("Connected to WebSocket:", frame);
+      //     setStompClient(client); 
+      //     SuccesfulMessageToast("Connected to chat");
           
-            client.subscribe(`  /topic/room/2`, (message) => {
-              console.log("Received message:", message);
-              const receivedMessage = JSON.parse(message.body);
-              setMessages((prev) => [...prev, receivedMessage]);
-            });
-        },
-        (error) => {
-          console.error("WebSocket connection error:", error);
-          // Handle reconnection logic here if needed
-        }
-      );
+      //       client.subscribe(`  /topic/room/2`, (message) => {
+      //         console.log("Received message:", message);
+      //         const receivedMessage = JSON.parse(message.body);
+      //         setMessages((prev) => [...prev, receivedMessage]);
+      //       });
+      //   },
+      //   (error) => {
+      //     console.error("WebSocket connection error:", error);
+      //     // Handle reconnection logic here if needed
+      //   }
+      // );
 
       return () => {
         if (client && client.connected) {
