@@ -22,6 +22,7 @@ import FarmerKYCform from "./Pages/Farmer/Parts/FarmerKYCform";
 import FarmerChatbox from "./Pages/Farmer/Parts/FarmerChatbox";
 import FarmerKYChome from "./Pages/Farmer/Parts/FarmerKYChome";
 import Farmerorderlist from "./Pages/Farmer/Parts/Farmerorderlist";
+import FarmerEditProduct from "./Pages/Farmer/Function/FarmerEditProduct";
 
 
 
@@ -39,7 +40,7 @@ const App = () => {
           <Route path="Buyer-register" element={<Register />} />
           <Route path="Farmer-register" element={<FarmerRegister />} />
           <Route path='KYC' element={<KYChome/>}/> 
-           <Route path='KYC-Form' element={<KYCform/>}/>
+          <Route path='KYC-Form' element={<KYCform/>}/>
 
           {/* Farmer page */}
           <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
@@ -52,8 +53,9 @@ const App = () => {
               <Route path="FarmerKYCHome" element={<FarmerKYChome />} />
               <Route path='FarmerKYCForm' element={<FarmerKYCform/>}/>
               <Route path='Farmerorderlist' element={<Farmerorderlist/>}/>
+              <Route path='Farmereditproduct' element={<FarmerEditProduct/>}/>
             </Route>
-            </Route>
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons";
 import { useAuth } from "../../../Context/AuthContext";
 import { addProduct } from "../../../services/authService";
+import { SlTag } from "react-icons/sl";
 
 const FarmerAddProduct = () => {
   const { user } = useAuth();
@@ -129,9 +130,9 @@ const FarmerAddProduct = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 bg-[#7F7F7F] p-2 rounded">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 bg-[#ECEDF3] p-1 rounded">
         <div
-          className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
+          className={`flex items-center gap-2 p-1 rounded cursor-pointer ${
             activeTab === "product" ? "bg-white" : ""
           }`}
           onClick={() => setActiveTab("product")}
@@ -145,7 +146,7 @@ const FarmerAddProduct = () => {
         </div>
 
         <div
-          className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
+          className={`flex items-center gap-2 p-1 rounded cursor-pointer ${
             activeTab === "delivery" ? "bg-white" : ""
           }`}
           onClick={() => setActiveTab("delivery")}
@@ -195,19 +196,28 @@ const FarmerAddProduct = () => {
                   >
                     Category
                   </label>
-                  <select
-                    id="Category"
-                    name="category"
-                    onChange={handleChange}
-                    className="border-2 p-2 rounded border-gray-500 focus:outline-none focus:border-gray-500"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="vegetables">Vegetables</option>
-                    <option value="fruits">Fruits</option>
-                    <option value="grains">Grains</option>
-                    <option value="dairy">Dairy</option>
-                    <option value="meat">Meat</option>
-                  </select>
+
+                  {/* Custom select wrapper with icon */}
+                  <div className="relative">
+                    <select
+                      id="Category"
+                      name="category"
+                      onChange={handleChange}
+                      className="appearance-none border-2 p-2 pr-10 rounded border-gray-500 focus:outline-none focus:border-gray-500 w-full"
+                    >
+                      <option value="">Select Category</option>
+                      <option value="vegetables">Vegetables</option>
+                      <option value="fruits">Fruits</option>
+                      <option value="grains">Grains</option>
+                      <option value="dairy">Dairy</option>
+                      <option value="meat">Meat</option>
+                    </select>
+
+                    {/* Tag Icon on the right */}
+                    <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                      <SlTag className="text-gray-500 -rotate-90" />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col w-full">
@@ -259,21 +269,29 @@ const FarmerAddProduct = () => {
                   >
                     Unit of Measurement
                   </label>
-                  <select
-                    id="unit"
-                    name="unitOfMeasurement"
-                    onChange={handleChange}
-                    className="border-2 p-2 rounded border-gray-500 focus:outline-none focus:border-gray-500"
-                  >
-                    <option value="">Select Unit</option>
-                    <option value="kg">Kilogram (kg)</option>
-                    <option value="g">Gram (g)</option>
-                    <option value="l">Liter (l)</option>
-                    <option value="ml">Milliliter (ml)</option>
-                    <option value="piece">Piece</option>
-                    <option value="dozen">Dozen</option>
-                    <option value="packet">Packet</option>
-                  </select>
+
+                  <div className="relative">
+                    <select
+                      id="unit"
+                      name="unitOfMeasurement"
+                      onChange={handleChange}
+                      className="appearance-none border-2 p-2 pr-10 rounded border-gray-500 focus:outline-none focus:border-gray-500 w-full"
+                    >
+                      <option value="">Select Unit</option>
+                      <option value="kg">Kilogram (kg)</option>
+                      <option value="g">Gram (g)</option>
+                      <option value="l">Liter (l)</option>
+                      <option value="ml">Milliliter (ml)</option>
+                      <option value="piece">Piece</option>
+                      <option value="dozen">Dozen</option>
+                      <option value="packet">Packet</option>
+                    </select>
+
+                    {/* Icon inside the select box */}
+                    <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
+                      <SlTag className="text-gray-500 -rotate-90" />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-4 mb-4">
