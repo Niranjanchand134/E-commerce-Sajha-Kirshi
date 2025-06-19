@@ -1,7 +1,26 @@
-import { Link } from 'react-router-dom';
-import { RightOutlined } from '@ant-design/icons';
+import { Link } from "react-router-dom";
+import { RightOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
+import { getProductByfarmer } from "../../../services/farmer/farmerApiService";
+import { getAllProduct } from "../../../services/authService";
 
 const Product = () => {
+  const [products, setProduct] = useState([]);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await getAllProduct();
+        console.log("the reposnse od product..", response);
+        setProduct(response);
+      } catch (error) {
+        console.log("Error fetching products:", err);
+      }
+    };
+
+    fetchProduct();
+  }, []);
+
   return (
     <>
       <div>
@@ -12,93 +31,34 @@ const Product = () => {
 
         <div className="flex justify-around items-center flex-wrap mb-4 px-4">
           <h2>Listings</h2>
-          <Link to="buyer-shop" className="m-2 text-black">View All <RightOutlined /></Link>
+          <Link to="buyer-shop" className="m-2 text-black">
+            View All <RightOutlined />
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:px-60">
-          <div className="text-center rounded">
-            <img src="/assets/BuyersImg/Products/Onion.png" alt="Onion" />
-            <div className="flex justify-between">
-              <div className="p-2">
-                <h5>Onions</h5>
-                <p className='text-green-500 text-lg'>Rs 20.00</p>
-              </div>
-              <div className="text-right">
-                <p className='mt-1'>Farm Name</p>
-                <p>Godawari-5-Lalitpur</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center rounded">
-            <img src="/assets/BuyersImg/Products/Carrot.jpg" alt="Carrot" />
-            <div className="flex justify-between">
-              <div className="p-2">
-                <h5>Onions</h5>
-                <p className='text-green-500 text-lg'>Rs 20.00</p>
-              </div>
-              <div className="text-right">
-                <p className='mt-1'>Farm Name</p>
-                <p>Godawari-5-Lalitpur</p>
+          {products.map((product) => (
+            <div className="text-center rounded">
+              <img
+                src={
+                  product.imagePaths || "/assets/BuyersImg/Products/Onion.png"
+                } // Fallback image if product.image doesn't exist
+                alt={product.name}
+              />
+              <div className="flex justify-between">
+                <div className="p-2">
+                  <h5>{product.name}</h5>
+                  <p className="text-green-500 text-lg">
+                    Rs {product.price || "00.00"}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="mt-1">{product.farmName || "Farm Name"}</p>
+                  <p>{product.location || "Location"}</p>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="text-center rounded">
-            <img src="/assets/BuyersImg/Products/Tomato.png" alt="Tomato" />
-            <div className="flex justify-between">
-              <div className="p-2">
-                <h5>Onions</h5>
-                <p className='text-green-500 text-lg'>Rs 20.00</p>
-              </div>
-              <div className="text-right">
-                <p className='mt-1'>Farm Name</p>
-                <p>Godawari-5-Lalitpur</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center rounded">
-            <img src="/assets/BuyersImg/Products/Grapes.png" alt="Grapes" />
-            <div className="flex justify-between">
-              <div className="p-2">
-                <h5>Onions</h5>
-                <p className='text-green-500 text-lg'>Rs 20.00</p>
-              </div>
-              <div className="text-right">
-                <p className='mt-1'>Farm Name</p>
-                <p>Godawari-5-Lalitpur</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center rounded">
-            <img src="/assets/BuyersImg/Products/Lasun.png" alt="Garlic" />
-            <div className="flex justify-between">
-              <div className="p-2">
-                <h5>Onions</h5>
-                <p className='text-green-500 text-lg'>Rs 20.00</p>
-              </div>
-              <div className="text-right">
-                <p className='mt-1'>Farm Name</p>
-                <p>Godawari-5-Lalitpur</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center rounded">
-            <img src="/assets/BuyersImg/Products/Rayo.png" alt="Mustard Leaves" />
-            <div className="flex justify-between">
-              <div className="p-2">
-                <h5>Onions</h5>
-                <p className='text-green-500 text-lg'>Rs 20.00</p>
-              </div>
-              <div className="text-right">
-                <p className='mt-1'>Farm Name</p>
-                <p>Godawari-5-Lalitpur</p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </>

@@ -5,6 +5,11 @@ import {
   SuccesfulMessageToast,
 } from "../../../utils/Tostify.util";
 
+import { MapContainer, TileLayer } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import "../../../App.css"
+import AdminMapComponent from "../Component/map/AdminMapComponent";
+
 const FarmerKYCform = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [gender, setGender] = useState("");
@@ -16,6 +21,7 @@ const FarmerKYCform = () => {
   const [image, setImage] = useState(
     "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
   );
+
 
   const [form, setForm] = useState({
     // Personal & Identity Details
@@ -158,12 +164,13 @@ const FarmerKYCform = () => {
     }
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setImage(imageUrl);
-    }
+  const handleLocationSelect = (latlng) => {
+    setLatitude(latlng.lat);
+    setLongitude(latlng.lng);
+    form.setFieldsValue({
+      latitude: latlng.lat,
+      longitude: latlng.lng,
+    });
   };
 
   const handleRemove = () => {
@@ -618,7 +625,14 @@ const FarmerKYCform = () => {
               </div>
               <div className="flex flex-col md:flex-row gap-4 mt-3">
                 <div className="flex justify-content-center">
-                  <iframe
+                  {/* <MapContainer center={[27.7103, 85.3222]} zoom={13}>
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                  </MapContainer> */}
+                  <AdminMapComponent onLocationSelect={handleLocationSelect} />
+                  {/* <iframe
                     title="Kumaripati Location"
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3533.522068845213!2d85.31823907471563!3d27.670254826203855!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19ce1dace9ed%3A0xfb9c8b305818fb7d!2sKumaripati%2C%20Lalitpur!5e0!3m2!1sen!2snp!4v1747846965367!5m2!1sen!2snp"
                     width="820"
@@ -627,7 +641,7 @@ const FarmerKYCform = () => {
                     allowFullScreen=""
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
-                  ></iframe>
+                  ></iframe> */}
                 </div>
               </div>
 
