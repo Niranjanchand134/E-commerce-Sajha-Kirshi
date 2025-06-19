@@ -1,7 +1,5 @@
-import React, { useState, useRef, useEffect, use } from "react";
-import { BiImageAdd } from "react-icons/bi";
+import React, { useState, useEffect, useCallback } from "react";
 import { IoMdArrowBack } from "react-icons/io";
-import { AiOutlinePlus } from "react-icons/ai";
 import {
   InfoCircleOutlined,
   SendOutlined,
@@ -9,81 +7,62 @@ import {
 } from "@ant-design/icons";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
-import { getChatRoomUserDetails } from "../../../services/farmer/farmerApiService";
+import axios from "axios";
 import { useAuth } from "../../../Context/AuthContext";
-import { SuccesfulMessageToast } from "../../../utils/Tostify.util";
+import {
+  ErrorMessageToast,
+  SuccesfulMessageToast,
+} from "../../../utils/Tostify.util";
+import { getChatRoomUserDetails } from "../../../services/farmer/farmerApiService";
 
 const FarmerChatbox = () => {
   const [stompClient, setStompClient] = useState(null);
-  const [connected, setConnected] = useState(false);
-  const [currentUser, setCurrentUser] = useState("You");
+  const [subscription, setSubscription] = useState(null);
   const { user } = useAuth();
-  const [roomId, setRoomId] = useState();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [roomId, setRoomId] = useState(null);
   const [users, setUsers] = useState([]);
-  // const users = [
-  //   {
-  //     name: "Yukesh Stha",
-  //     message: "Hi, yes, David have found it, ask our concierge 👀",
-  //     time: "5 minutes ago",
-  //     image: "https://i.pravatar.cc/150?img=1",
-  //   },
-  //   {
-  //     name: "Luella Mills",
-  //     message: "Well, it seems to be working now.",
-  //     time: "10 minutes ago",
-  //     image: "https://i.pravatar.cc/150?img=2",
-  //   },
-  //   {
-  //     name: "Ethel Kelly",
-  //     message: "Please review the tickets",
-  //     time: "2 hours ago",
-  //     image: "https://i.pravatar.cc/150?img=3",
-  //   },
-  //   {
-  //     name: "Herman May",
-  //     message: "Thanks a lot. It was easy to fix it .",
-  //     time: "4 hours ago",
-  //     image: "https://i.pravatar.cc/150?img=4",
-  //   },
-  // ];
-
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
-  const fileInputRef = useRef();
-  const imageVideoInputRef = useRef();
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredUsers = users.filter((user) =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Initialize current user
   useEffect(() => {
-    console.log(user.id);
-    console.log(user.name);
+    if (user) {
+      setCurrentUser({ id: user.id, name: user.name });
+    }
+  }, [user]);
 
+  // Fetch user rooms
+  useEffect(() => {
     const fetchUserRoom = async () => {
       try {
         const usersRoom = await getChatRoomUserDetails(user.id);
-        // console.log("printing the user room", usersRoom);
-
-        // Transform the room data to match the expected user list format
-        if (usersRoom && usersRoom.buyer) {
+        if (usersRoom && usersRoom !== "Empty Room." && usersRoom.buyer) {
           const transformedUser = {
             id: usersRoom.id,
             name: usersRoom.buyer.name,
             buyer: usersRoom.buyer,
             farmer: usersRoom.farmer,
-            message: usersRoom.lastMessage || "No messages yet",
-            time: usersRoom.lastActivity || "Recently",
-            image: `https://i.pravatar.cc/150?img=${usersRoom.buyer.id}`, // Generate avatar based on buyer ID
+            message: usersRoom.lastMessage?.content || "No messages yet",
+            time: usersRoom.lastActivity
+              ? new Date(usersRoom.lastActivity).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Recently",
+            image: `https://i.pravatar.cc/150?img=${usersRoom.buyer.id}`,
             messages: usersRoom.messages || [],
-            roomData: usersRoom, // Store the full room data for later use
+            roomData: usersRoom,
           };
-
-          setUsers([transformedUser]); // Wrap in array since UI expects array
+          setUsers([transformedUser]);
         } else {
-          setUsers([]); // Empty array if no room found
+          setUsers([]);
         }
       } catch (error) {
         console.error("Error fetching user room:", error);
@@ -91,165 +70,157 @@ const FarmerChatbox = () => {
       }
     };
 
-    fetchUserRoom();
-  }, []);
+    if (user?.id) {
+      fetchUserRoom();
+    }
+  }, [user]);
 
+  // Initialize WebSocket
   useEffect(() => {
-    const initializeWebSocket = () => {
-      // const token = localStorage.getItem("token");
-      const client = Stomp.over(function () {
-        return new SockJS("http://localhost:8080/chat"); 
-      });
-      // const client = Stomp.over(function () {
-      //   return new WebSocket("ws://localhost:8080/chat/websocket");
-      // });
-      client.debug = (str) => {
-        console.log("STOMP DEBUG:", str);
-      };
-      client.connect(
-        {
-          // Authorization: `Bearer ${token}`,
-        },
-        (frame) => {
-          console.log("Connected to WebSocket:", frame);
-          setStompClient(client); 
-          SuccesfulMessageToast("Connected to chat");
-          
-            client.subscribe(`  /topic/room/2`, (message) => {
-              console.log("Received message:", message);
-              const receivedMessage = JSON.parse(message.body);
-              setMessages((prev) => [...prev, receivedMessage]);
-            });
-        },
-        (error) => {
-          console.error("WebSocket connection error:", error);
-          // Handle reconnection logic here if needed
-        }
-      );
-
-      return () => {
-        if (client && client.connected) {
-          console.log("Disconnecting from backend WebSocket...");
-          client.disconnect(() => {
-            console.log("Disconnected successfully from backend WebSocket.");
-          });
-        }
-      };
+    const socket = new SockJS("http://localhost:8080/ws");
+    const client = Stomp.over(socket);
+    client.debug = (str) => {
+      console.log("STOMP DEBUG:", str);
     };
-   initializeWebSocket();
-    
-  }, []);
 
-  // const handleReceivedMessage = (message) => {
-  //   const newMessage = {
-  //     sender: message.senderName,
-  //     text: message.message,
-  //     time: new Date().toLocaleTimeString([], {
-  //       hour: "2-digit",
-  //       minute: "2-digit",
-  //     }),
-  //   };
-  //   setMessages((prev) => [...prev, newMessage]);
-  // };
+    client.connect(
+      {},
+      () => {
+        setStompClient(client);
+        SuccesfulMessageToast("Connected to chat");
+      },
+      (error) => {
+        console.error("WebSocket connection error:", error);
+        ErrorMessageToast("Failed to connect to chat");
+      }
+    );
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim() === "") return;
-
-    if (stompClient && connected) {
-      // For public messages
-      // stompClient.publish({
-      //   destination: '/app/message',
-      //   body: JSON.stringify({
-      //     senderName: currentUser,
-      //     receiverName: 'public',
-      //     message: inputMessage,
-      //     date: new Date(),
-      //     status: 'MESSAGE'
-      //   })
-      // });
-
-      // For private messages
-      if (selectedUser) {
-        stompClient.publish({
-          destination: "/app/private-message",
-          body: JSON.stringify({
-            senderName: currentUser,
-            receiverName: selectedUser.name, // This should match the receiver's username in your system
-            message: inputMessage,
-            date: new Date(),
-            status: "MESSAGE",
-          }),
+    return () => {
+      if (client && client.connected) {
+        console.log("Disconnecting from WebSocket...");
+        client.disconnect(() => {
+          console.log("Disconnected from WebSocket.");
+          setStompClient(null);
+          setSubscription(null);
         });
       }
+    };
+  }, []);
 
-      const newMessage = {
-        sender: "You",
-        text: inputMessage,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-      setMessages((prev) => [...prev, newMessage]);
-      setInputMessage("");
-    } else {
-      console.error("WebSocket not connected");
-    }
-  };
+  // Subscribe to WebSocket topic and fetch messages when roomId changes
+  useEffect(() => {
+    if (!roomId || !stompClient || !stompClient.connected) return;
 
-  const handleSendPdf = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type === "application/pdf") {
-      const newMessage = {
-        sender: "You",
-        text: `📄 ${file.name}`,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-      setMessages((prev) => [...prev, newMessage]);
-    }
-  };
-
-  const handleSendMedia = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.type.startsWith("image/") || file.type.startsWith("video/")) {
-        const newMessage = {
-          sender: "You",
-          text: file.type.startsWith("image/")
-            ? `🖼️ ${file.name}`
-            : `🎥 ${file.name}`,
-          time: new Date().toLocaleTimeString([], {
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/rooms/${roomId}/messages`
+        );
+        const fetchedMessages = response.data.map((msg) => ({
+          sender: msg.sender.id === currentUser?.id ? "You" : msg.sender.name,
+          text: msg.content,
+          time: new Date(msg.timestamp).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           }),
-          fileUrl: URL.createObjectURL(file),
-          fileType: file.type,
-        };
-        setMessages((prev) => [...prev, newMessage]);
-      } else {
-        alert("Please select an image or video file");
+          senderId: msg.sender.id,
+          receiverId: msg.receiver.id,
+        }));
+        setMessages(fetchedMessages);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        ErrorMessageToast("Failed to load messages");
       }
+    };
+
+    fetchMessages();
+
+    // Store subscription in a ref to avoid dependency loop
+    const sub = stompClient.subscribe(`/topic/room/${roomId}`, (message) => {
+      try {
+        const receivedMessage = JSON.parse(message.body);
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender:
+              receivedMessage.sender.id === currentUser?.id
+                ? "You"
+                : receivedMessage.sender.name,
+            text: receivedMessage.content,
+            time: new Date(receivedMessage.timestamp).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            senderId: receivedMessage.sender.id,
+            receiverId: receivedMessage.receiver.id,
+          },
+        ]);
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
+    });
+
+    return () => {
+      if (sub) {
+        sub.unsubscribe();
+      }
+    };
+  }, [roomId, stompClient, currentUser?.id]); // Removed subscription from dependencies // Removed subscription from dependencies
+
+  const handleSendMessage = () => {
+    if (!inputMessage.trim()) {
+      ErrorMessageToast("Message cannot be empty");
+      return;
+    }
+
+    if (!stompClient?.connected) {
+      ErrorMessageToast("Not connected to chat server");
+      return;
+    }
+    if (
+      inputMessage.trim() === "" ||
+      !stompClient ||
+      !stompClient.connected ||
+      !selectedUser ||
+      !roomId
+    ) {
+      ErrorMessageToast("Cannot send message: Invalid input or connection");
+      return;
+    }
+
+    const messagePayload = {
+      senderId: currentUser.id,
+      receiverId: selectedUser.buyer.id,
+      content: inputMessage,
+    };
+
+    try {
+      stompClient.publish({
+        destination: `/app/sendMessage/${roomId}`,
+        body: JSON.stringify(messagePayload),
+      });
+      setInputMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      ErrorMessageToast("Failed to send message");
     }
   };
 
-  const handleUserRoom = (chatUser) => {
-    if (stompClient && stompClient.connected) {
-      stompClient.disconnect();
-    }
-
-    setRoomId(chatUser.id);
-    console.log("here is the room id ", chatUser.id);
-    setSelectedUser(chatUser);
-  };
+  const handleUserRoom = useCallback(
+    (chatUser) => {
+      // Only update if roomId actually changed
+      if (roomId !== chatUser.id) {
+        setRoomId(chatUser.id);
+        setSelectedUser(chatUser);
+        setMessages([]); // Clear messages when changing rooms
+      }
+    },
+    [roomId]
+  );
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-white font-sans">
-      {/* Sidebar */}
       <div className="w-full md:w-1/4 border-r border-gray-200 bg-[#F7F9FA] flex flex-col">
-        {/* Sidebar Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-300">
           <div className="flex gap-2">
             <button className="text-xl text-gray-600">
@@ -257,12 +228,9 @@ const FarmerChatbox = () => {
             </button>
             <h2 className="text-lg mt-1 font-semibold text-gray-700">Chat</h2>
           </div>
-          <button className="text-sm text-gray-500 ununderline">
-            View all
-          </button>
+          <button className="text-sm text-gray-500 underline">View all</button>
         </div>
 
-        {/* Search */}
         <div className="p-4">
           <div className="relative">
             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-base">
@@ -278,7 +246,6 @@ const FarmerChatbox = () => {
           </div>
         </div>
 
-        {/* User List */}
         <div className="flex-1 overflow-y-auto space-y-4 p-4 pt-0">
           {filteredUsers.map((chatUser, index) => (
             <div key={chatUser.id || index}>
@@ -313,16 +280,14 @@ const FarmerChatbox = () => {
                 </div>
               </div>
               {index < filteredUsers.length - 1 && (
-                <hr className="border-green-700 " />
+                <hr className="border-green-700" />
               )}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Chat Area */}
       <div className="flex flex-col flex-1 w-full">
-        {/* Header */}
         {selectedUser ? (
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
@@ -348,95 +313,34 @@ const FarmerChatbox = () => {
           </div>
         )}
 
-        {/* Messages */}
         {selectedUser && (
           <>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((msg, index) =>
-                msg.sender === "You" ? (
-                  <div key={index} className="flex justify-end items-start">
-                    <div className="text-xs text-gray-400 mr-2 self-end">
-                      {msg.time}
-                    </div>
-                    <div className="bg-teal-100 p-3 rounded-lg max-w-xs md:max-w-md break-words">
-                      {msg.fileUrl ? (
-                        msg.fileType.startsWith("image/") ? (
-                          <img
-                            src={msg.fileUrl}
-                            alt={msg.text}
-                            className="max-w-full rounded"
-                          />
-                        ) : msg.fileType.startsWith("video/") ? (
-                          <video controls className="max-w-full rounded">
-                            <source src={msg.fileUrl} type={msg.fileType} />
-                            Your browser does not support the video tag.
-                          </video>
-                        ) : (
-                          msg.text
-                        )
-                      ) : (
-                        msg.text
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div key={index} className="flex items-start">
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex ${
+                    msg.sender === "You" ? "justify-end" : "justify-start"
+                  } items-start`}
+                >
+                  {msg.sender !== "You" && (
                     <div className="bg-gray-100 p-3 rounded-lg max-w-xs md:max-w-md break-words">
-                      {msg.fileUrl ? (
-                        msg.fileType.startsWith("image/") ? (
-                          <img
-                            src={msg.fileUrl}
-                            alt={msg.text}
-                            className="max-w-full rounded"
-                          />
-                        ) : msg.fileType.startsWith("video/") ? (
-                          <video controls className="max-w-full rounded">
-                            <source src={msg.fileUrl} type={msg.fileType} />
-                            Your browser does not support the video tag.
-                          </video>
-                        ) : (
-                          msg.text
-                        )
-                      ) : (
-                        msg.text
-                      )}
+                      {msg.text}
                     </div>
-                    <div className="text-xs text-gray-400 ml-2 self-end">
-                      {msg.time}
-                    </div>
+                  )}
+                  <div className="text-xs text-gray-400 mx-2 self-end">
+                    {msg.time}
                   </div>
-                )
-              )}
+                  {msg.sender === "You" && (
+                    <div className="bg-teal-100 p-3 rounded-lg max-w-xs md:max-w-md break-words">
+                      {msg.text}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
 
-            {/* Input */}
             <div className="flex flex-wrap items-center gap-2 p-4 border-t border-gray-200">
-              <input
-                type="file"
-                accept="image/*,video/*"
-                ref={imageVideoInputRef}
-                style={{ display: "none" }}
-                onChange={handleSendMedia}
-              />
-              <button
-                className="text-xl text-black"
-                onClick={() => imageVideoInputRef.current.click()}
-              >
-                <BiImageAdd />
-              </button>
-              <button
-                className="text-lg bg-black rounded-full text-white"
-                onClick={() => fileInputRef.current.click()}
-              >
-                <AiOutlinePlus />
-              </button>
-              <input
-                type="file"
-                accept="application/pdf"
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                onChange={handleSendPdf}
-              />
               <input
                 type="text"
                 value={inputMessage}

@@ -81,12 +81,44 @@ export const StatusChanges = async (status) => {
 };
 
 
-export const getChatRoomUserDetails = async (id) =>{
+export const fillFarmerKyc = async (data) =>{
+
+  const token = localStorage.getItem("token");
+  const response = await axios.post(
+    "http://localhost:8080/api/farmer/farmerKyc",
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return response.data
+}
+
+export const getProductByfarmer = async () =>{
+
+  const token = localStorage.getItem("token");
 
   const response = await axios.get(
-    `http://localhost:8080/api/rooms/getUserRoom/${id}`
+    "http://localhost:8080/api/farmer/getByFarmerId",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
   );
 
   return response.data;
-
 }
+
+
+export const getChatRoomUserDetails = async (id) => {
+  const response = await axios.get(
+    `http://localhost:8080/api/rooms/getUserRoom/${id}`
+  );
+  return response.data;
+};

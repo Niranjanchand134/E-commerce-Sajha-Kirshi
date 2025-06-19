@@ -5,11 +5,11 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   define: {
-    global: {},
+    global: 'window',
   },
   resolve: {
     alias: {
-      './runtimeConfig': './runtimeConfig.browser',
+      "./runtimeConfig": "./runtimeConfig.browser",
     },
   },
   server: {
