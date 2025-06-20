@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { UserRegister } from '../../../services/authService';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import { ErrorMessageToast, SuccesfulMessageToast } from '../../../utils/Tostify.util';
 
 const FarmerRegister = () => {
     const navigate = useNavigate();
@@ -20,14 +21,20 @@ const FarmerRegister = () => {
         number: ''
     });
 
+    const [formData, setFormData] = useState({
+      name: "",
+      number: "",
+      email: "",
+      password: "",
+      role: "farmer",
+    });
+
     const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm({ ...form, [name]: value });
-
-        // Validate individual field on change
-        validateField(name, value);
+      const { name, value } = e.target;
+      setForm({ ...form, [name]: value });
+      setFormData({ ...formData, [name]: value });
     };
 
     const validateField = (name, value) => {
@@ -74,17 +81,19 @@ const FarmerRegister = () => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) return;
-
-        try {
-            const response = await UserRegister(form);
-            SuccesfulMessageToast("Register Successfully!");
-            navigate("/Buyer-login");
-        } catch (err) {
-           ErrorMessageToast(err.message || "Something went wrong");
-        }
-    };
+            e.preventDefault();
+    
+            if (!validateForm()) return;
+    
+            try {
+                const response = await UserRegister(formData);
+                SuccesfulMessageToast("Register Successfully!");
+                navigate("/Buyer-login");
+            } catch (err) {
+                setErrors({ ...errors, form: err.message });
+                ErrorMessageToast(err.message);
+            }
+        };
 
     return (
         <>

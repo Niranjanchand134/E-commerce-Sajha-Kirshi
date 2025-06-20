@@ -28,4 +28,6 @@ If you are developing a production application, we recommend using TypeScript wi
 - npm i sockjs-client --save
 - npm install @stomp/stompjs --save
 - npm i @react-oauth/google
+- npm i leaflet
+- npm i react-leaflet
 

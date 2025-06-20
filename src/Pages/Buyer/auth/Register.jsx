@@ -4,7 +4,9 @@ import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import { UserRegister } from '../../../services/authService';
+import {
+  UserRegister
+} from "../../../services/authService";
 import { ErrorMessageToast, SuccesfulMessageToast } from '../../../utils/Tostify.util';
 
 const Register = () => {
@@ -70,8 +72,9 @@ const Register = () => {
 
         try {
             const response = await UserRegister(formData);
-            SuccesfulMessageToast("Register Successfully!");
+            
             navigate("/Buyer-login");
+            SuccesfulMessageToast("Register Successfully!");
         } catch (err) {
             setErrors({ ...errors, form: err.message });
             ErrorMessageToast(err.message);

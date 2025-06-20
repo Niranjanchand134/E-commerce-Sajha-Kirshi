@@ -24,6 +24,7 @@ import FarmerKYChome from "./Pages/Farmer/Parts/FarmerKYChome";
 import Farmerorderlist from "./Pages/Farmer/Parts/Farmerorderlist";
 import FarmerEditProduct from "./Pages/Farmer/Function/FarmerEditProduct";
 import FarmerProfile from "./Pages/Farmer/Parts/FarmerProfile";
+import WebSocketClient from "./Pages/Farmer/Parts/WebSocketClient";
 
 
 
@@ -40,8 +41,9 @@ const App = () => {
           <Route path="Buyer-login" element={<Login />} />
           <Route path="Buyer-register" element={<Register />} />
           <Route path="Farmer-register" element={<FarmerRegister />} />
-          <Route path='KYC' element={<KYChome/>}/> 
-          <Route path='KYC-Form' element={<KYCform/>}/>
+          <Route path="KYC" element={<KYChome />} />
+          <Route path="KYC-Form" element={<KYCform />} />
+          <Route path="websocket" element={<WebSocketClient />} />
 
           {/* Farmer page */}
           <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
@@ -55,7 +57,7 @@ const App = () => {
               <Route path='FarmerKYCForm' element={<FarmerKYCform/>}/>
               <Route path='Farmerorderlist' element={<Farmerorderlist/>}/>
               <Route path='Farmerprofile' element={<FarmerProfile/>}/>
-              {/* <Route path='Farmereditproduct' element={<FarmerEditProduct/>}/> */}
+              <Route path='Farmereditproduct' element={<FarmerEditProduct/>}/>
             </Route>
           </Route>
         </Routes>
