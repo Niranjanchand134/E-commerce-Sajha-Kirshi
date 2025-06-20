@@ -236,14 +236,6 @@ const FarmerRegister = () => {
                         <button className="btn btn-sm" type="submit" style={{ backgroundColor: '#49A760', color: 'white' }}>
                             Sign Up
                         </button>
-                        <div className="text-center small d-flex align-items-center justify-content-center gap-2 mt-2">
-                            <span>Or login with</span>
-                            <img
-                                src="/assets/BuyersImg/images/google-logo.png"
-                                alt="Google"
-                                style={{ width: '20px', height: '20px' }}
-                            />
-                        </div>
                     </div>
                 </form>
             </div>

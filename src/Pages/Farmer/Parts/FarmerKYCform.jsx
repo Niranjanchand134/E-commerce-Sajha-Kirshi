@@ -257,7 +257,7 @@ const FarmerKYCform = () => {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col md:flex-row gap-4 mt-3">
                   <div className="flex flex-col w-full mt-3">
                     <label htmlFor="date" className="mb-1 font-semibold">
                       Permanent Address
@@ -342,7 +342,7 @@ const FarmerKYCform = () => {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col md:flex-row gap-4 mt-3">
+                <div className="flex flex-col md:flex-row gap-4 mt-4">
                   <div className="flex flex-col w-full">
                     <label htmlFor="number" className="mb-1 font-semibold">
                       Citizenship Number
@@ -494,7 +494,7 @@ const FarmerKYCform = () => {
                     <i className="fas fa-search fa-lg absolute right-3 mt-3 text-gray-500 pointer-events-none"></i>
                   </div> */}
                 </div>
-                <div className="flex">
+                <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex flex-col w-full mt-3">
                     <label htmlFor="crops" className="mb-1 font-semibold">
                       Province
@@ -539,7 +539,7 @@ const FarmerKYCform = () => {
                     </select>
                   </div>
                 </div>
-                <div className="flex">
+                <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex flex-col w-full mt-3">
                     <label
                       htmlFor="municipality"
@@ -699,7 +699,7 @@ const FarmerKYCform = () => {
                 <div className="flex justify-between">
                   <h2 className="text-lg mb-4">
                     3. Farming Experience{" "}
-                    <span className="text-gray-600">(Optional)</span>
+                    <span className="text-gray-400">(10 Years)</span>
                   </h2>
                   <h2 className="text-lg mb-4 mr-60 text-left">Farm picture</h2>
                 </div>
@@ -724,7 +724,7 @@ const FarmerKYCform = () => {
                       />
                     </div>
 
-                    <div className="flex flex-col">
+                    <div className="flex flex-col w-full">
                       <label
                         htmlFor="farmingType"
                         className="mb-1 font-semibold"

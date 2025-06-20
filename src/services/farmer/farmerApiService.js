@@ -1,5 +1,16 @@
 import axios from "axios";
 
+export const deleteProductById = async (id) => {
+  const response = await fetch(`http://localhost:8080/farmer/product/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete product");
+  }
+  return response.json();
+};
+
 
 export const updateProductById = async (id, data)=>{
 

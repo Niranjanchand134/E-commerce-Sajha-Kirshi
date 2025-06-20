@@ -1,11 +1,13 @@
-// FarmerProducts.jsx
-import { Space, Table, Button, Dropdown, Menu } from 'antd';
+import { Space, Table, Button, Dropdown, Menu, Modal } from 'antd';
 import { createStyles } from "antd-style";
-import { FormOutlined, DeleteOutlined } from '@ant-design/icons';
+import { FormOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { getAllProduct } from '../../../services/authService';
 import { categoryChanges, StatusChanges, updateProductById } from '../../../services/farmer/farmerApiService';
+import FarmerEditProduct from '../Function/FarmerEditProduct';
+
+// Add your delete API import here
+import { deleteProductById } from '../../../services/farmer/farmerApiService';
 
 const useStyle = createStyles(({ css, token }) => {
   const { antCls } = token;
@@ -84,7 +86,13 @@ const FarmerProducts = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+
+  // New states for delete modal
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [deleteProductId, setDeleteProductId] = useState(null);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -111,7 +119,7 @@ const FarmerProducts = () => {
       const response = await categoryChanges(value);
       setFilteredData(response);
     } catch (error) {
-      console.log("error .........");
+      console.log("Category filter error:", error);
     }
   };
 
@@ -122,7 +130,37 @@ const FarmerProducts = () => {
       const response = await StatusChanges(value);
       setFilteredData(response);
     } catch (error) {
-      console.log("error .........");
+      console.log("Status filter error:", error);
+    }
+  };
+
+  const handleEdit = (product) => {
+    setSelectedProduct(product);
+    setIsModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    setSelectedProduct(null);
+  };
+
+  // Updated showDeleteConfirm function
+  const showDeleteConfirm = (productId) => {
+    setDeleteProductId(productId);
+    setIsDeleteModalVisible(true);
+  };
+
+  // New delete confirm handler
+  const handleDeleteConfirm = async () => {
+    try {
+      if (deleteProductId) {
+        await deleteProductById(deleteProductId);
+        setFilteredData(prev => prev.filter(item => item.id !== deleteProductId));
+      }
+      setIsDeleteModalVisible(false);
+      setDeleteProductId(null);
+    } catch (error) {
+      console.error("Failed to delete product:", error);
     }
   };
 
@@ -217,13 +255,13 @@ const FarmerProducts = () => {
           <Button
             type="link"
             icon={<FormOutlined />}
-            onClick={() => navigate(`/Farmerlayout/Farmereditproduct/${record.id}`, { state: { product: record } })}
+            onClick={() => handleEdit(record)}
           />
           <Button
             type="link"
             icon={<DeleteOutlined />}
             danger
-            onClick={() => console.log("Delete:", record)}
+            onClick={() => showDeleteConfirm(record.id)}
           />
         </Space>
       ),
@@ -294,6 +332,43 @@ const FarmerProducts = () => {
           loading={loading}
         />
       </div>
+
+      {/* Modal Popup for Editing Product */}
+      <Modal
+        title="Edit Product"
+        open={isModalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+        width={800}
+        destroyOnClose
+      >
+        {selectedProduct && (
+          <FarmerEditProduct product={selectedProduct} onClose={handleModalClose} />
+        )}
+      </Modal>
+
+      {/* Custom Delete Confirmation Modal */}
+      <Modal
+        title="Confirm Deletion"
+        open={isDeleteModalVisible}
+        onCancel={() => {
+          setIsDeleteModalVisible(false);
+          setDeleteProductId(null);
+        }}
+        onOk={handleDeleteConfirm}
+        okText="Yes, Delete"
+        okType="danger"
+        cancelText="Cancel"
+        centered
+      >
+        <div className="text-center">
+          <ExclamationCircleOutlined style={{ fontSize: 40, color: "#faad14", marginBottom: 16 }} />
+          <p className="text-lg font-semibold">Are you sure you want to delete this product?</p>
+          {deleteProductId && (
+            <p className="text-gray-500">Product ID: <strong>{deleteProductId}</strong></p>
+          )}
+        </div>
+      </Modal>
     </>
   );
 };

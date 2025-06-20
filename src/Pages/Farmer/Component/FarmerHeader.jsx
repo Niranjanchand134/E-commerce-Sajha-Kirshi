@@ -9,11 +9,12 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../../Context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const { Header } = Layout;
 
 const FarmerHeader = ({ collapsed, setCollapsed }) => {
-
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -34,7 +35,7 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
           label: "Profile",
           key: "profile",
           icon: <UserOutlined />,
-          onClick: () => navigate("/profilePage"),
+          onClick: () => navigate("/Farmerlayout/Farmerprofile"),
         },
         {
           label: "Logout",
