@@ -253,34 +253,33 @@ const FarmerKYCform = () => {
                   />
                 </div>
 
-                <div className="flex flex-col w-full">
-                  <label htmlFor="email" className="mb-1 font-semibold">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    onChange={handleChange}
-                    value={form.email}
-                    className="border rounded-full p-2 w-full"
-                  />
+                  <div className="flex flex-col w-full">
+                    <label htmlFor="email" className="mb-1 font-semibold">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      onChange={handleChange}
+                      value={form.email}
+                      className="border rounded-full p-2 w-full"
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex flex-col w-full mt-3">
-                  <label htmlFor="date" className="mb-1 font-semibold">
-                    Permanent Address
-                  </label>
-                  <input
-                    type="text"
-                    id="address"
-                    name="permanentAddress"
-                    onChange={handleChange}
-                    value={form.permanentAddress}
-                    className="border rounded-full p-2 w-full"
-                  />
-                </div>
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex flex-col w-full mt-3">
+                    <label htmlFor="date" className="mb-1 font-semibold">
+                      Permanent Address
+                    </label>
+                    <input
+                      type="text"
+                      id="address"
+                      name="permanentAddress"
+                      onChange={handleChange}
+                      value={form.permanentAddress}
+                      className="border rounded-full p-2 w-full"
+                    />
+                  </div>
 
                 <div className="flex flex-col w-full mt-3">
                   <label className="mb-1 font-semibold">Gender</label>
@@ -339,35 +338,35 @@ const FarmerKYCform = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col w-full mt-3">
-                  <label htmlFor="date" className="mb-1 font-semibold">
-                    Birth Date
-                  </label>
-                  <input
-                    type="date"
-                    id="date"
-                    name="dateOfBirth"
-                    onChange={handleChange}
-                    value={form.dateOfBirth}
-                    placeholder="Enter email"
-                    className="border rounded-full p-2 w-full"
-                  />
+                  <div className="flex flex-col w-full mt-3">
+                    <label htmlFor="date" className="mb-1 font-semibold">
+                      Birth Date
+                    </label>
+                    <input
+                      type="date"
+                      id="date"
+                      name="dateOfBirth"
+                      onChange={handleChange}
+                      value={form.dateOfBirth}
+                      placeholder="Enter email"
+                      className="border rounded-full p-2 w-full"
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col md:flex-row gap-4 mt-3">
-                <div className="flex flex-col w-full">
-                  <label htmlFor="number" className="mb-1 font-semibold">
-                    Citizenship Number
-                  </label>
-                  <input
-                    type="text"
-                    id="number"
-                    name="citizenshipNumber"
-                    onChange={handleChange}
-                    value={form.citizenshipNumber}
-                    className="border rounded-full p-2 w-full"
-                  />
-                </div>
+                <div className="flex flex-col md:flex-row gap-4 mt-3">
+                  <div className="flex flex-col w-full">
+                    <label htmlFor="number" className="mb-1 font-semibold">
+                      Citizenship Number
+                    </label>
+                    <input
+                      type="text"
+                      id="number"
+                      name="citizenshipNumber"
+                      onChange={handleChange}
+                      value={form.citizenshipNumber}
+                      className="border rounded-full p-2 w-full"
+                    />
+                  </div>
 
                 <div className="flex flex-col w-full">
                   <label
@@ -506,85 +505,88 @@ const FarmerKYCform = () => {
                     />
                     <i className="fas fa-search fa-lg absolute right-3 mt-3 text-gray-500 pointer-events-none"></i>
                   </div> */}
-              </div>
-              <div className="flex">
-                <div className="flex flex-col w-full mt-3">
-                  <label htmlFor="crops" className="mb-1 font-semibold">
-                    Province
-                  </label>
-                  <select
-                    id="province"
-                    name="province"
-                    onChange={handleChange}
-                    value={form.province}
-                    className="border rounded-full p-2 w-full"
-                  >
-                    <option value="">Select</option>
-                    <option value="Province 1">Province 1</option>
-                    <option value="Province 2">Province 2</option>
-                    <option value="Bagmati Province">Bagmati Province</option>
-                    <option value="Gandaki Province">Gandaki Province</option>
-                    <option value="Lumbini Province">Lumbini Province</option>
-                    <option value="Karnali Province">Karnali Province</option>
-                    <option value="Sudurpashchim Province">
-                      Sudurpashchim Province
-                    </option>
-                  </select>
                 </div>
-                <div className="flex flex-col w-full mt-3">
-                  <label htmlFor="crops" className="mb-1 font-semibold">
-                    District
-                  </label>
-                  <select
-                    id="district"
-                    name="district"
-                    onChange={handleChange}
-                    value={form.district}
-                    className="border rounded-full p-2 w-full"
-                  >
-                    <option value="">Select</option>
-                    <option value="Kathmandu">Kathmandu</option>
-                    <option value="Lalitpur">Lalitpur</option>
-                    <option value="Bhaktapur">Bhaktapur</option>
-                    <option value="Chitwan">Chitwan</option>
-                    <option value="Rupandehi">Rupandehi</option>
-                    <option value="Nepalgunj">Nepalgunj</option>
-                  </select>
+                <div className="flex">
+                  <div className="flex flex-col w-full mt-3">
+                    <label htmlFor="crops" className="mb-1 font-semibold">
+                      Province
+                    </label>
+                    <select
+                      id="province"
+                      name="province"
+                      onChange={handleChange}
+                      value={form.province}
+                      className="border rounded-full p-2 w-full"
+                    >
+                      <option value="">Select</option>
+                      <option value="Province 1">Province 1</option>
+                      <option value="Province 2">Province 2</option>
+                      <option value="Bagmati Province">Bagmati Province</option>
+                      <option value="Gandaki Province">Gandaki Province</option>
+                      <option value="Lumbini Province">Lumbini Province</option>
+                      <option value="Karnali Province">Karnali Province</option>
+                      <option value="Sudurpashchim Province">
+                        Sudurpashchim Province
+                      </option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col w-full mt-3">
+                    <label htmlFor="crops" className="mb-1 font-semibold">
+                      District
+                    </label>
+                    <select
+                      id="district"
+                      name="district"
+                      onChange={handleChange}
+                      value={form.district}
+                      className="border rounded-full p-2 w-full"
+                    >
+                      <option value="">Select</option>
+                      <option value="Kathmandu">Kathmandu</option>
+                      <option value="Lalitpur">Lalitpur</option>
+                      <option value="Bhaktapur">Bhaktapur</option>
+                      <option value="Chitwan">Chitwan</option>
+                      <option value="Rupandehi">Rupandehi</option>
+                      <option value="Nepalgunj">Nepalgunj</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <div className="flex">
-                <div className="flex flex-col w-full mt-3">
-                  <label htmlFor="municipality" className="mb-1 font-semibold">
-                    Municipality
-                  </label>
-                  <select
-                    id="municipality"
-                    name="municipality"
-                    onChange={handleChange}
-                    value={form.municipality}
-                    className="border rounded-full p-2 w-full"
-                  >
-                    <option value="">Select</option>
-                    <option value="Kathmandu Metropolitan">
-                      Kathmandu Metropolitan
-                    </option>
-                    <option value="Lalitpur Metropolitan">
-                      Lalitpur Metropolitan
-                    </option>
-                    <option value="Bhaktapur Municipality">
-                      Bhaktapur Municipality
-                    </option>
-                    <option value="Bharatpur Metropolitan">
-                      Bharatpur Metropolitan
-                    </option>
-                    <option value="Pokhara Metropolitan">
-                      Pokhara Metropolitan
-                    </option>
-                    <option value="Biratnagar Metropolitan">
-                      Biratnagar Metropolitan
-                    </option>
-                  </select>
-                </div>
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex flex-col w-full mt-3">
+                    <label
+                      htmlFor="municipality"
+                      className="mb-1 font-semibold"
+                    >
+                      Municipality
+                    </label>
+                    <select
+                      id="municipality"
+                      name="municipality"
+                      onChange={handleChange}
+                      value={form.municipality}
+                      className="border rounded-full p-2 w-full"
+                    >
+                      <option value="">Select</option>
+                      <option value="Kathmandu Metropolitan">
+                        Kathmandu Metropolitan
+                      </option>
+                      <option value="Lalitpur Metropolitan">
+                        Lalitpur Metropolitan
+                      </option>
+                      <option value="Bhaktapur Municipality">
+                        Bhaktapur Municipality
+                      </option>
+                      <option value="Bharatpur Metropolitan">
+                        Bharatpur Metropolitan
+                      </option>
+                      <option value="Pokhara Metropolitan">
+                        Pokhara Metropolitan
+                      </option>
+                      <option value="Biratnagar Metropolitan">
+                        Biratnagar Metropolitan
+                      </option>
+                    </select>
+                  </div>
 
                 <div className="flex flex-col w-full mt-3">
                   <label htmlFor="ward" className="mb-1 font-semibold">
@@ -710,15 +712,15 @@ const FarmerKYCform = () => {
             </div>
           )}
 
-          {currentStep === 3 && (
-            <div>
-              <div className="flex justify-between">
-                <h2 className="text-lg mb-4">
-                  3. Farming Experience{" "}
-                  <span className="text-gray-600">(Optional)</span>
-                </h2>
-                <h2 className="text-lg mb-4 mr-60 text-left">Farm picture</h2>
-              </div>
+            {currentStep === 3 && (
+              <div>
+                <div className="flex justify-between">
+                  <h2 className="text-lg mb-4">
+                    3. Farming Experience{" "}
+                    <span className="text-gray-600">(10 Years)</span>
+                  </h2>
+                  <h2 className="text-lg mb-4 mr-60 text-left">Farm picture</h2>
+                </div>
 
               <div className="flex flex-col-2 gap-4 justify-content-between ">
                 <div className="flow flow-rows-2 md:flex-row-2 space-y-4 mt-3">
@@ -740,25 +742,28 @@ const FarmerKYCform = () => {
                     />
                   </div>
 
-                  <div className="flex flex-col">
-                    <label htmlFor="farmingType" className="mb-1 font-semibold">
-                      Farming Type
-                    </label>
-                    <select
-                      id="farmingType"
-                      name="farmingType"
-                      onChange={handleChange}
-                      value={form.farmingType}
-                      className="border rounded-full p-2 w-full"
-                    >
-                      <option value="">Select</option>
-                      <option value="Organic">Organic</option>
-                      <option value="Traditional">Traditional</option>
-                      <option value="Commercial">Commercial</option>
-                      <option value="Mixed">Mixed</option>
-                    </select>
+                    <div className="flex flex-col w-full">
+                      <label
+                        htmlFor="farmingType"
+                        className="mb-1 font-semibold"
+                      >
+                        Farming Type
+                      </label>
+                      <select
+                        id="farmingType"
+                        name="farmingType"
+                        onChange={handleChange}
+                        value={form.farmingType}
+                        className="border rounded-full p-2 w-full"
+                      >
+                        <option value="">Select</option>
+                        <option value="Organic">Organic</option>
+                        <option value="Traditional">Traditional</option>
+                        <option value="Commercial">Commercial</option>
+                        <option value="Mixed">Mixed</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
 
                 <div className="flex flex-col w-full md:w-1/2 items-center">
                   <div className="flex flex-col md:flex-row items-center gap-6 border-1 border-black rounded p-2">

@@ -20,6 +20,7 @@ module.exports = {
     "./src/pages/Farmer/Parts/FarmerChatbox.jsx",
     "./src/pages/Farmer/Parts/FarmerKYCform.jsx",
     "./src/pages/Farmer/Parts/FarmerKYChome.jsx",
+    "./src/pages/Farmer/Parts/FarmerProfile.jsx",
   ],
   theme: {
     extend: {},

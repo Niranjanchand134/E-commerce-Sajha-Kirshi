@@ -1,11 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { ExclamationCircleOutlined, AppstoreOutlined, UploadOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import {
+  ExclamationCircleOutlined,
+  AppstoreOutlined,
+  UploadOutlined,
+  CloseCircleOutlined
+} from "@ant-design/icons";
 import { SlTag } from "react-icons/sl";
 
-const FarmerEditProduct = () => {
+const FarmerEditProduct = ({ onClose }) => {
   const location = useLocation();
-  const { product } = location.state || {};
+  const { product } = location.state || {}; // ✅ Get product from location
+
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -61,6 +67,7 @@ const FarmerEditProduct = () => {
 
   const handleSubmit = () => {
     console.log("Form submitted", formData, images);
+    // Add API call or update logic here
   };
 
   return (
@@ -269,9 +276,7 @@ const FarmerEditProduct = () => {
           </div>
           <h4 className="text-xl font-semibold">Product Images</h4>
         </div>
-        <p className="text-gray-500">
-          Upload up to 5 images for your product. First image will be used as a cover.
-        </p>
+        <p className="text-gray-500">Upload up to 5 images for your product. First image will be used as a cover.</p>
 
         {images.length < 5 && (
           <label

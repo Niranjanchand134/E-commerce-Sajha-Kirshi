@@ -23,6 +23,7 @@ import FarmerChatbox from "./Pages/Farmer/Parts/FarmerChatbox";
 import FarmerKYChome from "./Pages/Farmer/Parts/FarmerKYChome";
 import Farmerorderlist from "./Pages/Farmer/Parts/Farmerorderlist";
 import FarmerEditProduct from "./Pages/Farmer/Function/FarmerEditProduct";
+import FarmerProfile from "./Pages/Farmer/Parts/FarmerProfile";
 import WebSocketClient from "./Pages/Farmer/Parts/WebSocketClient";
 
 
@@ -53,9 +54,10 @@ const App = () => {
               <Route path="Farmeraddproduct" element={<FarmerAddProduct />} />
               <Route path="Farmerchatbox" element={<FarmerChatbox />} />
               <Route path="FarmerKYCHome" element={<FarmerKYChome />} />
-              <Route path="FarmerKYCForm" element={<FarmerKYCform />} />
-              <Route path="Farmerorderlist" element={<Farmerorderlist />} />
-              <Route path="Farmereditproduct" element={<FarmerEditProduct />} />
+              <Route path='FarmerKYCForm' element={<FarmerKYCform/>}/>
+              <Route path='Farmerorderlist' element={<Farmerorderlist/>}/>
+              <Route path='Farmerprofile' element={<FarmerProfile/>}/>
+              <Route path='Farmereditproduct' element={<FarmerEditProduct/>}/>
             </Route>
           </Route>
         </Routes>
