@@ -76,6 +76,10 @@ const Header = () => {
   ]
 };
 
+const handleMessageClick = ()=>{
+  navigate("/message");
+}
+
 
   return (
     <nav className="sticky top-0 bg-white p-2 shadow-md z-50">
@@ -120,7 +124,12 @@ const Header = () => {
               Services
             </li>
             <li className="hover:text-black cursor-pointer">Contact</li>
-            <li className="hover:text-black cursor-pointer" onClick={() => navigate('/KYC')}>KYC Form</li>
+            <li
+              className="hover:text-black cursor-pointer"
+              onClick={() => navigate("/KYC")}
+            >
+              KYC Form
+            </li>
             {/* <li className="hover:text-black cursor-pointer" onClick={() => navigate('/Buyer-login')}>Login</li>
             <li className="hover:text-black cursor-pointer" onClick={() => navigate('/Buyer-register')}>SignUp</li> */}
           </ul>
@@ -138,6 +147,10 @@ const Header = () => {
             )}
           </div>
           <i className="fa-solid fa-bell hover:text-black cursor-pointer"></i>
+          <i
+            onClick={handleMessageClick}
+            className="fa-solid fa-message hover:text-black cursor-pointer"
+          ></i>
 
           <div className="buttons d-flex align-items-center text-center gap-3">
             {user !== null ? (
@@ -168,7 +181,6 @@ const Header = () => {
                     </a>
                   </Dropdown>
                 </button>
-
               </div>
             )}
           </div>
