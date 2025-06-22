@@ -1,9 +1,11 @@
 import Footer from "./Footer";
 import Header from "./Header";
 import { useRef, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 
 const ShopDetail = () => {
     const scrollRef = useRef(null);
+    const navigate = useNavigate();
 
     // Step 1: Create state for selected image
     const [selectedImage, setSelectedImage] = useState("/assets/BuyersImg/Products/Onion.png");
@@ -23,6 +25,20 @@ const ShopDetail = () => {
         "https://yt3.googleusercontent.com/s5hlNKKDDQWjFGzYNnh8UeOW2j2w6id-cZGx7GdAA3d5Fu7zEi7ZMXEyslysuQUKigXNxtAB=s900-c-k-c0x00ffffff-no-rj",
         "https://bf1af2.a-cdn.akinoncloud.com/products/2024/10/01/146178/36fc22ee-1e52-430b-ba5b-d8229470fea3_size3840_cropCenter.jpg",
     ];
+
+    const handleBuynowClick = () => {
+        navigate('/buynow');
+    };
+
+    const handleAddCartClick = () => {
+        // Get existing count or default to 0
+        const count = parseInt(localStorage.getItem("cartCount") || "0");
+        // Increment and update
+        localStorage.setItem("cartCount", count + 1);
+
+        alert("Product added to cart!");
+        navigate('/addcart');
+    };
 
     return (
         <>
@@ -57,10 +73,10 @@ const ShopDetail = () => {
                         />
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                        <button className="bg-green-600 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto">
+                        <button onClick={handleAddCartClick} className="bg-green-600 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto">
                             Add to cart
                         </button>
-                        <button className="bg-[#EEC044] text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto">
+                        <button onClick={handleBuynowClick} className="bg-[#EEC044] text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto">
                             Add to wishlist
                         </button>
                     </div>

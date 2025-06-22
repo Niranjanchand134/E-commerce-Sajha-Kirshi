@@ -25,6 +25,8 @@ import Farmerorderlist from "./Pages/Farmer/Parts/Farmerorderlist";
 import FarmerEditProduct from "./Pages/Farmer/Function/FarmerEditProduct";
 import FarmerProfile from "./Pages/Farmer/Parts/FarmerProfile";
 import WebSocketClient from "./Pages/Farmer/Parts/WebSocketClient";
+import Buynow from "./Pages/Buyer/Component/Buynow";
+import AddCart from "./Pages/Buyer/Component/AddCart";
 
 
 
@@ -44,6 +46,8 @@ const App = () => {
           <Route path="KYC" element={<KYChome />} />
           <Route path="KYC-Form" element={<KYCform />} />
           <Route path="websocket" element={<WebSocketClient />} />
+          <Route path="buynow" element={<Buynow />} />
+          <Route path="addcart" element={<AddCart />} />
 
           {/* Farmer page */}
           <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
