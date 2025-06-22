@@ -11,6 +11,8 @@ module.exports = {
     "./src/pages/Buyer/Component/OtherContent.jsx",
     "./src/pages/Buyer/auth/FarmerRegister.jsx",
     "./src/pages/Buyer/Component/KYChome.jsx",
+    "./src/pages/Buyer/Component/Buynow.jsx",
+    "./src/pages/Buyer/Component/AddCart.jsx",
 
     "./src/pages/Farmer/FarmerHomePage.jsx",
     "./src/pages/Farmer/Component/FarmerSidebar.jsx",
@@ -20,6 +22,7 @@ module.exports = {
     "./src/pages/Farmer/Parts/FarmerChatbox.jsx",
     "./src/pages/Farmer/Parts/FarmerKYCform.jsx",
     "./src/pages/Farmer/Parts/FarmerKYChome.jsx",
+    "./src/pages/Farmer/Parts/FarmerProfile.jsx",
   ],
   theme: {
     extend: {},

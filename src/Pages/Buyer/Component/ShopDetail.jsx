@@ -3,40 +3,43 @@ import { getDetailsByUserId, getProductById } from "../../../services/farmer/far
 import Footer from "./Footer";
 import Header from "./Header";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const ShopDetail = () => {
-  const { productId } = useParams();
-  const scrollRef = useRef(null);
-  const [product, setProduct] = useState(null);
-  const [farmer, setFarmer] = useState(null);
-  const [selectedImage, setSelectedImage] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProductAndFarmer = async () => {
-      try {
-        setLoading(true);
-        // Fetch product details
-        const productData = await getProductById(productId);
-        setProduct(productData);
-        setSelectedImage(
-          productData.imagePaths[0] || "/assets/BuyersImg/Products/Onion.png"
-        );
+   const { productId } = useParams();
+   const scrollRef = useRef(null);
+   const [product, setProduct] = useState(null);
+   const [farmer, setFarmer] = useState(null);
+   const [selectedImage, setSelectedImage] = useState("");
+   const [loading, setLoading] = useState(true);
+   const [error, setError] = useState(null);
 
-        // Fetch farmer details
-        const farmerData = await getDetailsByUserId(productData.user.id);
-        setFarmer(farmerData);
-      } catch (err) {
-        console.error("Error fetching product or farmer details:", err);
-        setError("Failed to load product details.");
-      } finally {
-        setLoading(false);
-      }
-    };
+   useEffect(() => {
+     const fetchProductAndFarmer = async () => {
+       try {
+         setLoading(true);
+         // Fetch product details
+         const productData = await getProductById(productId);
+         setProduct(productData);
+         setSelectedImage(
+           productData.imagePaths[0] || "/assets/BuyersImg/Products/Onion.png"
+         );
 
-    fetchProductAndFarmer();
-  }, [productId]);
+         // Fetch farmer details
+         const farmerData = await getDetailsByUserId(productData.user.id);
+         setFarmer(farmerData);
+       } catch (err) {
+         console.error("Error fetching product or farmer details:", err);
+         setError("Failed to load product details.");
+       } finally {
+         setLoading(false);
+       }
+     };
+
+     fetchProductAndFarmer();
+   }, [productId]);
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -58,6 +61,22 @@ const ShopDetail = () => {
       </div>
     );
   }
+
+  const handleBuynowClick = () => {
+    navigate("/buynow");
+  };
+
+  const handleAddCartClick = () => {
+    // Get existing count or default to 0
+    const count = parseInt(localStorage.getItem("cartCount") || "0");
+    // Increment and update
+    localStorage.setItem("cartCount", count + 1);
+
+    alert("Product added to cart!");
+    navigate("/addcart");
+  };
+
+
 
   return (
     <>
@@ -100,10 +119,16 @@ const ShopDetail = () => {
             />
           </div>
           <div className="flex flex-col sm:flex-row gap-3 mt-4">
-            <button className="bg-green-600 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto">
+            <button
+              onClick={handleAddCartClick}
+              className="bg-green-600 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
+            >
               Add to cart
             </button>
-            <button className="bg-[#EEC044] text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto">
+            <button
+              onClick={handleBuynowClick}
+              className="bg-[#EEC044] text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
+            >
               Add to wishlist
             </button>
           </div>
