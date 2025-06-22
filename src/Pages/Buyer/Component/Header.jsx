@@ -2,7 +2,7 @@ import './style.css';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { UserOutlined, LogoutOutlined, FormOutlined } from '@ant-design/icons';
 import { Dropdown, Menu, Space } from 'antd';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../Context/AuthContext';
 
 
@@ -10,12 +10,27 @@ const Header = () => {
   const navigate = useNavigate();
   const {user, logout} = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   
 
   const handleLogoutClick = () => {
     logout();
     window.location.reload();
   };
+
+  const handlecartClick = () => {
+    navigate("/addcart");
+  };
+
+  useEffect(() => {
+    const count = parseInt(localStorage.getItem("cartCount") || "0");
+    setCartCount(count);
+
+    // Optional: Update on storage change (e.g., if cart changes on another tab)
+    window.addEventListener("storage", () => {
+      setCartCount(parseInt(localStorage.getItem("cartCount") || "0"));
+    });
+  }, []);
 
   const menu = (
     <Menu
@@ -114,7 +129,14 @@ const Header = () => {
         {/* Right Icons */}
         <div className="hidden lg:flex items-center space-x-4 text-xl text-gray-700">
           <i className="fa-solid fa-magnifying-glass hover:text-black cursor-pointer"></i>
-          <i className="fa-solid fa-cart-shopping hover:text-black cursor-pointer"></i>
+          <div className="relative cursor-pointer" onClick={handlecartClick}>
+            <i className="fa-solid fa-cart-shopping hover:text-black text-xl"></i>
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                {cartCount}
+              </span>
+            )}
+          </div>
           <i className="fa-solid fa-bell hover:text-black cursor-pointer"></i>
 
           <div className="buttons d-flex align-items-center text-center gap-3">

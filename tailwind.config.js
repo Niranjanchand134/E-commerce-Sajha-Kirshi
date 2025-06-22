@@ -11,6 +11,8 @@ module.exports = {
     "./src/pages/Buyer/Component/OtherContent.jsx",
     "./src/pages/Buyer/auth/FarmerRegister.jsx",
     "./src/pages/Buyer/Component/KYChome.jsx",
+    "./src/pages/Buyer/Component/Buynow.jsx",
+    "./src/pages/Buyer/Component/AddCart.jsx",
 
     "./src/pages/Farmer/FarmerHomePage.jsx",
     "./src/pages/Farmer/Component/FarmerSidebar.jsx",

@@ -1,3 +1,9 @@
 .leaflet-container{
   height: 100vh;
 }
+
+.custom-pagination .ant-pagination-item-active {
+  border-color: #22c55e !important;
+  background-color: #22c55e !important;
+  color: white !important;
+}
