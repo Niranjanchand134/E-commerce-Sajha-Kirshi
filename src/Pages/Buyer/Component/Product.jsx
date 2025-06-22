@@ -1,20 +1,37 @@
 import { Link } from "react-router-dom";
 import { RightOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { getProductByfarmer } from "../../../services/farmer/farmerApiService";
+import { getDetailsByUserId, getProductByfarmer } from "../../../services/farmer/farmerApiService";
 import { getAllProduct } from "../../../services/authService";
 
 const Product = () => {
   const [products, setProduct] = useState([]);
+  const [farmerDetails, setFarmerDetails] = useState({});
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await getAllProduct();
-        console.log("the reposnse od product..", response);
-        setProduct(response);
+        const productResponse = await getAllProduct();
+        console.log("the reposnse of product..", productResponse);
+        setProduct(productResponse);
+        // Fetch farmer details for each unique user ID
+        const uniqueUserIds = [
+          ...new Set(productResponse.map((product) => product.user.id)),
+        ];
+        const farmerPromises = uniqueUserIds.map((userId) =>
+          getDetailsByUserId(userId)
+        );
+        const farmerResponses = await Promise.all(farmerPromises);
+        console.log("the farmer details is ", farmerResponses);
+
+        // Create a map of userId -> farmer details
+        const farmerMap = farmerResponses.reduce((acc, farmer) => {
+          acc[farmer.id] = farmer;
+          return acc;
+        }, {});
+        setFarmerDetails(farmerMap);
       } catch (error) {
-        console.log("Error fetching products:", err);
+        console.log("Error fetching products:", error);
       }
     };
 
@@ -38,26 +55,43 @@ const Product = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:px-60">
           {products.map((product) => (
-            <div className="text-center rounded">
-              <img
-                src={
-                  product.imagePaths || "/assets/BuyersImg/Products/Onion.png"
-                } // Fallback image if product.image doesn't exist
-                alt={product.name}
-              />
-              <div className="flex justify-between">
-                <div className="p-2">
-                  <h5>{product.name}</h5>
-                  <p className="text-green-500 text-lg">
-                    Rs {product.price || "00.00"}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="mt-1">{product.farmName || "Farm Name"}</p>
-                  <p>{product.location || "Location"}</p>
+            <Link
+              key={product.id}
+              to={`/shop-detail/${product.id}`}
+              className="text-center rounded hover:shadow-lg transition-shadow"
+            >
+              <div className="text-center rounded">
+                <img
+                  src={
+                    product.imagePaths || "/assets/BuyersImg/Products/Onion.png"
+                  } // Fallback image if product.image doesn't exist
+                  alt={product.name}
+                />
+                <div className="flex justify-between">
+                  <div className="p-2">
+                    <h5>{product.name}</h5>
+                    <p className="text-green-500 text-lg">
+                      Rs {product.price || "00.00"}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="mt-1 ">
+                      {farmerDetails[product.user.id]?.farmName || "Farm Name"}
+                    </p>
+                    <div className="flex">
+                      <p className="text-[10px]">
+                        {farmerDetails[product.user.id]?.district || "Location"}
+                      </p>
+                      <p className="text-[10px]">
+                        {(farmerDetails[product.user.id]?.district &&
+                          farmerDetails[product.user.id]?.municipality) ||
+                          "Location"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
