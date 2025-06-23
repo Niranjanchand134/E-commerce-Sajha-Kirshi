@@ -13,6 +13,9 @@ module.exports = {
     "./src/pages/Buyer/Component/KYChome.jsx",
     "./src/pages/Buyer/Component/Buynow.jsx",
     "./src/pages/Buyer/Component/AddCart.jsx",
+    "./src/pages/Buyer/auth/ForgetPassword.jsx",
+    "./src/pages/Buyer/auth/VerifyOTP.jsx",
+    "./src/pages/Buyer/auth/ResetPassword.jsx",
 
     "./src/pages/Farmer/FarmerHomePage.jsx",
     "./src/pages/Farmer/Component/FarmerSidebar.jsx",

@@ -106,73 +106,67 @@ const ShopDetail = () => {
             </p>
           </div>
 
-          <hr className="mt-1" />
-          <p className="w-full md:w-96 text-sm md:text-base">
-            {product.description || "No description available."}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2 mt-4">
-            <h4 className="text-base font-semibold">Choose Quantity</h4>
-            <input
-              type="number"
-              placeholder={` /${product.unitOfMeasurement || "unit"}`}
-              className="w-full sm:w-20 border-2 border-solid border-black px-2 py-1"
-              min={product.minimumOrderQuantity || 1}
-            />
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 mt-4">
-            <button
-              onClick={handleAddCartClick}
-              className="bg-green-600 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
-            >
-              Add to cart
-            </button>
-            <button
-              onClick={handleBuynowClick}
-              className="bg-[#EEC044] text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
-            >
-              Add to wishlist
-            </button>
-          </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-3">
-            <h5>Chat With the Farmer</h5>
-            <button className="bg-green-500 rounded text-white p-1">
-              Message
-            </button>
-          </div>
-          <div className="relative flex items-center w-full max-w-md mx-auto mt-4">
-            <button
-              onClick={() => scroll("left")}
-              className="absolute left-0 z-10 bg-transparent text-gray-600 text-xl p-2"
-            >
-              ❮
-            </button>
-            <div
-              ref={scrollRef}
-              className="flex space-x-4 overflow-x-auto scroll-smooth px-8 no-scrollbar"
-            >
-              {product.imagePaths.map((src, index) => (
-                <div
-                  key={index}
-                  className="w-[80px] h-[80px] bg-gray-200 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden cursor-pointer"
-                  onClick={() => setSelectedImage(src)}
-                >
-                  <img
-                    src={src}
-                    alt={`Image ${index + 1}`}
-                    className="w-[80px] h-[100px] object-contain"
-                  />
+                    <hr className="mt-1" />
+                    <p className="w-full md:w-96 text-sm md:text-base">
+                        {product.description || "No description available."}
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                        <h4 className="text-base font-semibold">Choose Quantity</h4>
+                        <input
+                            type="number"
+                            placeholder={` /${product.unitOfMeasurement || "unit"}`}
+                            className="w-full sm:w-20 border-2 border-solid border-black px-2 py-1"
+                            min={product.minimumOrderQuantity || 1}
+                        />
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                        <button onClick={handleAddCartClick} className="bg-green-600 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto">
+                            Add to cart
+                        </button>
+                        <button onClick={handleBuynowClick} className="bg-[#EEC044] text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto">
+                            Buy Now
+                        </button>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-3">
+                        <h5>Chat With the Farmer</h5>
+                        <button className="bg-green-500 rounded text-white p-2 text-[16px] w-24">Message</button>
+                    </div>
+                    <div className="relative flex items-center w-full max-w-md mx-auto mt-4">
+                        <button
+                            onClick={() => scroll("left")}
+                            className="absolute left-0 z-10 bg-transparent text-gray-600 text-xl p-2"
+                        >
+                            &#x276E;
+                        </button>
+
+                        <div
+                            ref={scrollRef}
+                            className="flex space-x-4 overflow-x-auto scroll-smooth px-8 no-scrollbar"
+                        >
+                            {product.imagePaths.map((src, index) => (
+                            <div
+                                key={index}
+                                className="w-[80px] h-[80px] bg-gray-200 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden cursor-pointer"
+                                onClick={() => setSelectedImage(src)}
+                            >
+                                <img
+                                src={src}
+                                alt={`Image ${index + 1}`}
+                                className="w-[80px] h-[100px] object-contain"
+                                />
+                            </div>
+                            ))}
+                        </div>
+
+                         <button
+                            onClick={() => scroll('right')}
+                            className="absolute right-0 z-10 bg-transparent text-gray-600 text-xl p-2"
+                        >
+                            &#x276F;
+                        </button>
+                    </div>
                 </div>
-              ))}
             </div>
-            <button
-              onClick={() => scroll("right")}
-              className="absolute right-0 z-10 bg-transparent text-gray-600 text-xl p-2"
-            >
-              ❯
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* About us part */}
       <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-4 text-white my-8">
