@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
       
     }, 2000);
     
-  }, ); 
+  } ); 
 
   const login = (token) => {
     setAuthToken(token);

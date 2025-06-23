@@ -104,13 +104,7 @@ export const getAllProduct = async () =>{
   const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
-      "http://localhost:8080/api/getAll",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
+      "http://localhost:8080/api/getAll"
     );
     console.log("cors header", response);
     return response.data;

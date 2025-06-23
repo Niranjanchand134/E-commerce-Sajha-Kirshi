@@ -133,3 +133,23 @@ export const getChatRoomUserDetails = async (id) => {
   );
   return response.data;
 };
+
+export const getChatRoomFarmerDetails = async (id) => {
+  const response = await axios.get(
+    `http://localhost:8080/api/rooms/getFarmerRoom/${id}`
+  );
+  return response.data;
+};
+
+
+export const getDetailsByUserId = async (id) =>{
+  const response = await axios.get(
+    `http://localhost:8080/api/farmer/getFarmerKYCDetails/${id}`
+  );
+  return response.data;
+}
+
+export const getProductById = async (id)=>{
+  const response = await axios.get(`http://localhost:8080/getById/${id}`);
+  return response.data;
+}

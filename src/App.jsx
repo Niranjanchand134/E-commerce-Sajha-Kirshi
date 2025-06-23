@@ -25,11 +25,14 @@ import Farmerorderlist from "./Pages/Farmer/Parts/Farmerorderlist";
 import FarmerEditProduct from "./Pages/Farmer/Function/FarmerEditProduct";
 import FarmerProfile from "./Pages/Farmer/Parts/FarmerProfile";
 import WebSocketClient from "./Pages/Farmer/Parts/WebSocketClient";
+
 import Buynow from "./Pages/Buyer/Component/Buynow";
 import AddCart from "./Pages/Buyer/Component/AddCart";
+import BuyerChatBox from "./Pages/Buyer/Component/BuyerChatBox";
 import ForgetPassword from "./Pages/Buyer/auth/ForgetPassword";
 import VerifyOTP from "./Pages/Buyer/auth/VerifyOTP";
 import ResetPassword from "./Pages/Buyer/auth/ResetPassword";
+
 
 
 
@@ -42,13 +45,14 @@ const App = () => {
           {/* Buyer page */}
           <Route path="/" element={<Landing />} />
           <Route path="Buyer-shop" element={<Shop />} />
-          <Route path="Buyer-shopdetail" element={<ShopDetail />} />
+          <Route path="shop-detail/:productId" element={<ShopDetail />} />
           <Route path="Buyer-login" element={<Login />} />
           <Route path="Buyer-register" element={<Register />} />
           <Route path="Farmer-register" element={<FarmerRegister />} />
           <Route path="KYC" element={<KYChome />} />
           <Route path="KYC-Form" element={<KYCform />} />
           <Route path="websocket" element={<WebSocketClient />} />
+          <Route path="message" element={<BuyerChatBox />} />
           <Route path="buynow" element={<Buynow />} />
           <Route path="addcart" element={<AddCart />} />
           <Route path="forgetpassword" element={<ForgetPassword />} />
@@ -64,10 +68,10 @@ const App = () => {
               <Route path="Farmeraddproduct" element={<FarmerAddProduct />} />
               <Route path="Farmerchatbox" element={<FarmerChatbox />} />
               <Route path="FarmerKYCHome" element={<FarmerKYChome />} />
-              <Route path='FarmerKYCForm' element={<FarmerKYCform/>}/>
-              <Route path='Farmerorderlist' element={<Farmerorderlist/>}/>
-              <Route path='Farmerprofile' element={<FarmerProfile/>}/>
-              <Route path='Farmereditproduct' element={<FarmerEditProduct/>}/>
+              <Route path="FarmerKYCForm" element={<FarmerKYCform />} />
+              <Route path="Farmerorderlist" element={<Farmerorderlist />} />
+              <Route path="Farmerprofile" element={<FarmerProfile />} />
+              <Route path="Farmereditproduct" element={<FarmerEditProduct />} />
             </Route>
           </Route>
         </Routes>
