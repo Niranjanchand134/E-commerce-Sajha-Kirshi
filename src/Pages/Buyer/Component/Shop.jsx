@@ -116,7 +116,7 @@ const Shop = () => {
                       </span>
                     </button>
                     {openIndex === index && (
-                      <ul className="ml-4 mt-2 text-sm text-gray-500 space-y-1">
+                      <ul className=" mt-2 text-sm text-gray-500 space-y-2 text-[16px]">
                         {cat.subItems.map((item, i) => (
                           <li key={i} className="hover:text-green-600 cursor-pointer">{item}</li>
                         ))}
