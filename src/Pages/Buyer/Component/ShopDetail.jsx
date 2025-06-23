@@ -77,12 +77,12 @@ const ShopDetail = () => {
                             Add to cart
                         </button>
                         <button onClick={handleBuynowClick} className="bg-[#EEC044] text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto">
-                            Add to wishlist
+                            Buy Now
                         </button>
                     </div>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-3">
                         <h5>Chat With the Farmer</h5>
-                        <button className="bg-green-500 rounded text-white p-1">Message</button>
+                        <button className="bg-green-500 rounded text-white p-2 text-[16px] w-24">Message</button>
                     </div>
                     <div className="relative flex items-center w-full max-w-md mx-auto mt-4">
                         <button

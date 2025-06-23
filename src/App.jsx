@@ -27,6 +27,9 @@ import FarmerProfile from "./Pages/Farmer/Parts/FarmerProfile";
 import WebSocketClient from "./Pages/Farmer/Parts/WebSocketClient";
 import Buynow from "./Pages/Buyer/Component/Buynow";
 import AddCart from "./Pages/Buyer/Component/AddCart";
+import ForgetPassword from "./Pages/Buyer/auth/ForgetPassword";
+import VerifyOTP from "./Pages/Buyer/auth/VerifyOTP";
+import ResetPassword from "./Pages/Buyer/auth/ResetPassword";
 
 
 
@@ -48,6 +51,9 @@ const App = () => {
           <Route path="websocket" element={<WebSocketClient />} />
           <Route path="buynow" element={<Buynow />} />
           <Route path="addcart" element={<AddCart />} />
+          <Route path="forgetpassword" element={<ForgetPassword />} />
+          <Route path="verifyOTP" element={<VerifyOTP />} />
+          <Route path="reset-password" element={<ResetPassword />} />
 
           {/* Farmer page */}
           <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>

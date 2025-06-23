@@ -14,7 +14,7 @@ const Product = () => {
         console.log("the reposnse od product..", response);
         setProduct(response);
       } catch (error) {
-        console.log("Error fetching products:", err);
+        console.log("Error fetching products:", error);
       }
     };
 
