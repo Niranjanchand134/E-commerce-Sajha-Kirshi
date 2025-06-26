@@ -29,6 +29,7 @@ const ShopDetail = () => {
 
          // Fetch farmer details
          const farmerData = await getDetailsByUserId(productData.user.id);
+         console.log(farmerData);
          setFarmer(farmerData);
        } catch (err) {
          console.error("Error fetching product or farmer details:", err);
