@@ -120,3 +120,28 @@ export const getAllProduct = async () =>{
   }
 
 }
+
+export const CheckEmail = async ({email})=>{
+  const response = await axios.post(`http://localhost:8080/api/checkEmail`, {email});
+  console.log(response)
+  return response;
+}
+
+export const CheckOtp = async ({ email, otp }) => {
+  const response = await axios.post("http://localhost:8080/api/checkOTP", {
+    email,
+    otp
+  });
+  return response.data;
+};
+
+export const UpdatePassword = async ({ email, password }) => {
+  const response = await axios.post(
+    `http://localhost:8080/api/updatePassword`,
+    {
+      email, password
+    }
+  );
+  console.log(response);
+  return response;
+};

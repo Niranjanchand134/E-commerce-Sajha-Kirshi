@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../Component/Header';
+import { CheckOtp } from '../../../services/authService';
+import { ErrorMessageToast, SuccesfulMessageToast } from '../../../utils/Tostify.util';
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const emailOrPhone = location.state?.emailOrPhone || '';
-
-  const [otp, setOtp] = useState(new Array(6).fill(''));
-  const [error, setError] = useState('');
+  const email = location.state?.email || "";
+  const [otp, setOtp] = useState(new Array(6).fill(""));
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [otpSent, setOtpSent] = useState(true);
-
   const inputsRef = useRef([]);
 
   useEffect(() => {
@@ -42,20 +43,33 @@ const VerifyOtp = () => {
     }
   };
 
-  const handleOtpSubmit = () => {
-    const otpCode = otp.join('');
+  const handleOtpSubmit = async () => {
+    const otpCode = otp.join("");
     if (otpCode.length !== 6) {
-      setError('Please enter a 6-digit OTP.');
+      setError("Please enter a 6-digit OTP.");
+      ErrorMessageToast("Please enter a 6-digit OTP.");
       return;
     }
 
-    alert(`OTP Verified: ${otpCode}`);
-    navigate('/reset-password');
+    setError("");
+    setLoading(true);
+    try {
+      const response = await CheckOtp({ email, otp: otpCode });
+      SuccesfulMessageToast(response || "OTP verified successfully");
+      navigate("/reset-password", { state: { email } });
+    } catch (error) {
+      const errorMessage =
+        error.response?.data || "Invalid OTP or expired. Please try again.";
+      setError(errorMessage);
+      ErrorMessageToast(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResendOtp = () => {
     if (countdown === 0) {
-      alert(`OTP resent to ${emailOrPhone}`);
+      alert(`OTP resent to ${email}`);
       setCountdown(60);
       setOtpSent(true);
       setOtp(new Array(6).fill(''));
@@ -82,7 +96,7 @@ const VerifyOtp = () => {
         <div className="bg-white rounded p-4 w-full max-w-md">
           <h4>Verify OTP</h4>
           <p className="text-[#6C7278]">Please enter the OTP via your email id to continue</p>
-          <p className='font-semibold'>Email : <span className="font-semibold text-[#A5A49A]"> {emailOrPhone}</span></p>
+          <p className='font-semibold'>Email : <span className="font-semibold text-[#A5A49A]"> {email}</span></p>
 
 
           {/* OTP Input Boxes */}

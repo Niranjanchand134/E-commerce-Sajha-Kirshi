@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../Component/Header';
+import { CheckEmail } from '../../../services/authService';
+import { ErrorMessageToast, SuccesfulMessageToast } from '../../../utils/Tostify.util';
 
 const ForgetPassword = () => {
-  const [emailOrPhone, setEmailOrPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleConfirm = () => {
-    if (!emailOrPhone.trim()) {
+  const handleConfirm = async () => {
+    if (!email.trim()) {
       setError('Please enter your email or phone number.');
       return;
     }
 
-    const isEmail = /\S+@\S+\.\S+/.test(emailOrPhone);
-    const isPhone = /^\d{7,15}$/.test(emailOrPhone);
+    const isEmail = /\S+@\S+\.\S+/.test(email);
+    const isPhone = /^\d{7,15}$/.test(email);
 
     if (!isEmail && !isPhone) {
       setError('Enter a valid email or phone number.');
@@ -22,9 +25,30 @@ const ForgetPassword = () => {
     }
 
     setError('');
-    alert('Reset link sent (simulated).');
-     navigate('/verifyOTP', { state: { emailOrPhone } });
-    setEmailOrPhone('');
+    setLoading(true);
+    try {
+      const response = await CheckEmail({ email });
+      console.log(response);
+      if (response.status === 200) {
+        SuccesfulMessageToast(response.data || 'OTP sent successfully');
+        navigate('/verifyOTP', { state: { email } });
+        setEmail("");
+      }
+    } catch (error) { 
+      console.log(error)
+      let errorMessage = 'Failed to send OTP. Please try again.';
+      if (error.response) { 
+        if (error.response.status === 404) {
+          errorMessage = 'This email does not exist.';
+        } else if (error.response.status === 500) {
+          errorMessage = error.response.data || 'Server error occurred.';
+        }
+      }
+      setError(errorMessage);
+      ErrorMessageToast(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -53,14 +77,14 @@ const ForgetPassword = () => {
           </p>
 
           <div className="flex flex-col mb-4">
-            <label htmlFor="email">Phone Number or Email</label>
+            <label htmlFor="email">Please Enter your Email</label>
             <input
               type="text"
               id="email"
-              value={emailOrPhone}
-              onChange={(e) => setEmailOrPhone(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="border p-1 rounded focus:outline-none focus:ring-0 mt-2"
-              placeholder="Hello@gmail.com or 9800000000"
+              placeholder="Hello@gmail.com "
             />
             {error && <span className="text-red-500 text-sm mt-1">{error}</span>}
           </div>

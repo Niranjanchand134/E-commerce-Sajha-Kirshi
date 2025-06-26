@@ -1,35 +1,48 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Header from '../Component/Header';
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import Header from "../Component/Header";
+import { UpdatePassword } from "../../../services/authService";
+import {
+  ErrorMessageToast,
+  SuccesfulMessageToast,
+} from "../../../utils/Tostify.util";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const emailOrPhone = location.state?.emailOrPhone || ''; // Optional if you want to show it
-
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const email = location.state?.email || "";
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = () => {
     // Basic validations
     if (!password) {
-      setError('Please enter a new password.');
+      setError("Please enter a new password.");
       return;
     }
     if (password.length < 6) {
-      setError('Password should be at least 6 characters.');
+      setError("Password should be at least 6 characters.");
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError("Passwords do not match.");
       return;
     }
 
-    setError('');
+    setError("");
     // Simulate API call or password reset process
-    alert('Password reset successful! Please login with your new password.');
-    navigate('/Buyer-login');
+    try {
+      const response = UpdatePassword({ email, password });
+      SuccesfulMessageToast("Password Changed Successfully");
+      navigate("/Buyer-login");
+      
+    } catch (error) {
+      const errorMessage =
+        error.response?.data || "Failed to Change Password";
+      setError(errorMessage);
+      ErrorMessageToast(errorMessage);
+    }
   };
 
   const handleBack = () => {
@@ -43,17 +56,18 @@ const ResetPassword = () => {
         className="w-full flex justify-center items-center"
         style={{
           backgroundImage: "url('/assets/BuyersImg/images/Forgetbg.png')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          minHeight: 'calc(102vh - 80px)',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          minHeight: "calc(102vh - 80px)",
         }}
       >
         <div className="bg-white rounded p-4 w-full max-w-md">
           <h4>Reset Password</h4>
 
-          {emailOrPhone && (
+          {email && (
             <p className="text-[#6C7278] mb-4">
-              Reset password for: <span className="font-semibold text-black">{emailOrPhone}</span>
+              Reset password for:{" "}
+              <span className="font-semibold text-black">{email}</span>
             </p>
           )}
 
