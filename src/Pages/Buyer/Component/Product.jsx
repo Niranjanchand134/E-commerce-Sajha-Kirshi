@@ -54,7 +54,8 @@ const Product = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:px-60">
-          {products.map((product) => (
+        {products && Array.isArray(products) ? (
+          products.map((product) => (
             <Link
               key={product.id}
               to={`/shop-detail/${product.id}`}
@@ -92,7 +93,10 @@ const Product = () => {
                 </div>
               </div>
             </Link>
-          ))}
+          ))
+        ) : (
+          <div>No products available</div> // Fallback UI
+        )}
         </div>
       </div>
     </>
