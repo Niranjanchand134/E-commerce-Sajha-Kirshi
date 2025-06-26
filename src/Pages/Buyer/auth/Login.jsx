@@ -153,7 +153,7 @@ const Login = () => {
       >
         <form
           className="bg-white p-4 rounded-3 shadow-lg w-75"
-          onSubmit={handleSubmit}
+          
         >
           <div style={{ width: "65%", margin: "0 auto" }}>
             <div className="text-center mb-3">
@@ -257,7 +257,7 @@ const Login = () => {
             </div>
 
             <div className="d-grid gap-2">
-              <button className="btn btn-sm" style={{ backgroundColor: "#49A760", color: "white" }} type="submit">
+              <button className="btn btn-sm" onSubmit={handleSubmit} style={{ backgroundColor: "#49A760", color: "white" }} type="button">
                 Login
               </button>
               <div className="flex justify-center space-x-4">

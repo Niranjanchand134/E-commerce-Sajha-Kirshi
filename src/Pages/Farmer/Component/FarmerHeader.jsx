@@ -134,7 +134,7 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
           <Dropdown overlay={dropmenu} trigger={["hover"]}>
             <a onClick={(e) => e.preventDefault()}>
               <i className="fa-solid fa-user-circle text-2xl"></i>
-              {/* <span className="text-base">{user.name}</span> */}
+              <span className="text-base text-black no-underline">{user.name}</span>
             </a>
           </Dropdown>
         </div>

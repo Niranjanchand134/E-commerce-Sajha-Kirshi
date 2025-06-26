@@ -10,11 +10,13 @@ import {
   ProfileOutlined,
   SettingOutlined
 } from '@ant-design/icons';
+import { useAuth } from '../../../Context/AuthContext';
 
 const { Sider } = Layout;
 
 const FarmerSidebar = ({ collapsed }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   return (
     <Sider trigger={null} collapsible collapsed={collapsed} theme="light">
       {/* Logo Section */}
@@ -40,7 +42,7 @@ const FarmerSidebar = ({ collapsed }) => {
         ) : (
           <div className="flex items-center space-x-2">
             <i className="fa-solid fa-user-circle text-2xl"></i>
-            <span className="text-base">Niranjan Chand</span>
+            <span className="text-base">{user.name}</span>
           </div>
         )}
       </div>
