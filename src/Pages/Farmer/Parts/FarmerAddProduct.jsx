@@ -9,6 +9,8 @@ import {
 import { useAuth } from "../../../Context/AuthContext";
 import { addProduct } from "../../../services/authService";
 import { SlTag } from "react-icons/sl";
+import { useNavigate } from "react-router-dom";
+import { SuccesfulMessageToast } from "../../../utils/Tostify.util";
 
 const FarmerAddProduct = () => {
   const { user } = useAuth();
@@ -16,6 +18,7 @@ const FarmerAddProduct = () => {
   const [images, setImages] = useState([]);
   const fileInputRef = useRef(null);
   const [imageUpload, setImageUpload] = useState([]);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     // user: user.id, // or use a nested object if needed like { id: "", name: "" }
     date: "2025-10-22", // You can use new Date().toISOString().slice(0, 10) for default
@@ -114,6 +117,9 @@ const FarmerAddProduct = () => {
   
       const response = await addProduct(finalData);
       console.log("Product saved:", response);
+      SuccesfulMessageToast("Product Added Successfully");
+      setFormData("");
+      navigate("/Farmerlayout/Farmerproducts");
     } catch (error) {
       console.error("Error uploading images:", error);
     }

@@ -1,14 +1,17 @@
 import axios from "axios";
 
 export const deleteProductById = async (id) => {
-  const response = await fetch(`http://localhost:8080/farmer/product/${id}`, {
-    method: "DELETE",
-  });
+  const response = await fetch(
+    `http://localhost:8080/api/farmer/deleteProduct/${id}`,
+    {
+      method: "DELETE",
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Failed to delete product");
   }
-  return response.json();
+  return response.data;
 };
 
 
@@ -95,18 +98,22 @@ export const StatusChanges = async (status) => {
 export const fillFarmerKyc = async (data) =>{
 
   const token = localStorage.getItem("token");
-  const response = await axios.post(
-    "http://localhost:8080/api/farmer/farmerKyc",
-    data,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/api/farmer/farmerKyc",
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-  return response.data
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error submitting KYC");
+  }
 }
 
 export const getProductByfarmer = async () =>{
@@ -142,14 +149,36 @@ export const getChatRoomFarmerDetails = async (id) => {
 };
 
 
-export const getDetailsByUserId = async (id) =>{
-  const response = await axios.get(
-    `http://localhost:8080/api/farmer/getFarmerKYCDetails/${id}`
-  );
-  return response.data;
-}
+export const getDetailsByUserId = async (id) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8080/api/farmer/getFarmerKYCDetails/${id}`
+    );
+    return response.data; // Always return the data
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      return { status: 404 }; // Return a consistent error object
+    }
+    throw error; // Re-throw other errors
+  }
+};
 
 export const getProductById = async (id)=>{
   const response = await axios.get(`http://localhost:8080/getById/${id}`);
   return response.data;
 }
+
+
+export const searchProduct = async (item) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8080/api/farmer/product/${item}`
+    );
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      return []; // return empty array if not found
+    }
+    throw error; // rethrow other errors
+  }
+};

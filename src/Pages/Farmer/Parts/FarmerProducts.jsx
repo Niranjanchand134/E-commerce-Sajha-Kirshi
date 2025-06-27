@@ -3,11 +3,12 @@ import { createStyles } from "antd-style";
 import { FormOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import { getAllProduct } from '../../../services/authService';
-import { categoryChanges, StatusChanges, updateProductById } from '../../../services/farmer/farmerApiService';
+import { categoryChanges, searchProduct, StatusChanges, updateProductById } from '../../../services/farmer/farmerApiService';
 import FarmerEditProduct from '../Function/FarmerEditProduct';
 
 // Add your delete API import here
 import { deleteProductById } from '../../../services/farmer/farmerApiService';
+import { SuccesfulMessageToast } from '../../../utils/Tostify.util';
 
 const useStyle = createStyles(({ css, token }) => {
   const { antCls } = token;
@@ -44,6 +45,7 @@ const StatusCell = ({ initialStatus, record, onStatusChange }) => {
       await updateProductById(record.id, { status: key });
       setStatus(key);
       onStatusChange(record.id, key);
+      SuccesfulMessageToast(`Status Changed to ${key}`)
     } catch (error) {
       console.error("Failed to update status:", error);
     } finally {
@@ -135,12 +137,23 @@ const FarmerProducts = () => {
   };
 
   const handleEdit = (product) => {
+    console.log("here is the record data", product);
     setSelectedProduct(product);
     setIsModalVisible(true);
   };
 
-  const handleModalClose = () => {
+  const handleModalClose = (updatedProduct) => {
     setIsModalVisible(false);
+
+    // If we received an updated product, update our state
+    if (updatedProduct) {
+      setFilteredData((prev) =>
+        prev.map((item) =>
+          item.id === updatedProduct.id ? updatedProduct : item
+        )
+      );
+    }
+
     setSelectedProduct(null);
   };
 
@@ -148,6 +161,16 @@ const FarmerProducts = () => {
   const showDeleteConfirm = (productId) => {
     setDeleteProductId(productId);
     setIsDeleteModalVisible(true);
+  };
+
+  const handleSearchItem = async () => {
+    try {
+      const response = await searchProduct(searchTerm);
+      setFilteredData(response);
+    } catch (error) {
+      console.error("Search failed:", error);
+      setFilteredData([]); // or show error message to user
+    }
   };
 
   // New delete confirm handler
@@ -159,6 +182,7 @@ const FarmerProducts = () => {
       }
       setIsDeleteModalVisible(false);
       setDeleteProductId(null);
+      SuccesfulMessageToast("Product Deleted Successfully")
     } catch (error) {
       console.error("Failed to delete product:", error);
     }
@@ -273,7 +297,9 @@ const FarmerProducts = () => {
       <div className="flex items-center gap-4 ml-4 mb-4 bg-white flex-wrap">
         {/* Category Filter */}
         <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">Category</label>
+          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">
+            Category
+          </label>
           <select
             className="border border-gray-300 rounded-full w-32 px-2 py-2 focus:outline-none"
             value={categoryFilter}
@@ -290,7 +316,9 @@ const FarmerProducts = () => {
 
         {/* Status Filter */}
         <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">Status</label>
+          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">
+            Status
+          </label>
           <select
             className="border border-gray-300 w-32 rounded-full px-2 py-2 focus:outline-none"
             value={statusFilter}
@@ -313,7 +341,10 @@ const FarmerProducts = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button className="bg-green-500 text-white px-6 py-2 mt-4 rounded-full hover:bg-green-600 transition duration-200">
+            <button
+              onClick={handleSearchItem}
+              className="bg-green-500 text-white px-6 py-2 mt-4 rounded-full hover:bg-green-600 transition duration-200"
+            >
               Search
             </button>
           </div>
@@ -337,13 +368,16 @@ const FarmerProducts = () => {
       <Modal
         title="Edit Product"
         open={isModalVisible}
-        onCancel={handleModalClose}
+        onCancel={() => handleModalClose()} // Close without updating
         footer={null}
         width={800}
         destroyOnClose
       >
         {selectedProduct && (
-          <FarmerEditProduct product={selectedProduct} onClose={handleModalClose} />
+          <FarmerEditProduct
+            product={selectedProduct}
+            onClose={handleModalClose}
+          />
         )}
       </Modal>
 
@@ -362,10 +396,16 @@ const FarmerProducts = () => {
         centered
       >
         <div className="text-center">
-          <ExclamationCircleOutlined style={{ fontSize: 40, color: "#faad14", marginBottom: 16 }} />
-          <p className="text-lg font-semibold">Are you sure you want to delete this product?</p>
+          <ExclamationCircleOutlined
+            style={{ fontSize: 40, color: "#faad14", marginBottom: 16 }}
+          />
+          <p className="text-lg font-semibold">
+            Are you sure you want to delete this product?
+          </p>
           {deleteProductId && (
-            <p className="text-gray-500">Product ID: <strong>{deleteProductId}</strong></p>
+            <p className="text-gray-500">
+              Product ID: <strong>{deleteProductId}</strong>
+            </p>
           )}
         </div>
       </Modal>
