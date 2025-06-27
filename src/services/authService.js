@@ -145,3 +145,10 @@ export const UpdatePassword = async ({ email, password }) => {
   console.log(response);
   return response;
 };
+
+export const getUserDetailsById = async (id)=>{
+  const response = await axios.post(
+    `http://localhost:8080/api/user/getUserDetailsById/${id}`
+  );
+  return response.data;
+}
