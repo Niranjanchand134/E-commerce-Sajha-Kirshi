@@ -4,43 +4,73 @@ import Footer from "./Footer";
 import Header from "./Header";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getUserDetailsById } from "../../../services/authService";
 
 const ShopDetail = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-   const { productId } = useParams();
-   const scrollRef = useRef(null);
-   const [product, setProduct] = useState(null);
-   const [farmer, setFarmer] = useState(null);
-   const [selectedImage, setSelectedImage] = useState("");
-   const [loading, setLoading] = useState(true);
-   const [error, setError] = useState(null);
+  const { productId } = useParams();
+  const scrollRef = useRef(null);
+  const [product, setProduct] = useState(null);
+  const [farmer, setFarmer] = useState(null);
+  const [UserData, setUserData] = useState(null);
+  const [selectedImage, setSelectedImage] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-   useEffect(() => {
-     const fetchProductAndFarmer = async () => {
-       try {
-         setLoading(true);
-         // Fetch product details
-         const productData = await getProductById(productId);
-         setProduct(productData);
-         setSelectedImage(
-           productData.imagePaths[0] || "/assets/BuyersImg/Products/Onion.png"
-         );
+  useEffect(() => {
+    const fetchProductAndFarmer = async () => {
+      try {
+        setLoading(true);
+        // Fetch product details
+        const productData = await getProductById(productId);
+        setProduct(productData);
+        setSelectedImage(
+          productData.imagePaths[0] || "/assets/BuyersImg/Products/Onion.png"
+        );
 
-         // Fetch farmer details
-         const farmerData = await getDetailsByUserId(productData.user.id);
-         console.log(farmerData);
-         setFarmer(farmerData);
-       } catch (err) {
-         console.error("Error fetching product or farmer details:", err);
-         setError("Failed to load product details.");
-       } finally {
-         setLoading(false);
-       }
-     };
+        const userDetails = await getUserDetailsById(productData.user.id);
+        setUserData(userDetails);
 
-     fetchProductAndFarmer();
-   }, [productId]);
+        // Fetch farmer details
+        const farmerData = await getDetailsByUserId(productData.user.id);
+        console.log("here is the farmer", farmerData);
+        setFarmer(farmerData);
+      } catch (err) {
+        console.error("Error fetching product or farmer details:", err);
+        setError("Failed to load product details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductAndFarmer();
+  }, [productId]);
+
+  const getFormatContact = (userData) => {
+    if (!userData) {
+      return "66 Broklun Road Golden Street, New York, United States of America"; // Fallback
+    }
+
+    const { number, email } = userData;
+
+    return [`Number - ${number} \n`, `Email - ${email}`]
+      .filter(Boolean) // Remove null/undefined/empty strings
+      .join(", ");
+  };
+
+  // Format the address from farmer data
+  const getFormattedAddress = (farmer) => {
+    if (!farmer) {
+      return "66 Broklun Road Golden Street, New York, United States of America"; // Fallback
+    }
+    const { district, municipality, wardNumber, tole } = farmer;
+    // Concatenate available fields, filter out empty ones, and join with commas
+    return [tole, wardNumber && `Ward - ${wardNumber}`, municipality, district]
+      .filter(Boolean) // Remove null/undefined/empty strings
+      .join(", ");
+  };
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -64,7 +94,9 @@ const ShopDetail = () => {
   }
 
   const handleBuynowClick = () => {
-    navigate("/buynow");
+    navigate("/buynow", {
+      state: { product, farmer, UserData, quantity }, // Pass product, farmer, user, and quantity
+    });
   };
 
   const handleAddCartClick = () => {
@@ -76,8 +108,6 @@ const ShopDetail = () => {
     alert("Product added to cart!");
     navigate("/addcart");
   };
-
-
 
   return (
     <>
@@ -106,67 +136,84 @@ const ShopDetail = () => {
             </p>
           </div>
 
-                    <hr className="mt-1" />
-                    <p className="w-full md:w-96 text-sm md:text-base">
-                        {product.description || "No description available."}
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-2 mt-4">
-                        <h4 className="text-base font-semibold">Choose Quantity</h4>
-                        <input
-                            type="number"
-                            placeholder={` /${product.unitOfMeasurement || "unit"}`}
-                            className="w-full sm:w-20 border-2 border-solid border-black px-2 py-1"
-                            min={product.minimumOrderQuantity || 1}
-                        />
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                        <button onClick={handleAddCartClick} className="bg-green-600 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto">
-                            Add to cart
-                        </button>
-                        <button onClick={handleBuynowClick} className="bg-[#EEC044] text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto">
-                            Buy Now
-                        </button>
-                    </div>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-3">
-                        <h5>Chat With the Farmer</h5>
-                        <button className="bg-green-500 rounded text-white p-2 text-[16px] w-24">Message</button>
-                    </div>
-                    <div className="relative flex items-center w-full max-w-md mx-auto mt-4">
-                        <button
-                            onClick={() => scroll("left")}
-                            className="absolute left-0 z-10 bg-transparent text-gray-600 text-xl p-2"
-                        >
-                            &#x276E;
-                        </button>
+          <hr className="mt-1" />
+          <p className="w-full md:w-96 text-sm md:text-base">
+            {product.description || "No description available."}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2 mt-4">
+            <h4 className="text-base font-semibold">Choose Quantity</h4>
+            <input
+              type="number"
+              placeholder={` /${product.unitOfMeasurement || "unit"}`}
+              className="w-full sm:w-20 border-2 border-solid border-gray px-2 py-1 "
+              min={product.minimumOrderQuantity || 1}
+              value={quantity}
+              onChange={(e) =>
+                setQuantity(
+                  Math.max(
+                    product.minimumOrderQuantity || 1,
+                    parseInt(e.target.value) || 1
+                  )
+                )
+              }
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            <button
+              onClick={handleAddCartClick}
+              className="bg-green-600 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
+            >
+              Add to cart
+            </button>
+            <button
+              onClick={handleBuynowClick}
+              className="bg-[#EEC044] text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
+            >
+              Buy Now
+            </button>
+          </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-3">
+            <h5>Chat With the Farmer</h5>
+            <button className="bg-green-500 rounded text-white p-2 text-[16px] w-24">
+              Message
+            </button>
+          </div>
+          <div className="relative flex items-center w-full max-w-md mx-auto mt-4">
+            <button
+              onClick={() => scroll("left")}
+              className="absolute left-0 z-10 bg-transparent text-gray-600 text-xl p-2"
+            >
+              &#x276E;
+            </button>
 
-                        <div
-                            ref={scrollRef}
-                            className="flex space-x-4 overflow-x-auto scroll-smooth px-8 no-scrollbar"
-                        >
-                            {product.imagePaths.map((src, index) => (
-                            <div
-                                key={index}
-                                className="w-[80px] h-[80px] bg-gray-200 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden cursor-pointer"
-                                onClick={() => setSelectedImage(src)}
-                            >
-                                <img
-                                src={src}
-                                alt={`Image ${index + 1}`}
-                                className="w-[80px] h-[100px] object-contain"
-                                />
-                            </div>
-                            ))}
-                        </div>
-
-                         <button
-                            onClick={() => scroll('right')}
-                            className="absolute right-0 z-10 bg-transparent text-gray-600 text-xl p-2"
-                        >
-                            &#x276F;
-                        </button>
-                    </div>
+            <div
+              ref={scrollRef}
+              className="flex space-x-4 overflow-x-auto scroll-smooth px-8 no-scrollbar"
+            >
+              {product.imagePaths.map((src, index) => (
+                <div
+                  key={index}
+                  className="w-[80px] h-[80px] bg-gray-200 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden cursor-pointer"
+                  onClick={() => setSelectedImage(src)}
+                >
+                  <img
+                    src={src}
+                    alt={`Image ${index + 1}`}
+                    className="w-[80px] h-[100px] object-contain"
+                  />
                 </div>
+              ))}
             </div>
+
+            <button
+              onClick={() => scroll("right")}
+              className="absolute right-0 z-10 bg-transparent text-gray-600 text-xl p-2"
+            >
+              &#x276F;
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* About us part */}
       <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-4 text-white my-8">
@@ -179,17 +226,19 @@ const ShopDetail = () => {
         </div>
         <div className="bg-[#C5CE38] rounded w-64 p-4">
           <h4>Contact</h4>
-          <p>
-            {farmer?.contact ||
+          <p>{getFormatContact(UserData)}</p>
+          {/* <p>
+            {UserData?.number ||
               "+1- (246) 333-0079 support@agrios.com Mon - Fri: 7:00 am - 6:00 pm"}
           </p>
+          <p>
+            {UserData?.email ||
+              "+1- (246) 333-0079 support@agrios.com Mon - Fri: 7:00 am - 6:00 pm"}
+          </p> */}
         </div>
         <div className="bg-[#EEC044] rounded w-64 p-4">
           <h4>Address</h4>
-          <p>
-            {farmer?.location ||
-              "66 Broklun Road Golden Street, New York, United States of America"}
-          </p>
+          <p>{getFormattedAddress(farmer)}</p>
         </div>
       </div>
 

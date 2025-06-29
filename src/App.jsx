@@ -32,6 +32,7 @@ import BuyerChatBox from "./Pages/Buyer/Component/BuyerChatBox";
 import ForgetPassword from "./Pages/Buyer/auth/ForgetPassword";
 import VerifyOTP from "./Pages/Buyer/auth/VerifyOTP";
 import ResetPassword from "./Pages/Buyer/auth/ResetPassword";
+import FarmerKYCDetail from "./Pages/Farmer/Parts/FarmerKYCDetails";
 
 
 
@@ -45,7 +46,7 @@ const App = () => {
           {/* Buyer page */}
           <Route path="/" element={<Landing />} />
           <Route path="Buyer-shop" element={<Shop />} />
-          <Route path="shopDetail/:productId" element={<ShopDetail />} />
+          <Route path="shopdetail/:productId" element={<ShopDetail />} />
           <Route path="Buyer-login" element={<Login />} />
           <Route path="Buyer-register" element={<Register />} />
           <Route path="Farmer-register" element={<FarmerRegister />} />
@@ -58,17 +59,20 @@ const App = () => {
           <Route path="forgetpassword" element={<ForgetPassword />} />
           <Route path="verifyOTP" element={<VerifyOTP />} />
           <Route path="reset-password" element={<ResetPassword />} />
+        
 
           {/* Farmer page */}
-          <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
-            <Route path="Farmerlayout" element={<FarmerLayout />}>
-              <Route path="Farmer" element={<FarmerHomePage />} />
-              <Route path="Farmerdashboard" element={<FarmerDashboard />} />
-              <Route path="Farmerproducts" element={<FarmerProducts />} />
-              <Route path="Farmeraddproduct" element={<FarmerAddProduct />} />
-              <Route path="Farmerchatbox" element={<FarmerChatbox />} />
-              <Route path="FarmerKYCHome" element={<FarmerKYChome />} />
-              <Route path="FarmerKYCForm" element={<FarmerKYCform />} />
+            <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
+              <Route path="Farmerlayout" element={<FarmerLayout />}>
+                <Route path="Farmer" element={<FarmerHomePage />} />
+                <Route path="Farmerdashboard" element={<FarmerDashboard />} />
+                <Route path="Farmerproducts" element={<FarmerProducts />} />
+                <Route path="Farmeraddproduct" element={<FarmerAddProduct />} />
+                <Route path="Farmerchatbox" element={<FarmerChatbox />} />
+                <Route path="FarmerKYCHome" element={<FarmerKYChome />} />
+                <Route path="FarmerKYCForm" element={<FarmerKYCform />} />
+                <Route path="FarmerKYCDetail" element={<FarmerKYCDetail />} />
+
               <Route path="Farmerorderlist" element={<Farmerorderlist />} />
               <Route path="Farmerprofile" element={<FarmerProfile />} />
               <Route path="Farmereditproduct" element={<FarmerEditProduct />} />

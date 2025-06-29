@@ -7,14 +7,19 @@ import {
   CloseCircleOutlined
 } from "@ant-design/icons";
 import { SlTag } from "react-icons/sl";
+import { updateProductById } from "../../../services/farmer/farmerApiService";
+import { useAuth } from "../../../Context/AuthContext";
+import { SuccesfulMessageToast } from "../../../utils/Tostify.util";
 
-const FarmerEditProduct = ({ onClose }) => {
+const FarmerEditProduct = ({product, onClose }) => {
   const location = useLocation();
-  const { product } = location.state || {}; // ✅ Get product from location
+  // const { product } = location.state || {}; // ✅ Get product from location
 
   const fileInputRef = useRef(null);
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState({
+    id: "",
     name: "",
     category: "",
     description: "",
@@ -24,14 +29,19 @@ const FarmerEditProduct = ({ onClose }) => {
     price: "",
     discountPrice: "",
     deliveryOption: "",
-    deliveryTime: ""
+    deliveryTime: "",
+    imagePaths: []
   });
 
   const [images, setImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [imageUploads, setImageUploads] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (product) {
       setFormData({
+        id: product.id || "",
         name: product.name || "",
         category: product.category || "",
         description: product.description || "",
@@ -41,8 +51,13 @@ const FarmerEditProduct = ({ onClose }) => {
         price: product.price || "",
         discountPrice: product.discountPrice || "",
         deliveryOption: product.deliveryOption || "",
-        deliveryTime: product.deliveryTime || ""
+        deliveryTime: product.deliveryTime || "",
+        imagePaths: product.imagePaths || [],
       });
+      // Set existing images for display
+      if (product.imagePaths && product.imagePaths.length > 0) {
+        setExistingImages(product.imagePaths);
+      }
     }
   }, [product]);
 
@@ -55,20 +70,83 @@ const FarmerEditProduct = ({ onClose }) => {
   };
 
   const handleImageChange = (e) => {
-    const selectedImages = Array.from(e.target.files);
-    if (selectedImages.length + images.length <= 5) {
-      setImages((prev) => [...prev, ...selectedImages]);
+    const selectedFiles = Array.from(e.target.files);
+    const totalFiles = [...images, ...selectedFiles].slice(
+      0,
+      5 - existingImages.length
+    );
+
+    if (totalFiles.length > 0) {
+      setImages(totalFiles);
+
+      // Prepare upload data for Cloudinary
+      const uploads = selectedFiles.map((file) => {
+        const data = new FormData();
+        data.append("file", file);
+        data.append("upload_preset", "SajhaKrishi");
+        data.append("cloud_name", "dtwunctra");
+        return data;
+      });
+
+      setImageUploads(uploads);
+    }
+
+    e.target.value = null; // Reset file input
+  };
+
+  const removeImage = (indexToRemove) => {
+    setImages(images.filter((_, index) => index !== indexToRemove));
+  };
+
+  const removeExistingImage = (indexToRemove) => {
+    setExistingImages(
+      existingImages.filter((_, index) => index !== indexToRemove)
+    );
+    setFormData((prev) => ({
+      ...prev,
+      imagePaths: prev.imagePaths.filter((_, index) => index !== indexToRemove),
+    }));
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+
+    try {
+      // Upload new images first
+      let newImageUrls = [];
+      if (imageUploads.length > 0) {
+        const uploadPromises = imageUploads.map((uploadData) =>
+          fetch("https://api.cloudinary.com/v1_1/dtwunctra/image/upload", {
+            method: "POST",
+            body: uploadData,
+          }).then((res) => res.json())
+        );
+
+        const results = await Promise.all(uploadPromises);
+        newImageUrls = results.map((result) => result.secure_url || result.url);
+      }
+
+      // Combine existing images (that weren't removed) with new ones
+      const allImagePaths = [...formData.imagePaths, ...newImageUrls];
+
+      // Prepare final data with updated image paths
+      const finalData = {
+        ...formData,
+        imagePaths: allImagePaths,
+      };
+
+      // Call API to update product
+      const updatedProduct = await updateProductById(formData.id, finalData);
+
+      SuccesfulMessageToast("Product Updated Successfully");
+      onClose(updatedProduct);
+    } catch (error) {
+      console.error("Error updating product:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const removeImage = (index) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = () => {
-    console.log("Form submitted", formData, images);
-    // Add API call or update logic here
-  };
 
   return (
     <>
@@ -82,7 +160,10 @@ const FarmerEditProduct = ({ onClose }) => {
         </div>
         <div className="flex flex-col md:flex-row gap-4 mb-4">
           <div className="flex flex-col w-full">
-            <label htmlFor="Pname" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="Pname"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Product Name
             </label>
             <input
@@ -96,7 +177,10 @@ const FarmerEditProduct = ({ onClose }) => {
             />
           </div>
           <div className="flex flex-col w-full">
-            <label htmlFor="Category" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="Category"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Category
             </label>
             <div className="relative">
@@ -121,7 +205,10 @@ const FarmerEditProduct = ({ onClose }) => {
           </div>
         </div>
         <div className="flex flex-col w-full">
-          <label htmlFor="description" className="text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="description"
+            className="text-sm font-medium text-gray-700 mb-2"
+          >
             Description
           </label>
           <textarea
@@ -145,7 +232,10 @@ const FarmerEditProduct = ({ onClose }) => {
         </div>
         <div className="flex flex-col md:flex-row gap-4 mb-4">
           <div className="flex flex-col w-full">
-            <label htmlFor="quality" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="quality"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Available Quantity
             </label>
             <input
@@ -159,7 +249,10 @@ const FarmerEditProduct = ({ onClose }) => {
             />
           </div>
           <div className="flex flex-col w-full">
-            <label htmlFor="unit" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="unit"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Unit of Measurement
             </label>
             <div className="relative">
@@ -187,7 +280,10 @@ const FarmerEditProduct = ({ onClose }) => {
         </div>
         <div className="flex flex-col md:flex-row gap-4 mb-4">
           <div className="flex flex-col w-full">
-            <label htmlFor="Minimumorder" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="Minimumorder"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Minimum Order Quantity
             </label>
             <input
@@ -200,7 +296,10 @@ const FarmerEditProduct = ({ onClose }) => {
             />
           </div>
           <div className="flex flex-col w-full">
-            <label htmlFor="price" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="price"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Prices
             </label>
             <input
@@ -214,7 +313,10 @@ const FarmerEditProduct = ({ onClose }) => {
           </div>
         </div>
         <div className="flex flex-col md:w-1/2">
-          <label htmlFor="Dprice" className="text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="Dprice"
+            className="text-sm font-medium text-gray-700 mb-2"
+          >
             Discount Percentage
           </label>
           <input
@@ -238,7 +340,10 @@ const FarmerEditProduct = ({ onClose }) => {
         </div>
         <div className="flex flex-col md:flex-row gap-4 mb-4">
           <div className="flex flex-col w-full">
-            <label htmlFor="DeliveryOptions" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="DeliveryOptions"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Delivery Options
             </label>
             <input
@@ -252,7 +357,10 @@ const FarmerEditProduct = ({ onClose }) => {
             />
           </div>
           <div className="flex flex-col w-full">
-            <label htmlFor="DeliveryTime" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="DeliveryTime"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Estimated Delivery Time (optional)
             </label>
             <input
@@ -276,16 +384,47 @@ const FarmerEditProduct = ({ onClose }) => {
           </div>
           <h4 className="text-xl font-semibold">Product Images</h4>
         </div>
-        <p className="text-gray-500">Upload up to 5 images for your product. First image will be used as a cover.</p>
+        <p className="text-gray-500">
+          Upload up to 5 images for your product. First image will be used as a
+          cover.
+        </p>
 
-        {images.length < 5 && (
+        {/* Show existing images */}
+        <div className="flex gap-3 mt-4 flex-wrap">
+          {existingImages.map((imageUrl, index) => (
+            <div
+              key={`existing-${index}`}
+              className="relative w-20 h-20 border rounded overflow-hidden"
+            >
+              <img
+                src={imageUrl}
+                alt={`existing-${index}`}
+                className="w-full h-full object-cover"
+              />
+              <button
+                onClick={() => removeExistingImage(index)}
+                className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 text-sm shadow-md hover:bg-red-700"
+                title="Remove"
+              >
+                <CloseCircleOutlined style={{ fontSize: "16px" }} />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Allow new uploads if we haven't reached 5 images total */}
+        {existingImages.length + images.length < 5 && (
           <label
             htmlFor="fileUpload"
             className="flex flex-col items-center justify-center w-32 h-32 cursor-pointer border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 transition mt-3"
           >
             <UploadOutlined className="text-2xl text-blue-600 mb-1" />
-            <span className="text-sm text-gray-700 font-medium">Upload Image</span>
-            <span className="text-sm text-gray-500">{images.length}/5</span>
+            <span className="text-sm text-gray-700 font-medium">
+              Upload Image
+            </span>
+            <span className="text-sm text-gray-500">
+              {existingImages.length + images.length}/5
+            </span>
             <input
               type="file"
               id="fileUpload"
@@ -298,12 +437,16 @@ const FarmerEditProduct = ({ onClose }) => {
           </label>
         )}
 
+        {/* Show preview of newly uploaded images (not yet saved) */}
         <div className="flex gap-3 mt-4 flex-wrap">
           {images.map((file, index) => (
-            <div key={index} className="relative w-20 h-20 border rounded overflow-hidden">
+            <div
+              key={`new-${index}`}
+              className="relative w-20 h-20 border rounded overflow-hidden"
+            >
               <img
                 src={URL.createObjectURL(file)}
-                alt={`preview ${index}`}
+                alt={`preview-${index}`}
                 className="w-full h-full object-cover"
               />
               <button
@@ -321,9 +464,12 @@ const FarmerEditProduct = ({ onClose }) => {
       <div className="flex justify-end">
         <button
           onClick={handleSubmit}
-          className="bg-green-500 mt-4 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
+          disabled={isSubmitting}
+          className={`bg-green-500 mt-4 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto ${
+            isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+          }`}
         >
-          Submit
+          {isSubmitting ? "Updating..." : "Submit"}
         </button>
       </div>
     </>
