@@ -45,7 +45,7 @@ const App = () => {
           {/* Buyer page */}
           <Route path="/" element={<Landing />} />
           <Route path="Buyer-shop" element={<Shop />} />
-          <Route path="shopdetail" element={<ShopDetail />} />
+          <Route path="shopDetail/:productId" element={<ShopDetail />} />
           <Route path="Buyer-login" element={<Login />} />
           <Route path="Buyer-register" element={<Register />} />
           <Route path="Farmer-register" element={<FarmerRegister />} />

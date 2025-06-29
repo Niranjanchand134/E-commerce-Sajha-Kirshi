@@ -52,15 +52,12 @@ const Product = () => {
             View All <RightOutlined />
           </Link>
         </div>
-
-<div className="flex justify-center items-center min-h-screen">
-          <div className="w-full md:w-3/4 bg-white rounded-lg ">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:px-60">
           {products && Array.isArray(products) ? (
-           products.map((product) => (
+          products.map((product) => (
             <Link
               key={product.id}
-              to={`/shop-detail/${product.id}`}
+              to={`/shopDetail/${product.id}`}
               className="rounded text-black no-underline transition-shadow duration-300 hover:shadow-md"
             >
               <div className="text-center rounded">
@@ -69,6 +66,7 @@ const Product = () => {
                     product.imagePaths || "/assets/BuyersImg/Products/Onion.png"
                   } // Fallback image if product.image doesn't exist
                   alt={product.name}
+                  className="w-full h-[200px] object-cover mx-auto rounded"
                 />
                 <div className="flex justify-between">
                   <div className="p-2">
@@ -95,13 +93,10 @@ const Product = () => {
                 </div>
               </div>
             </Link>
-           ))
+          ))
         ) : (
           <div>No products available</div> // Fallback UI
         )}
-
-        </div>
-        </div>
         </div>
       </div>
     </>

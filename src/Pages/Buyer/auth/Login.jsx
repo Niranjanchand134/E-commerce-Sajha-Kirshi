@@ -257,7 +257,7 @@ const Login = () => {
             </div>
 
             <div className="d-grid gap-2">
-              <button className="btn btn-sm" onSubmit={handleSubmit} style={{ backgroundColor: "#49A760", color: "white" }} type="button">
+              <button className="btn btn-sm" onClick={handleSubmit} style={{ backgroundColor: "#49A760", color: "white" }} type="button">
                 Login
               </button>
               <div className="flex justify-center space-x-4">
