@@ -33,6 +33,7 @@ import ForgetPassword from "./Pages/Buyer/auth/ForgetPassword";
 import VerifyOTP from "./Pages/Buyer/auth/VerifyOTP";
 import ResetPassword from "./Pages/Buyer/auth/ResetPassword";
 import FarmerKYCDetail from "./Pages/Farmer/Parts/FarmerKYCDetails";
+import PaymentMethod from "./Pages/Buyer/Component/PaymentMethod";
 
 
 
@@ -59,6 +60,7 @@ const App = () => {
           <Route path="forgetpassword" element={<ForgetPassword />} />
           <Route path="verifyOTP" element={<VerifyOTP />} />
           <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="Payment" element={< PaymentMethod />} />
         
 
           {/* Farmer page */}

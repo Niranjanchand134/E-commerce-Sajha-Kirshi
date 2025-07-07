@@ -53,55 +53,53 @@ const Product = () => {
           </Link>
         </div>
 
-        {/* <div className="flex justify-center items-center min-h-screen">
+{/* <div className="flex justify-center items-center min-h-screen">
           <div className="w-full md:w-3/4 bg-white rounded-lg "> */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:px-60">
           {products && Array.isArray(products) ? (
-            products.map((product) => (
-              <Link
-                key={product.id}
-                to={`/shopdetail/${product.id}`}
-                className="rounded text-black no-underline transition-shadow duration-300 hover:shadow-md"
-              >
-                <div className="text-center rounded">
-                  <img
-                    src={
-                      product.imagePaths[0] ||
-                      "/assets/BuyersImg/Products/Onion.png"
-                    } // Fallback image if product.image doesn't exist
-                    alt={product.name}
-                  />
-                  <div className="flex justify-between">
-                    <div className="p-2">
-                      <h5>{product.name}</h5>
-                      <p className="text-green-500 text-lg">
-                        Rs {product.price || "00.00"}
+           products.map((product) => (
+            <Link
+              key={product.id}
+              to={`/shopdetail/${product.id}`}
+              className="rounded text-black no-underline transition-shadow duration-300 hover:shadow-md"
+            >
+              <div className="text-center rounded">
+                <img
+                  src={
+                    product.imagePaths[0] || "/assets/BuyersImg/Products/Onion.png"
+                  } // Fallback image if product.image doesn't exist
+                  alt={product.name}
+                  className="w-full h-[200px] object-cover mx-auto rounded"
+                />
+                <div className="flex justify-between">
+                  <div className="p-2">
+                    <h5>{product.name}</h5>
+                    <p className="text-green-500 text-lg">
+                      Rs {product.price || "00.00"}
+                    </p>
+                  </div>
+                  <div className="text-right p-2">
+                    <p className="mt-1 ">
+                      {farmerDetails[product.user.id]?.farmName || "Farm Name"}
+                    </p>
+                    <div className="flex gap-1">
+                      <p className="text-[10px]">
+                        {farmerDetails[product.user.id]?.district || "Location"}
                       </p>
-                    </div>
-                    <div className="text-right p-2">
-                      <p className="mt-1 ">
-                        {farmerDetails[product.user.id]?.farmName ||
-                          "Farm Name"}
+                      <p className="text-[10px]">
+                        {(farmerDetails[product.user.id]?.district &&
+                          farmerDetails[product.user.id]?.municipality) ||
+                          "Location"}
                       </p>
-                      <div className="flex gap-1">
-                        <p className="text-[10px]">
-                          {farmerDetails[product.user.id]?.district ||
-                            "Location"}
-                        </p>
-                        <p className="text-[10px]">
-                          {(farmerDetails[product.user.id]?.district &&
-                            farmerDetails[product.user.id]?.municipality) ||
-                            "Location"}
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </div>
-              </Link>
-            ))
-          ) : (
-            <div>No products available</div> // Fallback UI
-          )}
+              </div>
+            </Link>
+           ))
+        ) : (
+          <div>No products available</div> // Fallback UI
+        )}
         </div>
       </div>
       {/* </div> */}
