@@ -16,6 +16,7 @@ module.exports = {
     "./src/pages/Buyer/auth/ForgetPassword.jsx",
     "./src/pages/Buyer/auth/VerifyOTP.jsx",
     "./src/pages/Buyer/auth/ResetPassword.jsx",
+    "./src/pages/Buyer/Component/PaymentMethod.jsx",
 
     "./src/pages/Farmer/FarmerHomePage.jsx",
     "./src/pages/Farmer/Component/FarmerSidebar.jsx",
