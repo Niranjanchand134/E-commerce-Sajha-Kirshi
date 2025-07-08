@@ -192,7 +192,7 @@ const FarmerDashboard = () => {
               className="rounded text-black no-underline transition-shadow duration-300 hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]"
             >
               <img
-                src={product.imagePaths || "/assets/BuyersImg/Products/Onion.png"} // Fallback image if product.image doesn't exist
+                src={product.imagePaths[0] || "/assets/BuyersImg/Products/Onion.png"} // Fallback image if product.image doesn't exist
                 alt={product.name}
               />
               <div className="flex justify-between">

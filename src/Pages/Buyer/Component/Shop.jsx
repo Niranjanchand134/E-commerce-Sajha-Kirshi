@@ -1,43 +1,83 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 import Footer from "./Footer";
 import Header from "./Header";
-import { Pagination } from 'antd';
-import { NavLink } from 'react-router-dom';
+import { Pagination } from "antd";
+import { NavLink } from "react-router-dom";
+import { getAllProduct } from "../../../services/authService";
+import { getDetailsByUserId } from "../../../services/farmer/farmerApiService";
 
 const Shop = () => {
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [openIndex, setOpenIndex] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1); // ✅ Current page state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [products, setProduct] = useState([]);
+  const [farmerDetails, setFarmerDetails] = useState({});
 
   const handleCategoryChanges = (e) => setCategoryFilter(e.target.value);
   const handleStatusChanges = (e) => setStatusFilter(e.target.value);
-  const toggleCategory = (index) => setOpenIndex(openIndex === index ? null : index);
+  const toggleCategory = (index) =>
+    setOpenIndex(openIndex === index ? null : index);
 
-  const productsPerPage = 9; // ✅ Display 4 products per page
+  const productsPerPage = 9;
 
-  // ✅ Dummy data (you can replace with real products)
-  const allProducts = new Array(12).fill({
-    name: 'Onions',
-    price: 20,
-    location: 'Godawari-5-Lalitpur',
-    image: '/assets/BuyersImg/Products/Onion.png',
+  // Filter products based on search term and filters
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    // Add more filter logic here if needed for category and status
+    return matchesSearch;
   });
 
   const indexOfLast = currentPage * productsPerPage;
   const indexOfFirst = indexOfLast - productsPerPage;
-  const currentProducts = allProducts.slice(indexOfFirst, indexOfLast);
+  const currentProducts = filteredProducts.slice(indexOfFirst, indexOfLast);
 
   const handlePageChange = (page) => setCurrentPage(page);
 
   const categories = [
-    { title: 'Agriculture', subItems: ['Crops', 'Tools', 'Irrigation'] },
-    { title: 'Farming', subItems: ['Animal Husbandry', 'Aquaculture'] },
-    { title: 'Fresh Vegetables', subItems: ['Leafy Greens', 'Root Vegetables'] },
-    { title: 'Harvest', subItems: ['Seasonal', 'Storage'] },
-    { title: 'Organic Food', subItems: ['Certified', 'Non-GMO'] },
+    { title: "Agriculture", subItems: ["Crops", "Tools", "Irrigation"] },
+    { title: "Farming", subItems: ["Animal Husbandry", "Aquaculture"] },
+    {
+      title: "Fresh Vegetables",
+      subItems: ["Leafy Greens", "Root Vegetables"],
+    },
+    { title: "Harvest", subItems: ["Seasonal", "Storage"] },
+    { title: "Organic Food", subItems: ["Certified", "Non-GMO"] },
   ];
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const productResponse = await getAllProduct();
+        console.log("the response of product..", productResponse);
+        setProduct(productResponse);
+
+        // Fetch farmer details for each unique user ID
+        const uniqueUserIds = [
+          ...new Set(productResponse.map((product) => product.user.id)),
+        ];
+        const farmerPromises = uniqueUserIds.map((userId) =>
+          getDetailsByUserId(userId)
+        );
+        const farmerResponses = await Promise.all(farmerPromises);
+        console.log("the farmer details is ", farmerResponses);
+
+        // Create a map of userId -> farmer details
+        const farmerMap = farmerResponses.reduce((acc, farmer) => {
+          acc[farmer.id] = farmer;
+          return acc;
+        }, {});
+        setFarmerDetails(farmerMap);
+      } catch (error) {
+        console.log("Error fetching products:", error);
+      }
+    };
+
+    fetchProduct();
+  }, []);
 
   return (
     <>
@@ -111,14 +151,23 @@ const Shop = () => {
                       className="flex items-center justify-between w-full text-left text-gray-700 font-medium hover:text-green-600"
                     >
                       {cat.title}
-                      <span className={`transform transition-transform ${openIndex === index ? 'rotate-90' : ''}`}>
+                      <span
+                        className={`transform transition-transform ${
+                          openIndex === index ? "rotate-90" : ""
+                        }`}
+                      >
                         ›
                       </span>
                     </button>
                     {openIndex === index && (
                       <ul className=" mt-2 text-sm text-gray-500 space-y-2 text-[16px]">
                         {cat.subItems.map((item, i) => (
-                          <li key={i} className="hover:text-green-600 cursor-pointer">{item}</li>
+                          <li
+                            key={i}
+                            className="hover:text-green-600 cursor-pointer"
+                          >
+                            {item}
+                          </li>
                         ))}
                       </ul>
                     )}
@@ -130,25 +179,52 @@ const Shop = () => {
             {/* Product Grid */}
             <div className="w-full md:w-3/4 bg-white rounded-lg ">
               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {currentProducts.map((product, idx) => (
-                  <NavLink
-                    key={idx}
-                    to={'/Buyer-shopdetail'}
-                    className="rounded text-black no-underline transition-shadow duration-300 hover:shadow-md"
-                  >
-                    <img src={product.image} alt={product.name} />
-                    <div className="flex justify-between">
-                      <div className="p-2">
-                        <h5>{product.name}</h5>
-                        <p className="text-green-500 text-lg">Rs {product.price}.00</p>
+                {currentProducts.length > 0 ? (
+                  currentProducts.map((product) => (
+                    <NavLink
+                      key={product.id}
+                      to={`/shopdetail/${product.id}`}
+                      className="rounded text-black no-underline transition-shadow duration-300 hover:shadow-md"
+                    >
+                      <img
+                        src={
+                          product.imagePaths[0] ||
+                          "/assets/BuyersImg/Products/Onion.png"
+                        }
+                        alt={product.name}
+                      />
+                      <div className="flex justify-between">
+                        <div className="p-2">
+                          <h5>{product.name}</h5>
+                          <p className="text-green-500 text-lg">
+                            Rs {product.price || "00.00"}
+                          </p>
+                        </div>
+                        <div className="text-right p-2">
+                          <p>
+                            {farmerDetails[product.user.id]?.farmName ||
+                              "Farm Name"}
+                          </p>
+                          <div className="flex gap-1">
+                            <p className="text-[10px]">
+                              {farmerDetails[product.user.id]?.district ||
+                                "Location"}
+                            </p>
+                            <p className="text-[10px]">
+                              {(farmerDetails[product.user.id]?.district &&
+                                farmerDetails[product.user.id]?.municipality) ||
+                                "Location"}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-right p-2">
-                        <p>Farm Name</p>
-                        <p>{product.location}</p>
-                      </div>
-                    </div>
-                  </NavLink>
-                ))}
+                    </NavLink>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-8">
+                    <p>No products available</p>
+                  </div>
+                )}
               </div>
 
               {/* Pagination */}
@@ -156,7 +232,7 @@ const Shop = () => {
                 <Pagination
                   current={currentPage}
                   onChange={handlePageChange}
-                  total={allProducts.length}
+                  total={filteredProducts.length}
                   pageSize={productsPerPage}
                   className="custom-pagination"
                 />
