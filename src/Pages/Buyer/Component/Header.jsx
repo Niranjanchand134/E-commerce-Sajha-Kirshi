@@ -1,36 +1,46 @@
-import './style.css';
-import { useNavigate, NavLink } from 'react-router-dom';
-import { UserOutlined, LogoutOutlined, FormOutlined } from '@ant-design/icons';
-import { Dropdown, Menu, Space } from 'antd';
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../Context/AuthContext';
+import "./style.css";
+import { useNavigate, NavLink } from "react-router-dom";
+import { UserOutlined, LogoutOutlined, FormOutlined } from "@ant-design/icons";
+import { Dropdown, Menu, Space } from "antd";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../../Context/AuthContext";
+import { getCartItemCount } from "../../../services/OtherServices/cartService";
 
 
 const Header = () => {
   const navigate = useNavigate();
-  const {user, logout} = useAuth();
+  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchCartCount();
+    }
+  }, [user]);
+
+  const fetchCartCount = async () => {
+    try {
+      const response = await getCartItemCount(user.id);
+      setCartCount(response.data);
+      localStorage.setItem("cartCount", response.data);
+    } catch (error) {
+      console.error("Failed to fetch cart count:", error);
+      setCartCount(0);
+      localStorage.setItem("cartCount", "0");
+    }
+  };
 
   const handleLogoutClick = () => {
     logout();
+    setCartCount(0);
+    localStorage.setItem("cartCount", "0");
     window.location.reload();
   };
 
-  const handlecartClick = () => {
+  const handleCartClick = () => {
     navigate("/addcart");
   };
-
-  useEffect(() => {
-    const count = parseInt(localStorage.getItem("cartCount") || "0");
-    setCartCount(count);
-
-    // Optional: Update on storage change (e.g., if cart changes on another tab)
-    window.addEventListener("storage", () => {
-      setCartCount(parseInt(localStorage.getItem("cartCount") || "0"));
-    });
-  }, []);
 
   const menu = (
     <Menu
@@ -39,13 +49,13 @@ const Header = () => {
           label: "Manage my ad",
           key: "manage my ads",
           icon: <FormOutlined />,
-          onClick: () => navigate('/manageAd'),
+          onClick: () => navigate("/manageAd"),
         },
         {
           label: "Profile",
           key: "profile",
           icon: <UserOutlined />,
-          onClick: () => navigate('/profilePage'),
+          onClick: () => navigate("/profilePage"),
         },
         {
           label: "Logout",
@@ -61,30 +71,28 @@ const Header = () => {
     />
   );
 
- const joinus = {
-  items: [
-    {
-      label: "Farmer Register",
-      key: "seller",
-      onClick: () => navigate("/Farmer-register"),
-    },
-    {
-      label: "Join as a Delivery Partner",
-      key: "delivery",
-      onClick: () => navigate("/Farmerlayout/Farmerdashboard"),
-    },
-  ]
-};
+  const joinus = {
+    items: [
+      {
+        label: "Farmer Register",
+        key: "seller",
+        onClick: () => navigate("/Farmer-register"),
+      },
+      {
+        label: "Join as a Delivery Partner",
+        key: "delivery",
+        onClick: () => navigate("/Farmerlayout/Farmerdashboard"),
+      },
+    ],
+  };
 
-const handleMessageClick = ()=>{
-  navigate("/message");
-}
-
+  const handleMessageClick = () => {
+    navigate("/message");
+  };
 
   return (
     <nav className="sticky top-0 bg-white p-2 shadow-md z-50">
       <div className="max-w-7xl mx-auto flex justify-around items-center">
-        {/* Logo */}
         <div className="w-28">
           <img
             src="/assets/BuyersImg/images/logo.png"
@@ -93,7 +101,6 @@ const handleMessageClick = ()=>{
           />
         </div>
 
-        {/* Hamburger for mobile */}
         <div className="lg:hidden">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -103,7 +110,6 @@ const handleMessageClick = ()=>{
           </button>
         </div>
 
-        {/* Navigation Links */}
         <div
           className={`lg:flex lg:items-center lg:space-x-6 ${
             isMenuOpen ? "block" : "hidden"
@@ -130,15 +136,12 @@ const handleMessageClick = ()=>{
             >
               KYC Form
             </li>
-            {/* <li className="hover:text-black cursor-pointer" onClick={() => navigate('/Buyer-login')}>Login</li>
-            <li className="hover:text-black cursor-pointer" onClick={() => navigate('/Buyer-register')}>SignUp</li> */}
           </ul>
         </div>
 
-        {/* Right Icons */}
         <div className="hidden lg:flex items-center space-x-4 text-xl text-gray-700">
           <i className="fa-solid fa-magnifying-glass hover:text-black cursor-pointer"></i>
-          <div className="relative cursor-pointer" onClick={handlecartClick}>
+          <div className="relative cursor-pointer" onClick={handleCartClick}>
             <i className="fa-solid fa-cart-shopping hover:text-black text-xl"></i>
             {cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">

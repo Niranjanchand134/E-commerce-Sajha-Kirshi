@@ -1,19 +1,25 @@
 import { useParams } from "react-router-dom";
-import { getDetailsByUserId, getProductById } from "../../../services/farmer/farmerApiService";
+import {
+  getDetailsByUserId,
+  getProductById,
+} from "../../../services/farmer/farmerApiService";
 import Footer from "./Footer";
 import Header from "./Header";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserDetailsById } from "../../../services/authService";
+import { useAuth } from "../../../Context/AuthContext";
+import { addToCart } from "../../../services/OtherServices/cartService";
+
 
 const ShopDetail = () => {
   const navigate = useNavigate();
-
+  const { user } = useAuth();
   const { productId } = useParams();
   const scrollRef = useRef(null);
   const [product, setProduct] = useState(null);
   const [farmer, setFarmer] = useState(null);
-  const [UserData, setUserData] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [selectedImage, setSelectedImage] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -23,7 +29,6 @@ const ShopDetail = () => {
     const fetchProductAndFarmer = async () => {
       try {
         setLoading(true);
-        // Fetch product details
         const productData = await getProductById(productId);
         setProduct(productData);
         setSelectedImage(
@@ -33,9 +38,7 @@ const ShopDetail = () => {
         const userDetails = await getUserDetailsById(productData.user.id);
         setUserData(userDetails);
 
-        // Fetch farmer details
         const farmerData = await getDetailsByUserId(productData.user.id);
-        console.log("here is the farmer", farmerData);
         setFarmer(farmerData);
       } catch (err) {
         console.error("Error fetching product or farmer details:", err);
@@ -50,25 +53,22 @@ const ShopDetail = () => {
 
   const getFormatContact = (userData) => {
     if (!userData) {
-      return "66 Broklun Road Golden Street, New York, United States of America"; // Fallback
+      return "66 Broklun Road Golden Street, New York, United States of America";
     }
 
     const { number, email } = userData;
-
-    return [`Number - ${number} \n`, `Email - ${email}`]
-      .filter(Boolean) // Remove null/undefined/empty strings
+    return [`Number - ${number}`, `Email - ${email}`]
+      .filter(Boolean)
       .join(", ");
   };
 
-  // Format the address from farmer data
   const getFormattedAddress = (farmer) => {
     if (!farmer) {
-      return "66 Broklun Road Golden Street, New York, United States of America"; // Fallback
+      return "66 Broklun Road Golden Street, New York, United States of America";
     }
     const { district, municipality, wardNumber, tole } = farmer;
-    // Concatenate available fields, filter out empty ones, and join with commas
     return [tole, wardNumber && `Ward - ${wardNumber}`, municipality, district]
-      .filter(Boolean) // Remove null/undefined/empty strings
+      .filter(Boolean)
       .join(", ");
   };
 
@@ -79,6 +79,41 @@ const ShopDetail = () => {
         behavior: "smooth",
       });
     }
+  };
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      alert("Please log in to add items to cart!");
+      navigate("/Buyer-login");
+      return;
+    }
+
+    try {
+      const cartItem = {
+        userId: user.id,
+        productId: parseInt(productId),
+        productName: product.name,
+        price: product.price,
+        description: product.description,
+        quantity: quantity,
+        imageUrl: selectedImage,
+        farmName: farmer?.farmName || "Unknown Farm",
+        location: getFormattedAddress(farmer),
+      };
+
+      await addToCart(cartItem);
+      alert("Product added to cart!");
+      navigate("/addcart");
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      alert(`Failed to add to cart: ${error.message}`);
+    }
+  };
+
+  const handleBuynowClick = () => {
+    navigate("/buynow", {
+      state: { product, farmer, userData, quantity },
+    });
   };
 
   if (loading) {
@@ -93,26 +128,9 @@ const ShopDetail = () => {
     );
   }
 
-  const handleBuynowClick = () => {
-    navigate("/buynow", {
-      state: { product, farmer, UserData, quantity }, // Pass product, farmer, user, and quantity
-    });
-  };
-
-  const handleAddCartClick = () => {
-    // Get existing count or default to 0
-    const count = parseInt(localStorage.getItem("cartCount") || "0");
-    // Increment and update
-    localStorage.setItem("cartCount", count + 1);
-
-    alert("Product added to cart!");
-    navigate("/addcart");
-  };
-
   return (
     <>
       <Header />
-      {/* Detail part */}
       <div className="flex flex-col md:flex-row justify-center gap-4 mt-8 px-4 md:px-0">
         <div className="w-96 h-105 md:w-80 h-auto md:h-140 object-contain">
           <img
@@ -145,7 +163,7 @@ const ShopDetail = () => {
             <input
               type="number"
               placeholder={` /${product.unitOfMeasurement || "unit"}`}
-              className="w-full sm:w-20 border-2 border-solid border-gray px-2 py-1 "
+              className="w-full sm:w-20 border-2 border-solid border-gray px-2 py-1"
               min={product.minimumOrderQuantity || 1}
               value={quantity}
               onChange={(e) =>
@@ -160,7 +178,7 @@ const ShopDetail = () => {
           </div>
           <div className="flex flex-col sm:flex-row gap-3 mt-4">
             <button
-              onClick={handleAddCartClick}
+              onClick={handleAddToCart}
               className="bg-green-600 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
             >
               Add to cart
@@ -183,7 +201,7 @@ const ShopDetail = () => {
               onClick={() => scroll("left")}
               className="absolute left-0 z-10 bg-transparent text-gray-600 text-xl p-2"
             >
-              &#x276E;
+              ❮
             </button>
 
             <div
@@ -209,13 +227,12 @@ const ShopDetail = () => {
               onClick={() => scroll("right")}
               className="absolute right-0 z-10 bg-transparent text-gray-600 text-xl p-2"
             >
-              &#x276F;
+              ❯
             </button>
           </div>
         </div>
       </div>
 
-      {/* About us part */}
       <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-4 text-white my-8">
         <div className="bg-green-600 rounded w-64 p-4">
           <h4>About</h4>
@@ -226,15 +243,7 @@ const ShopDetail = () => {
         </div>
         <div className="bg-[#C5CE38] rounded w-64 p-4">
           <h4>Contact</h4>
-          <p>{getFormatContact(UserData)}</p>
-          {/* <p>
-            {UserData?.number ||
-              "+1- (246) 333-0079 support@agrios.com Mon - Fri: 7:00 am - 6:00 pm"}
-          </p>
-          <p>
-            {UserData?.email ||
-              "+1- (246) 333-0079 support@agrios.com Mon - Fri: 7:00 am - 6:00 pm"}
-          </p> */}
+          <p>{getFormatContact(userData)}</p>
         </div>
         <div className="bg-[#EEC044] rounded w-64 p-4">
           <h4>Address</h4>
@@ -242,7 +251,6 @@ const ShopDetail = () => {
         </div>
       </div>
 
-      {/* Google Map */}
       <div className="flex justify-center">
         <iframe
           title={`${farmer?.farmName || "Farm"} Location`}
@@ -259,7 +267,6 @@ const ShopDetail = () => {
         ></iframe>
       </div>
 
-      {/* Farmer Detail */}
       <div className="flex flex-col items-center justify-center my-8">
         <div className="w-full max-w-4xl">
           <h3 className="text-xl font-semibold mb-4 text-left ml-6">

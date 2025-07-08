@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { BuyerKycForm } from "../../../services/farmer/BuyerApiService";
+import { BuyerKycForm } from "../../../services/buyer/BuyerApiService";
 import { ErrorMessageToast, SuccesfulMessageToast } from "../../../utils/Tostify.util";
 import Footer from "./Footer";
 import Header from "./Header";
