@@ -213,25 +213,33 @@ export const getCartSummary = async (userId) => {
   }
 };
 
-// 9. Move cart to checkout
-export const moveToCheckout = async (userId) => {
+
+
+export const moveToCheckout = async (userId, productIds) => {
   try {
-    if (!userId || typeof userId !== "number") {
-      throw new Error("Valid userId is required");
+    if (
+      !userId ||
+      typeof userId !== "number" ||
+      !productIds ||
+      !Array.isArray(productIds)
+    ) {
+      throw new Error("Valid userId and productIds are required");
     }
 
-    const response = await axios.post(`${BASE_URL}/checkout/${userId}`);
+    const response = await axios.post(
+      `${BASE_URL}/checkout/${userId}`,
+      productIds
+    );
     return {
       success: true,
       data: response.data,
-      message: "Cart moved to checkout successfully",
+      message: "Items moved to checkout successfully",
     };
   } catch (error) {
     handleApiError(error, "moveToCheckout");
   }
 };
 
-// 10. Mark cart as completed
 export const markAsCompleted = async (userId) => {
   try {
     if (!userId || typeof userId !== "number") {
