@@ -1,122 +1,541 @@
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
-import React, { useState } from "react";
+import { useAuth } from "../../../Context/AuthContext";
+import cartService from "../../../services/OtherServices/cartService";
 
 const PaymentMethod = () => {
   const { state } = useLocation();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { checkoutItems = [] } = state || {};
+
+  // Fallback data
+  const defaultCheckoutItems = [
+    {
+      id: 1,
+      productName: "Mustang ko Apple",
+      price: 999,
+      quantity: 1,
+      imageUrl:
+        "https://www.collinsdictionary.com/images/full/apple_158989157.jpg",
+      farmName: "Pratik Farm",
+      location: "Shadobato, Road, Lalitpur, Nepal",
+    },
+  ];
+
+  const items = checkoutItems.length > 0 ? checkoutItems : defaultCheckoutItems;
+
+  // Delivery information state
+  const [deliveryInfo, setDeliveryInfo] = useState({
+    fullName: user?.name || "",
+    streetAddress: "",
+    wardNumber: "",
+    municipality: "",
+    district: "",
+    landmark: "",
+    phoneNumber: user?.number || "",
+    alternatePhoneNumber: "",
+    email: user?.email || "",
+    deliveryInstructions: "",
+    billingSameAsDelivery: true,
+    billingAddress: {
+      streetAddress: "",
+      wardNumber: "",
+      municipality: "",
+      district: "",
+    },
+  });
   const [selectedMethod, setSelectedMethod] = useState("");
-  const { product, farmer, UserData, quantity } = state || {};
+  const [errors, setErrors] = useState({});
 
-  const productData = product || { name: "Apple", price: 999 };
-  const qty = quantity || 1;
-
-  const itemTotal = productData.price * qty;
+  // Calculate totals
+  const itemTotal = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
   const deliveryFee = 135;
   const total = itemTotal + deliveryFee;
 
+  // Validate delivery information
+  const validateForm = () => {
+    const newErrors = {};
+    if (!deliveryInfo.fullName.trim())
+      newErrors.fullName = "Full name is required";
+    if (!deliveryInfo.streetAddress.trim())
+      newErrors.streetAddress = "Street address is required";
+    if (!deliveryInfo.municipality.trim())
+      newErrors.municipality = "Municipality is required";
+    if (!deliveryInfo.district.trim())
+      newErrors.district = "District is required";
+    if (!deliveryInfo.phoneNumber.trim())
+      newErrors.phoneNumber = "Phone number is required";
+    if (
+      deliveryInfo.phoneNumber.trim() &&
+      !/^\+?\d{10,}$/.test(deliveryInfo.phoneNumber)
+    )
+      newErrors.phoneNumber = "Invalid phone number";
+    if (
+      deliveryInfo.alternatePhoneNumber.trim() &&
+      !/^\+?\d{10,}$/.test(deliveryInfo.alternatePhoneNumber)
+    )
+      newErrors.alternatePhoneNumber = "Invalid alternate phone number";
+    if (deliveryInfo.email.trim() && !/\S+@\S+\.\S+/.test(deliveryInfo.email))
+      newErrors.email = "Invalid email address";
+    if (!selectedMethod)
+      newErrors.paymentMethod = "Please select a payment method";
+    if (!deliveryInfo.billingSameAsDelivery) {
+      if (!deliveryInfo.billingAddress.streetAddress.trim())
+        newErrors.billingStreetAddress = "Billing street address is required";
+      if (!deliveryInfo.billingAddress.municipality.trim())
+        newErrors.billingMunicipality = "Billing municipality is required";
+      if (!deliveryInfo.billingAddress.district.trim())
+        newErrors.billingDistrict = "Billing district is required";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleConfirmOrder = async () => {
+    if (!validateForm()) {
+      alert("Please fill in all required fields correctly.");
+      return;
+    }
+
+    try {
+      // Prepare order data
+      const orderData = {
+        userId: user.id,
+        items: items.map((item) => ({
+          id: item.id,
+          productId: item.productId,
+          productName: item.productName,
+          price: item.price,
+          quantity: item.quantity,
+          farmName: item.farmName,
+          location: item.location,
+        })),
+        deliveryInfo: {
+          ...deliveryInfo,
+          billingAddress: deliveryInfo.billingSameAsDelivery
+            ? {
+                streetAddress: deliveryInfo.streetAddress,
+                wardNumber: deliveryInfo.wardNumber,
+                municipality: deliveryInfo.municipality,
+                district: deliveryInfo.district,
+              }
+            : deliveryInfo.billingAddress,
+        },
+        paymentMethod: selectedMethod,
+        totalAmount: total,
+      };
+
+      // Assuming you have an API to save the order
+      // await cartService.createOrder(orderData);
+
+      // Mark cart as completed
+      await cartService.markAsCompleted(user.id);
+
+      // Redirect to a confirmation page or payment gateway
+      if (selectedMethod === "esewa") {
+        alert("Redirecting to eSewa payment gateway...");
+        // Implement eSewa payment integration here
+      } else {
+        alert("Order confirmed with Cash on Delivery!");
+      }
+      navigate("/order-confirmation", { state: { orderData } });
+    } catch (error) {
+      alert(`Order confirmation failed: ${error.message}`);
+    }
+  };
+
   return (
     <>
-    <Header/>
+      <Header />
       <div className="min-h-screen py-8">
-        <div className="container flex gap-4 px-4">
-        <div className="lg:w-2/3 bg-white p-4">
+        <div className="container flex flex-col lg:flex-row gap-4 px-4">
+        <div className="lg:w-2/3 bg-white p-4 rounded-lg">
+            <h4 className="text-lg font-semibold mb-4">Delivery Information</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium">Full Name</label>
+                <input
+                  type="text"
+                  className="w-full border rounded p-2"
+                  value={deliveryInfo.fullName}
+                  onChange={(e) =>
+                    setDeliveryInfo({
+                      ...deliveryInfo,
+                      fullName: e.target.value,
+                    })
+                  }
+                />
+                {errors.fullName && (
+                  <p className="text-red-500 text-sm">{errors.fullName}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium">
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  className="w-full border rounded p-2"
+                  value={deliveryInfo.phoneNumber}
+                  onChange={(e) =>
+                    setDeliveryInfo({
+                      ...deliveryInfo,
+                      phoneNumber: e.target.value,
+                    })
+                  }
+                />
+                {errors.phoneNumber && (
+                  <p className="text-red-500 text-sm">{errors.phoneNumber}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium">
+                  Alternate Phone Number
+                </label>
+                <input
+                  type="text"
+                  className="w-full border rounded p-2"
+                  value={deliveryInfo.alternatePhoneNumber}
+                  onChange={(e) =>
+                    setDeliveryInfo({
+                      ...deliveryInfo,
+                      alternatePhoneNumber: e.target.value,
+                    })
+                  }
+                />
+                {errors.alternatePhoneNumber && (
+                  <p className="text-red-500 text-sm">
+                    {errors.alternatePhoneNumber}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Email</label>
+                <input
+                  type="email"
+                  className="w-full border rounded p-2"
+                  value={deliveryInfo.email}
+                  onChange={(e) =>
+                    setDeliveryInfo({ ...deliveryInfo, email: e.target.value })
+                  }
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium">
+                  Street Address/Tole
+                </label>
+                <input
+                  type="text"
+                  className="w-full border rounded p-2"
+                  value={deliveryInfo.streetAddress}
+                  onChange={(e) =>
+                    setDeliveryInfo({
+                      ...deliveryInfo,
+                      streetAddress: e.target.value,
+                    })
+                  }
+                />
+                {errors.streetAddress && (
+                  <p className="text-red-500 text-sm">{errors.streetAddress}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Ward Number</label>
+                <input
+                  type="text"
+                  className="w-full border rounded p-2"
+                  value={deliveryInfo.wardNumber}
+                  onChange={(e) =>
+                    setDeliveryInfo({
+                      ...deliveryInfo,
+                      wardNumber: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">
+                  Municipality
+                </label>
+                <input
+                  type="text"
+                  className="w-full border rounded p-2"
+                  value={deliveryInfo.municipality}
+                  onChange={(e) =>
+                    setDeliveryInfo({
+                      ...deliveryInfo,
+                      municipality: e.target.value,
+                    })
+                  }
+                />
+                {errors.municipality && (
+                  <p className="text-red-500 text-sm">{errors.municipality}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium">District</label>
+                <input
+                  type="text"
+                  className="w-full border rounded p-2"
+                  value={deliveryInfo.district}
+                  onChange={(e) =>
+                    setDeliveryInfo({
+                      ...deliveryInfo,
+                      district: e.target.value,
+                    })
+                  }
+                />
+                {errors.district && (
+                  <p className="text-red-500 text-sm">{errors.district}</p>
+                )}
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium">
+                  Landmark (Optional)
+                </label>
+                <input
+                  type="text"
+                  className="w-full border rounded p-2"
+                  value={deliveryInfo.landmark}
+                  onChange={(e) =>
+                    setDeliveryInfo({
+                      ...deliveryInfo,
+                      landmark: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium">
+                  Delivery Instructions (Optional)
+                </label>
+                <textarea
+                  className="w-full border rounded p-2"
+                  value={deliveryInfo.deliveryInstructions}
+                  onChange={(e) =>
+                    setDeliveryInfo({
+                      ...deliveryInfo,
+                      deliveryInstructions: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={deliveryInfo.billingSameAsDelivery}
+                    onChange={(e) =>
+                      setDeliveryInfo({
+                        ...deliveryInfo,
+                        billingSameAsDelivery: e.target.checked,
+                      })
+                    }
+                  />
+                  <span className="ml-2">
+                    Billing address same as delivery address
+                  </span>
+                </label>
+              </div>
+              {!deliveryInfo.billingSameAsDelivery && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium">
+                      Billing Street Address
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full border rounded p-2"
+                      value={deliveryInfo.billingAddress.streetAddress}
+                      onChange={(e) =>
+                        setDeliveryInfo({
+                          ...deliveryInfo,
+                          billingAddress: {
+                            ...deliveryInfo.billingAddress,
+                            streetAddress: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                    {errors.billingStreetAddress && (
+                      <p className="text-red-500 text-sm">
+                        {errors.billingStreetAddress}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium">
+                      Billing Municipality
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full border rounded p-2"
+                      value={deliveryInfo.billingAddress.municipality}
+                      onChange={(e) =>
+                        setDeliveryInfo({
+                          ...deliveryInfo,
+                          billingAddress: {
+                            ...deliveryInfo.billingAddress,
+                            municipality: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                    {errors.billingMunicipality && (
+                      <p className="text-red-500 text-sm">
+                        {errors.billingMunicipality}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium">
+                      Billing District
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full border rounded p-2"
+                      value={deliveryInfo.billingAddress.district}
+                      onChange={(e) =>
+                        setDeliveryInfo({
+                          ...deliveryInfo,
+                          billingAddress: {
+                            ...deliveryInfo.billingAddress,
+                            district: e.target.value,
+                          },
+                        })
+                      }
+                    />
+                    {errors.billingDistrict && (
+                      <p className="text-red-500 text-sm">
+                        {errors.billingDistrict}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
             <h4 className="text-lg font-semibold">Select Payment Method</h4>
 
-            <div className="flex gap-4 mt-4 ">
+            <div className="flex gap-4 mt-4">
                 {/* eSewa Option */}
                 <div className="space-y-1" onClick={() => setSelectedMethod("esewa")}>
-                  <div className="h-32 w-32 p-4 border">
-                      <img src="./assets/BuyersImg/images/esewa.png" alt="esewa img" />
-                  </div>
-                  <div
-                      className={`w-32 rounded text-center cursor-pointer ${
-                      selectedMethod === "esewa"
-                          ? "bg-[#60BC47] text-white"
-                          : "text-black hover:bg-[#60BC47] "
-                      }`}
-                  >
-                      <button className="w-full h-full hover:text-white">eSewa Mobile Wallet</button>
-                  </div>
+                <div className="h-32 w-32 p-4 border">
+                    <img src="./assets/BuyersImg/images/esewa.png" alt="esewa img" />
+                </div>
+                <div
+                    className={`w-32 rounded text-center cursor-pointer ${
+                    selectedMethod === "esewa"
+                        ? "bg-[#60BC47] text-white"
+                        : "text-black hover:bg-[#60BC47] "
+                    }`}
+                >
+                    <button className="w-full h-full hover:text-white">eSewa Mobile Wallet</button>
+                </div>
                 </div>
 
                 {/* Cash on Delivery Option */}
                 <div className="space-y-1" onClick={() => setSelectedMethod("cod")}>
-                  <div className="h-32 w-32 p-4 border">
-                      <img src="./assets/BuyersImg/images/delivery.png" alt="delivery img" />
-                  </div>
-                  <div
-                      className={`w-32 rounded text-center cursor-pointer ${
-                      selectedMethod === "cod"
-                          ? "bg-[#60BC47] text-white"
-                          : "text-black hover:bg-[#60BC47] "
-                      }`}
-                  >
-                      <button className="w-full h-full hover:text-white">Cash on <br />Delivery</button>
-                  </div>
+                <div className="h-32 w-32 p-4 border">
+                    <img src="./assets/BuyersImg/images/delivery.png" alt="delivery img" />
+                </div>
+                <div
+                    className={`w-32 rounded text-center cursor-pointer ${
+                    selectedMethod === "cod"
+                        ? "bg-[#60BC47] text-white"
+                        : "text-black hover:bg-[#60BC47] "
+                    }`}
+                >
+                    <button className="w-full h-full hover:text-white">Cash on <br />Delivery</button>
+                </div>
                 </div>
             </div>
-
-            {/* Conditional Info Display */}
-            <div className="mt-6">
-                {selectedMethod === "esewa" && (
-                <div className="bg-green-100 border-l-4 border-green-600 p-4 rounded">
-                    <h5 className="font-bold text-green-700">eSewa Selected</h5>
-                    <p>eSewa account Pratik.....rai will be charged</p>
-                    <button className="bg-[#60BC47] rounded p-2 w-32 text-white">Pay Now</button>
-                </div>
-                )}
-                {selectedMethod === "cod" && (
-                <div className="bg-yellow-100 border-l-4 border-yellow-600 p-4 rounded">
-                    <h5 className="font-bold text-yellow-700">Cash on Delivery Selected</h5>
-                    <p>You may pay in cash to our courier upon receiving your parcel at the 
-                        doorstep- Before agreeing to receive the parcel, check if your 
-                        delivery status has been updated to 'Out for Delivery'- 
-                        Before receiving, confirm that the airway bill shows that the 
-                        parcel is from Daraz- Before you make payment to the courier, 
-                        confirm your order number, sender information and tracking number on the parcel</p>
-                    <button className="bg-[#60BC47] rounded p-2 w-32 text-white">Confirm  Order</button>
-                </div>
-                )}
-            </div>
-            </div>
-
-          {/* Proceed to Pay */}
-          <div className="lg:w-1/3 bg-white p-4 rounded">
-            <div className="flex justify-between bg-[#FAFAFA] p-2 ">
-              <h5 className="font-semibold mr-4">{productData.name}</h5>
-              <a href="#" className="no-underline text-black text-sm">EDIT</a>
-            </div>
-
-            <h5 className="font-semibold">Order Summary</h5>
-
-            <div className="flex justify-between">
-              <p>
-                Items Total{" "}
-                <span className="text-gray-500">
-                  ({qty} item{qty > 1 ? "s" : ""})
-                </span>
+            {errors.paymentMethod && (
+              <p className="text-red-500 text-sm mt-2">
+                {errors.paymentMethod}
               </p>
-              <h5>Rs. {itemTotal}</h5>
-            </div>
+            )}
 
+            <div className="mt-6">
+              {selectedMethod === "esewa" && (
+                <div className="bg-green-100 border-l-4 border-green-600 p-4 rounded">
+                  <h5 className="font-bold text-green-700">eSewa Selected</h5>
+                  <p>eSewa account {deliveryInfo.fullName} will be charged</p>
+                </div>
+              )}
+              {selectedMethod === "cod" && (
+                <div className="bg-yellow-100 border-l-4 border-yellow-600 p-4 rounded">
+                  <h5 className="font-bold text-yellow-700">
+                    Cash on Delivery Selected
+                  </h5>
+                  <p>
+                    You may pay in cash to our courier upon receiving your
+                    parcel at the doorstep. Before agreeing to receive the
+                    parcel, check if your delivery status has been updated to
+                    'Out for Delivery'. Before receiving, confirm that the
+                    airway bill shows that the parcel is from Sajha Krishi.
+                    Before you make payment to the courier, confirm your order
+                    number, sender information, and tracking number on the
+                    parcel.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Order Summary */}
+          <div className="lg:w-1/3 bg-white p-4 rounded-lg">
+            <div className="flex justify-between bg-[#FAFAFA] p-2 mb-4">
+              <h5 className="font-semibold">Order Summary</h5>
+              <a href="/addcart" className="no-underline text-black text-sm">
+                EDIT
+              </a>
+            </div>
+            {items.map((item) => (
+              <div key={item.id} className="mb-4">
+                <h5 className="font-semibold">{item.productName}</h5>
+                <p className="text-sm text-gray-600">{item.farmName}</p>
+                <div className="flex justify-between">
+                  <p>
+                    Item Total{" "}
+                    <span className="text-gray-500">
+                      ({item.quantity} item{item.quantity > 1 ? "s" : ""})
+                    </span>
+                  </p>
+                  <h5>Rs. {item.price * item.quantity}</h5>
+                </div>
+              </div>
+            ))}
             <div className="flex justify-between">
               <p>Delivery Fee</p>
               <h5>Rs. {deliveryFee}</h5>
             </div>
-
             <hr className="my-2" />
-
             <div className="flex justify-between">
               <div>
                 <p className="font-semibold">Total:</p>
+                <p className="text-sm text-gray-500">All Taxes included</p>
               </div>
               <h5 className="text-red-500 text-lg font-bold">Rs. {total}</h5>
             </div>
+            <button
+              onClick={handleConfirmOrder}
+              className="bg-green-600 p-2 font-semibold text-white w-full rounded hover:bg-green-700 transition mt-4"
+            >
+              Confirm Order
+            </button>
           </div>
         </div>
       </div>
-     <Footer/> 
+      <Footer />
     </>
   );
 };
