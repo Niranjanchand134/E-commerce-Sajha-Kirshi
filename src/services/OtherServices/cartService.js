@@ -213,25 +213,33 @@ export const getCartSummary = async (userId) => {
   }
 };
 
-// 9. Move cart to checkout
-export const moveToCheckout = async (userId) => {
+
+
+export const moveToCheckout = async (userId, productIds) => {
   try {
-    if (!userId || typeof userId !== "number") {
-      throw new Error("Valid userId is required");
+    if (
+      !userId ||
+      typeof userId !== "number" ||
+      !productIds ||
+      !Array.isArray(productIds)
+    ) {
+      throw new Error("Valid userId and productIds are required");
     }
 
-    const response = await axios.post(`${BASE_URL}/checkout/${userId}`);
+    const response = await axios.post(
+      `${BASE_URL}/checkout/${userId}`,
+      productIds
+    );
     return {
       success: true,
       data: response.data,
-      message: "Cart moved to checkout successfully",
+      message: "Items moved to checkout successfully",
     };
   } catch (error) {
     handleApiError(error, "moveToCheckout");
   }
 };
 
-// 10. Mark cart as completed
 export const markAsCompleted = async (userId) => {
   try {
     if (!userId || typeof userId !== "number") {
@@ -428,4 +436,54 @@ export default {
   validateCartItemData,
   retryApiCall,
 };
+
+
+
+export async function createOrder(orderData) {
+  try {
+    const response = await fetch("/api/orders/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData),
+    });
+    if (!response.ok) throw new Error("Failed to create order");
+    return response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export const initiateEsewaPayment = async(orderData)=>{
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/orders/initiate-esewa`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      }
+    );
+    if (!response.ok) throw new Error("Failed to initiate eSewa payment");
+    return response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export const getOrderById = async (orderId) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/orders/${orderId}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    if (!response.ok) throw new Error("Failed to fetch order details");
+    return response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 

@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import { useAuth } from "../../../Context/AuthContext";
-import cartService from "../../../services/OtherServices/cartService";
 
 const Buynow = () => {
   const { state } = useLocation();
@@ -31,15 +30,6 @@ const Buynow = () => {
     return location || "Shadobato, Road, Lalitpur, Near Shadobato Chok";
   };
 
-  const handleProceedClick = async () => {
-    try {
-      await cartService.markAsCompleted(user.id);
-      navigate("/Payment");
-    } catch (error) {
-      alert(`Failed to proceed: ${error.message}`);
-    }
-  };
-
   // Calculate totals
   const itemTotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -47,6 +37,18 @@ const Buynow = () => {
   );
   const deliveryFee = 135;
   const total = itemTotal + deliveryFee;
+
+  const handleProceedClick = () => {
+    // Pass order data to PaymentMethod page
+    navigate("/Payment", {
+      state: {
+        checkoutItems: items,
+        itemTotal,
+        deliveryFee,
+        total,
+      },
+    });
+  };
 
   return (
     <>
