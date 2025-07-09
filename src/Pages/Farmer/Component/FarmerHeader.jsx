@@ -132,9 +132,11 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
         {/* Profile */}
         <div className="flex items-center justify-center my-3 transition-all duration-300 cursor-pointer text-green-500 hover:text-green-500">
           <Dropdown overlay={dropmenu} trigger={["hover"]}>
-            <a onClick={(e) => e.preventDefault()}>
-              <span className="text-base">{user.name}</span>
-              <i className="fa-solid fa-user-circle text-2xl"></i>
+            <a onClick={(e) => e.preventDefault()} className="no-underline">
+              <div className="flex items-center space-x-2 text-green-500">
+                <i className="fa-solid fa-user-circle text-2xl "></i>
+                <span className="text-base ">{user.name}</span>
+              </div>
             </a>
           </Dropdown>
         </div>

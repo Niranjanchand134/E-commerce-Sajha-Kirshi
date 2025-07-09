@@ -23,39 +23,37 @@ const PaymentMethod = () => {
         <div className="lg:w-2/3 bg-white p-4">
             <h4 className="text-lg font-semibold">Select Payment Method</h4>
 
-            <div className="flex gap-4 mt-4">
+            <div className="flex gap-4 mt-4 ">
                 {/* eSewa Option */}
-                <div className="space-y-1">
-                <div className="h-32 w-32 p-4 border">
-                    <img src="./assets/BuyersImg/images/esewa.png" alt="esewa img" />
-                </div>
-                <div
-                    className={`w-32 rounded text-center cursor-pointer ${
-                    selectedMethod === "esewa"
-                        ? "bg-[#60BC47] text-white"
-                        : "text-black hover:bg-[#60BC47] "
-                    }`}
-                    onClick={() => setSelectedMethod("esewa")}
-                >
-                    <button className="w-full h-full hover:text-white">eSewa Mobile Wallet</button>
-                </div>
+                <div className="space-y-1" onClick={() => setSelectedMethod("esewa")}>
+                  <div className="h-32 w-32 p-4 border">
+                      <img src="./assets/BuyersImg/images/esewa.png" alt="esewa img" />
+                  </div>
+                  <div
+                      className={`w-32 rounded text-center cursor-pointer ${
+                      selectedMethod === "esewa"
+                          ? "bg-[#60BC47] text-white"
+                          : "text-black hover:bg-[#60BC47] "
+                      }`}
+                  >
+                      <button className="w-full h-full hover:text-white">eSewa Mobile Wallet</button>
+                  </div>
                 </div>
 
                 {/* Cash on Delivery Option */}
-                <div className="space-y-1">
-                <div className="h-32 w-32 p-4 border">
-                    <img src="./assets/BuyersImg/images/delivery.png" alt="delivery img" />
-                </div>
-                <div
-                    className={`w-32 rounded text-center cursor-pointer ${
-                    selectedMethod === "cod"
-                        ? "bg-[#60BC47] text-white"
-                        : "text-black hover:bg-[#60BC47] "
-                    }`}
-                    onClick={() => setSelectedMethod("cod")}
-                >
-                    <button className="w-full h-full hover:text-white">Cash on <br />Delivery</button>
-                </div>
+                <div className="space-y-1" onClick={() => setSelectedMethod("cod")}>
+                  <div className="h-32 w-32 p-4 border">
+                      <img src="./assets/BuyersImg/images/delivery.png" alt="delivery img" />
+                  </div>
+                  <div
+                      className={`w-32 rounded text-center cursor-pointer ${
+                      selectedMethod === "cod"
+                          ? "bg-[#60BC47] text-white"
+                          : "text-black hover:bg-[#60BC47] "
+                      }`}
+                  >
+                      <button className="w-full h-full hover:text-white">Cash on <br />Delivery</button>
+                  </div>
                 </div>
             </div>
 

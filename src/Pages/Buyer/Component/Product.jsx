@@ -41,7 +41,7 @@ const Product = () => {
   return (
     <>
       <div>
-        <div className="text-center p-4">
+        <div className="text-center p-2">
           <p className="text-[#EEC044]">Recently Added</p>
           <h2 className="font-bold">Products</h2>
         </div>
@@ -53,57 +53,49 @@ const Product = () => {
           </Link>
         </div>
 
-{/* <div className="flex justify-center items-center min-h-screen">
-          <div className="w-full md:w-3/4 bg-white rounded-lg "> */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:px-60">
-          {products && Array.isArray(products) ? (
-           products.map((product) => (
-            <Link
-              key={product.id}
-              to={`/shopdetail/${product.id}`}
-              className="rounded text-black no-underline transition-shadow duration-300 hover:shadow-md"
-            >
-              <div className="text-center rounded">
-                <img
-                  src={
-                    product.imagePaths[0] || "/assets/BuyersImg/Products/Onion.png"
-                  } // Fallback image if product.image doesn't exist
-                  alt={product.name}
-                  className="w-full h-[200px] object-cover mx-auto rounded"
-                />
-                <div className="flex justify-between">
-                  <div className="p-2">
-                    <h5>{product.name}</h5>
-                    <p className="text-green-500 text-lg">
-                      Rs {product.price || "00.00"}
-                    </p>
-                  </div>
-                  <div className="text-right p-2">
-                    <p className="mt-1 ">
-                      {farmerDetails[product.user.id]?.farmName || "Farm Name"}
-                    </p>
-                    <div className="flex gap-1">
-                      <p className="text-[10px]">
-                        {farmerDetails[product.user.id]?.district || "Location"}
-                      </p>
-                      <p className="text-[10px]">
-                        {(farmerDetails[product.user.id]?.district &&
-                          farmerDetails[product.user.id]?.municipality) ||
-                          "Location"}
-                      </p>
+        <div className="w-full mb-12">
+          <div className="max-w-6xl mx-auto px-8 lg:px-32">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
+              {products && Array.isArray(products) ? (
+                products.map((product) => (
+                  <Link
+                    key={product.id}
+                    to={`/shopdetail/${product.id}`}
+                    className="w-full max-w-[320px] bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition duration-300 group no-underline"
+                  >
+                    {/* Image Section */}
+                    <div className="w-full h-48 bg-white flex items-center justify-center p-2">
+                      <img
+                        src={product.imagePaths[0] || "/assets/BuyersImg/Products/Onion.png"}
+                        alt={product.name}
+                        className="max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-           ))
-        ) : (
-          <div>No products available</div> // Fallback UI
-        )}
+
+                    {/* Product Info */}
+                    <div className="p-3 space-y-1">
+                      <h3 className="text-sm font-semibold text-gray-800 leading-tight line-clamp-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-red-500 font-bold text-sm">Rs {product.price || "00.00"}</p>
+                      <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                        <span>{farmerDetails[product.user.id]?.farmName || "Farm Name"}</span>
+                        <span className="text-right">
+                          {(farmerDetails[product.user.id]?.district || "District")},{" "}
+                          {(farmerDetails[product.user.id]?.municipality || "Municipality")}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="col-span-full text-center text-gray-600">No products available</div>
+              )}
+            </div>
+          </div>
         </div>
+
       </div>
-      {/* </div> */}
-      {/* </div> */}
     </>
   );
 };
