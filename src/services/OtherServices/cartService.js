@@ -429,3 +429,53 @@ export default {
   retryApiCall,
 };
 
+
+
+export async function createOrder(orderData) {
+  try {
+    const response = await fetch("/api/orders/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData),
+    });
+    if (!response.ok) throw new Error("Failed to create order");
+    return response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export const initiateEsewaPayment = async(orderData)=>{
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/orders/initiate-esewa`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      }
+    );
+    if (!response.ok) throw new Error("Failed to initiate eSewa payment");
+    return response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
+export const getOrderById = async (orderId) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/orders/${orderId}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    if (!response.ok) throw new Error("Failed to fetch order details");
+    return response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+

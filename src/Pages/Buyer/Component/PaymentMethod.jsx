@@ -1,15 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import { useAuth } from "../../../Context/AuthContext";
-import cartService from "../../../services/OtherServices/cartService";
+import {
+  createOrder,
+  initiateEsewaPayment,
+  markAsCompleted,
+} from "../../../services/OtherServices/cartService";
 
 const PaymentMethod = () => {
   const { state } = useLocation();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { checkoutItems = [] } = state || {};
+  const {
+    checkoutItems = [],
+    itemTotal = 0,
+    deliveryFee = 135,
+    total = 0,
+  } = state || {};
 
   // Fallback data
   const defaultCheckoutItems = [
@@ -42,21 +51,13 @@ const PaymentMethod = () => {
     billingSameAsDelivery: true,
     billingAddress: {
       streetAddress: "",
-      wardNumber: "",
       municipality: "",
       district: "",
     },
   });
   const [selectedMethod, setSelectedMethod] = useState("");
   const [errors, setErrors] = useState({});
-
-  // Calculate totals
-  const itemTotal = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const deliveryFee = 135;
-  const total = itemTotal + deliveryFee;
+  const [isLoading, setIsLoading] = useState(false);
 
   // Validate delivery information
   const validateForm = () => {
@@ -103,18 +104,19 @@ const PaymentMethod = () => {
       return;
     }
 
+    setIsLoading(true);
     try {
       // Prepare order data
       const orderData = {
         userId: user.id,
         items: items.map((item) => ({
-          id: item.id,
-          productId: item.productId,
+          productId: item.productId || item.id,
           productName: item.productName,
           price: item.price,
           quantity: item.quantity,
           farmName: item.farmName,
           location: item.location,
+          imageUrl: item.imageUrl,
         })),
         deliveryInfo: {
           ...deliveryInfo,
@@ -127,26 +129,66 @@ const PaymentMethod = () => {
               }
             : deliveryInfo.billingAddress,
         },
-        paymentMethod: selectedMethod,
-        totalAmount: total,
+        payment: {
+          paymentMethod: selectedMethod.toUpperCase(),
+          paymentStatus: "PENDING",
+          amount: Number(total.toFixed(2)), // Ensure two decimal places
+        },
+        totalAmount: Number(total.toFixed(2)), // Ensure two decimal places
+        orderStatus: "PENDING",
       };
 
-      // Assuming you have an API to save the order
-      // await cartService.createOrder(orderData);
-
-      // Mark cart as completed
-      await cartService.markAsCompleted(user.id);
-
-      // Redirect to a confirmation page or payment gateway
       if (selectedMethod === "esewa") {
-        alert("Redirecting to eSewa payment gateway...");
-        // Implement eSewa payment integration here
+        // Initiate eSewa payment
+        const response = await initiateEsewaPayment(orderData);
+        const paymentRequest = response;
+
+        // Create form to submit to eSewa
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
+
+        const fields = {
+          amount: paymentRequest.amount,
+          tax_amount: paymentRequest.tax_amount,
+          total_amount: paymentRequest.total_amount,
+          transaction_uuid: paymentRequest.transaction_uuid,
+          product_code: paymentRequest.product_code,
+          product_service_charge: paymentRequest.product_service_charge,
+          product_delivery_charge: paymentRequest.product_delivery_charge,
+          success_url: paymentRequest.success_url,
+          failure_url: paymentRequest.failure_url,
+          signed_field_names: paymentRequest.signed_field_names,
+          signature: paymentRequest.signature,
+        };
+
+        for (const [key, value] of Object.entries(fields)) {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = value;
+          form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+        console.log("Submitting eSewa form with fields:", fields); // Debug log
+        form.submit();
       } else {
+        // Save order for Cash on Delivery
+        const response = await createOrder(orderData);
+        await markAsCompleted(user.id);
         alert("Order confirmed with Cash on Delivery!");
+        navigate("/order-confirmation", { state: { orderData: response } });
       }
-      navigate("/order-confirmation", { state: { orderData } });
     } catch (error) {
-      alert(`Order confirmation failed: ${error.message}`);
+      console.error("Order confirmation error:", error);
+      alert(
+        `Order confirmation failed: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -532,13 +574,18 @@ const PaymentMethod = () => {
                 <p className="font-semibold">Total:</p>
                 <p className="text-sm text-gray-500">All Taxes included</p>
               </div>
-              <h5 className="text-red-500 text-lg font-bold">Rs. {total}</h5>
+              <h5 className="text-red-500 text-lg font-bold">
+                Rs. {total.toFixed(2)}
+              </h5>
             </div>
             <button
               onClick={handleConfirmOrder}
-              className="bg-green-600 p-2 font-semibold text-white w-full rounded hover:bg-green-700 transition mt-4"
+              disabled={isLoading}
+              className={`bg-green-600 p-2 font-semibold text-white w-full rounded hover:bg-green-700 transition mt-4 ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
-              Confirm Order
+              {isLoading ? "Processing..." : "Confirm Order"}
             </button>
           </div>
         </div>
