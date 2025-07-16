@@ -182,3 +182,26 @@ export const searchProduct = async (item) => {
     throw error; // rethrow other errors
   }
 };
+
+export const getOrderList = async () =>{
+  const token = localStorage.getItem("token");
+  try{
+    const response = await axios.get(
+      `http://localhost:8080/api/orders/getOrder`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+
+  }
+  catch (error){
+    if (error.response && error.response.status === 404) {
+      return []; // return empty array if not found
+    }
+    throw error; // rethrow other errors
+  }
+}

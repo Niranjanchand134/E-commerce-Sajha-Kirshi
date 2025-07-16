@@ -107,6 +107,8 @@ const PaymentMethod = () => {
 
     setIsLoading(true);
     try {
+
+      console.log("Here is the Items Data at payment", items);
       // Move selected items to checkout
       const productIds = items.map((item) => item.productId || item.id);
       await moveToCheckout(user.id, productIds);
@@ -114,6 +116,7 @@ const PaymentMethod = () => {
       // Prepare order data
       const orderData = {
         userId: user.id,
+        farmerId: items[0].farmerId,
         items: items.map((item) => ({
           productId: item.productId || item.id,
           productName: item.productName,
@@ -142,6 +145,7 @@ const PaymentMethod = () => {
         totalAmount: Number(total.toFixed(2)),
         orderStatus: "PENDING",
       };
+      console.log("order data", orderData); 
 
       if (selectedMethod === "esewa") {
         // Initiate eSewa payment
