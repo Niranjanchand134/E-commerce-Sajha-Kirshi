@@ -134,6 +134,7 @@ const AddCart = () => {
     try {
       setLoading(true);
       const response = await cartService.getCartItems(user.id);
+      console.log("resp", response);
       const groupedItems = response.data.reduce((acc, item) => {
         const farm = item.farmName || "Unknown Farm";
         if (!acc[farm]) acc[farm] = [];

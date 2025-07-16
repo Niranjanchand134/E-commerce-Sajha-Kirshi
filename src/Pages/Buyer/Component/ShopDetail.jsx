@@ -82,6 +82,8 @@ const ShopDetail = () => {
   };
 
   const handleAddToCart = async () => {
+
+    console.log(" to know the farmer id", product);
     if (!user) {
       alert("Please log in to add items to cart!");
       navigate("/Buyer-login");
@@ -91,6 +93,7 @@ const ShopDetail = () => {
     try {
       const cartItem = {
         userId: user.id,
+        farmerId: parseInt(product.user.id),
         productId: parseInt(productId),
         productName: product.name,
         price: product.price,
@@ -100,6 +103,8 @@ const ShopDetail = () => {
         farmName: farmer?.farmName || "Unknown Farm",
         location: getFormattedAddress(farmer),
       };
+    console.log("here is the add to cart data to know the farmer id", cartItem);
+
 
       await addToCart(cartItem);
       alert("Product added to cart!");
