@@ -28,7 +28,7 @@ const FarmerChatbox = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase())
+    user?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Initialize current user
@@ -42,25 +42,33 @@ const FarmerChatbox = () => {
   useEffect(() => {
     const fetchUserRoom = async () => {
       try {
-        const usersRoom = await getChatRoomUserDetails(user.id);
-        if (usersRoom && usersRoom !== "Empty Room." && usersRoom.buyer) {
-          const transformedUser = {
-            id: usersRoom.id,
-            name: usersRoom.buyer.name,
-            buyer: usersRoom.buyer,
-            farmer: usersRoom.farmer,
-            message: usersRoom.lastMessage?.content || "No messages yet",
-            time: usersRoom.lastActivity
-              ? new Date(usersRoom.lastActivity).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "Recently",
-            image: `https://i.pravatar.cc/150?img=${usersRoom.buyer.id}`,
-            messages: usersRoom.messages || [],
-            roomData: usersRoom,
-          };
-          setUsers([transformedUser]);
+        const response = await getChatRoomUserDetails(user.id);
+        console.log("chat room", response);
+
+        if (response && Array.isArray(response)) {
+          const transformedUsers = response
+            .filter((room) => room.buyer) // Filter out rooms without buyers
+            .map((room) => ({
+              id: room.id,
+              name: room.buyer.name,
+              buyer: room.buyer,
+              farmer: room.farmer,
+              message:
+                room.messages?.length > 0
+                  ? room.messages[room.messages.length - 1].content
+                  : "No messages yet",
+              time: room.lastActivity
+                ? new Date(room.lastActivity).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "Recently",
+              image: `https://i.pravatar.cc/150?img=${room.buyer.id}`,
+              messages: room.messages || [],
+              roomData: room,
+            }));
+
+          setUsers(transformedUsers);
         } else {
           setUsers([]);
         }
@@ -87,7 +95,7 @@ const FarmerChatbox = () => {
       {},
       () => {
         setStompClient(client);
-        SuccesfulMessageToast("Connected to chat");
+
       },
       (error) => {
         console.error("WebSocket connection error:", error);
@@ -206,17 +214,20 @@ const FarmerChatbox = () => {
     }
   };
 
-  const handleUserRoom = useCallback(
-    (chatUser) => {
-      // Only update if roomId actually changed
-      if (roomId !== chatUser.id) {
-        setRoomId(chatUser.id);
-        setSelectedUser(chatUser);
-        setMessages([]); // Clear messages when changing rooms
-      }
-    },
-    [roomId]
-  );
+  const handleUserRoom = useCallback((chatUser) => {
+  setRoomId(chatUser.id);
+  setSelectedUser(chatUser);
+  setMessages(chatUser.messages.map(msg => ({
+    sender: msg.sender.id === currentUser?.id ? "You" : msg.sender.name,
+    text: msg.content,
+    time: new Date(msg.timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    senderId: msg.sender.id,
+    receiverId: msg.receiver.id,
+  })));
+}, [currentUser?.id]);
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-white font-sans">
@@ -247,43 +258,49 @@ const FarmerChatbox = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-4 p-4 pt-0">
-          {filteredUsers.map((chatUser, index) => (
-            <div key={chatUser.id || index}>
-              <div
-                className="flex items-start space-x-3 p-2 rounded cursor-pointer hover:bg-gray-100"
-                onClick={() => handleUserRoom(chatUser)}
-                style={{ minWidth: "0" }}
-              >
-                <img
-                  src={chatUser.image}
-                  alt={chatUser.name}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center">
-                    <span
-                      className="font-semibold truncate block max-w-[120px]"
-                      title={chatUser.name}
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map((chatUser, index) => (
+              <div key={chatUser.id || index}>
+                <div
+                  className="flex items-start space-x-3 p-2 rounded cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleUserRoom(chatUser)}
+                  style={{ minWidth: "0" }}
+                >
+                  <img
+                    src={chatUser.image}
+                    alt={chatUser.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <span
+                        className="font-semibold truncate block max-w-[120px]"
+                        title={chatUser.name}
+                      >
+                        {chatUser.name}
+                      </span>
+                      <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
+                        {chatUser.time}
+                      </span>
+                    </div>
+                    <div
+                      className="text-sm text-gray-500 truncate"
+                      title={chatUser.message}
                     >
-                      {chatUser.name}
-                    </span>
-                    <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                      {chatUser.time}
-                    </span>
-                  </div>
-                  <div
-                    className="text-sm text-gray-500 truncate"
-                    title={chatUser.message}
-                  >
-                    {chatUser.message}
+                      {chatUser.message}
+                    </div>
                   </div>
                 </div>
+                {index < filteredUsers.length - 1 && (
+                  <hr className="border-green-700" />
+                )}
               </div>
-              {index < filteredUsers.length - 1 && (
-                <hr className="border-green-700" />
-              )}
+            ))
+          ) : (
+            <div className="text-center text-gray-500 py-4">
+              No chat rooms found
             </div>
-          ))}
+          )}
         </div>
       </div>
 

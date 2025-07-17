@@ -1,6 +1,8 @@
 
 
+import { Client } from "@stomp/stompjs";
 import axios from "axios";
+import SockJS from "sockjs-client";
 
 export const BuyerKycForm = async (form)=>{
 
@@ -27,3 +29,9 @@ export const BuyerKycForm = async (form)=>{
 
     
 }
+
+export const createChatRoom = async (data)=>{
+  const response = await axios.post("http://localhost:8080/api/rooms/createRoom",data);
+  return response.data;
+}
+

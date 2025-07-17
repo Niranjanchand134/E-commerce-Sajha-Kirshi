@@ -205,3 +205,48 @@ export const getOrderList = async () =>{
     throw error; // rethrow other errors
   }
 }
+
+
+export const updateOrder = async (orderId, data) => {
+  try {
+    const response = await axios.patch(
+      `http://localhost:8080/api/orders/updateStatus/${orderId}`,
+      { orderStatus: data.status },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    // Extract error message from backend response if available
+    const errorMessage =
+      error.response?.data || error.message || "Unknown error";
+    throw new Error(`Failed to update order status: ${errorMessage}`);
+  }
+};
+
+export const filterOrders = async (params) => {
+  try {
+    const queryString = Object.keys(params)
+      .map(
+        (key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
+      )
+      .join("&");
+
+    const response = await axios.get(
+      `http://localhost:8080/api/orders/filter?${queryString}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

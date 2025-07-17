@@ -8,8 +8,7 @@ import {
   Descriptions,
 } from "antd";
 import { useEffect, useState } from "react";
-import { getOrderList } from "../../../services/farmer/farmerApiService";
-// import { updateOrder } from "../../../services/farmer/farmerApiService"; // Import updateOrder API
+import { filterOrders, getOrderList, updateOrder } from "../../../services/farmer/farmerApiService";
 
 const { RangePicker } = DatePicker;
 const { Title } = Typography;
@@ -18,10 +17,16 @@ const Farmerorderlist = () => {
   const [orderViewModal, setOrderViewModal] = useState(false);
   const [orderDetails, setOrderDetails] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [filteredOrders, setFilteredOrders] = useState([]); // For filtered data
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchStatus, setSearchStatus] = useState("ALL");
   const [dateRange, setDateRange] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusChangeModal, setStatusChangeModal] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState({
+    orderId: null,
+    newStatus: null,
+  });
+  const [loading, setLoading] = useState(false);
 
   const orderItems = (order) => [
     {
@@ -104,6 +109,57 @@ const Farmerorderlist = () => {
     },
   ];
 
+  const showStatusChangeModal = (orderId, newStatus) => {
+    setPendingStatusChange({ orderId, newStatus });
+    setStatusChangeModal(true);
+  };
+
+  const handleStatusChangeConfirm = async () => {
+    if (!pendingStatusChange.orderId || !pendingStatusChange.newStatus) {
+      setStatusChangeModal(false);
+      return;
+    }
+
+    try {
+      const updatedOrder = await updateOrder(pendingStatusChange.orderId, {
+        status: pendingStatusChange.newStatus,
+      });
+
+      // Update the order details state
+      setOrderDetails((prev) =>
+        prev.map((order) =>
+          order.id === pendingStatusChange.orderId
+            ? { ...order, orderStatus: updatedOrder.orderStatus }
+            : order
+        )
+      );
+
+      // Update the filtered orders state
+      setFilteredOrders((prev) =>
+        prev.map((order) =>
+          order.id === pendingStatusChange.orderId
+            ? { ...order, orderStatus: updatedOrder.orderStatus }
+            : order
+        )
+      );
+
+      // Update selected order if it's the one being changed
+      if (selectedOrder?.id === pendingStatusChange.orderId) {
+        setSelectedOrder({
+          ...selectedOrder,
+          orderStatus: updatedOrder.orderStatus,
+        });
+      }
+
+      setStatusChangeModal(false);
+      setPendingStatusChange({ orderId: null, newStatus: null });
+    } catch (error) {
+      console.error("Failed to update status:", error);
+      alert(`Failed to update order status: ${error.message}`);
+      setStatusChangeModal(false);
+    }
+  };
+
   const columns = [
     {
       title: "ID",
@@ -152,9 +208,11 @@ const Farmerorderlist = () => {
         let color =
           status === "PENDING"
             ? "orange"
-            : status === "COMPLETED"
+            : status === "DELIVERED"
             ? "green"
-            : "red";
+            : status === "CANCELLED"
+            ? "red"
+            : "blue"; // For CONFIRMED, PROCESSING, SHIPPED
         return (
           <Tag color={color} key={status}>
             {status.toUpperCase()}
@@ -169,30 +227,15 @@ const Farmerorderlist = () => {
       render: (_, record) => {
         const statusOptions = [
           { value: "PENDING", label: "Pending" },
-          { value: "APPROVED", label: "Approved" },
+          { value: "CONFIRMED", label: "Confirmed" },
           { value: "PROCESSING", label: "Processing" },
-          { value: "COMPLETED", label: "Completed" },
-          { value: "CANCELED", label: "Canceled", disabled: true },
+          { value: "SHIPPED", label: "Shipped" },
+          { value: "DELIVERED", label: "Delivered" },
+          { value: "CANCELLED", label: "Cancelled" },
         ];
 
-        const handleStatusChange = async (value) => {
-          try {
-            await updateOrder(record.id, { status: value });
-            setOrderDetails((prev) =>
-              prev.map((order) =>
-                order.id === record.id
-                  ? { ...order, orderStatus: value }
-                  : order
-              )
-            );
-            if (selectedOrder?.id === record.id) {
-              setSelectedOrder({ ...selectedOrder, orderStatus: value });
-            }
-            console.log(`Updated status for order ${record.id} to ${value}`);
-          } catch (error) {
-            console.error("Failed to update status:", error);
-            alert("Failed to update order status.");
-          }
+        const handleStatusChange = (value) => {
+          showStatusChangeModal(record.id, value);
         };
 
         return (
@@ -219,6 +262,14 @@ const Farmerorderlist = () => {
           >
             View Details
           </Button>
+          <Button
+            type="primary"
+            onClick={() => showModal(record)}
+            className="view-button"
+            style={{ background: "#1890ff", borderColor: "#1890ff" }}
+          >
+            Message
+          </Button>
         </Space>
       ),
     },
@@ -239,45 +290,51 @@ const Farmerorderlist = () => {
     setSelectedOrder(null);
   };
 
-  const handleSearch = () => {
-    let filtered = orderDetails;
+  // Add this function for filtering
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      let params = {};
 
-    // Filter by status
-    if (searchStatus !== "ALL") {
-      filtered = filtered.filter((order) => order.orderStatus === searchStatus);
+      if (searchStatus !== "ALL") {
+        params.status = searchStatus;
+      }
+
+      if (dateRange) {
+        params.startDate = dayjs(dateRange[0]).startOf("day").toISOString();
+        params.endDate = dayjs(dateRange[1]).endOf("day").toISOString();
+      }
+
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+
+      const response = await filterOrders(params);
+      setFilteredOrders(response);
+      message.success("Orders filtered successfully");
+    } catch (error) {
+      console.error("Error filtering orders:", error);
+      message.error("Failed to filter orders");
+    } finally {
+      setLoading(false);
     }
-
-    // Filter by date range
-    if (dateRange) {
-      const [start, end] = dateRange;
-      filtered = filtered.filter((order) => {
-        const orderDate = new Date(order.createdAt);
-        return (
-          orderDate >= start.startOf("day").toDate() &&
-          orderDate <= end.endOf("day").toDate()
-        );
-      });
-    }
-
-    // Filter by search term (user name or order ID)
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (order) =>
-          order.id.toString().includes(searchTerm) ||
-          order.deliveryInfo?.fullName
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase())
-      );
-    }
-
-    setFilteredOrders(filtered);
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
     setSearchStatus("ALL");
     setDateRange(null);
     setSearchTerm("");
-    setFilteredOrders(orderDetails);
+    try {
+      setLoading(true);
+      const response = await getOrderList();
+      setFilteredOrders(response);
+      message.success("Filters cleared");
+    } catch (error) {
+      console.error("Error clearing filters:", error);
+      message.error("Failed to clear filters");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -286,7 +343,7 @@ const Farmerorderlist = () => {
         console.log("Order response:", response);
         const orders = Array.isArray(response) ? response : [response];
         setOrderDetails(orders);
-        setFilteredOrders(orders); // Initialize filtered orders
+        setFilteredOrders(orders);
       })
       .catch((error) => {
         console.error("Error fetching orders:", error);
@@ -294,6 +351,8 @@ const Farmerorderlist = () => {
         setFilteredOrders([]);
       });
   }, []);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div>
@@ -312,33 +371,31 @@ const Farmerorderlist = () => {
           <Space size={20} style={{ width: "100%" }}>
             <Select
               showSearch
-              defaultValue="ALL"
+              value={searchStatus}
               placeholder="Select Status"
               style={{ width: 180 }}
               onChange={(value) => setSearchStatus(value)}
-              filterOption={(input, option) =>
-                (option?.label ?? "")
-                  .toLowerCase()
-                  .includes(input.toLowerCase())
-              }
               options={[
                 { value: "ALL", label: "All Orders" },
                 { value: "PENDING", label: "Pending" },
-                { value: "APPROVED", label: "Approved" },
+                { value: "CONFIRMED", label: "Confirmed" },
                 { value: "PROCESSING", label: "Processing" },
-                { value: "COMPLETED", label: "Completed" },
-                { value: "CANCELED", label: "Canceled" },
+                { value: "SHIPPED", label: "Shipped" },
+                { value: "DELIVERED", label: "Delivered" },
+                { value: "CANCELLED", label: "Cancelled" },
               ]}
             />
 
             <RangePicker
               style={{ width: 250 }}
+              value={dateRange}
               onChange={(dates) => setDateRange(dates)}
             />
 
             <Input
               placeholder="Search by Order ID or Name"
               style={{ width: 250 }}
+              value={searchTerm}
               allowClear
               onChange={(e) => setSearchTerm(e.target.value)}
               onPressEnter={handleSearch}
@@ -348,11 +405,14 @@ const Farmerorderlist = () => {
               <Button
                 type="primary"
                 onClick={handleSearch}
+                loading={loading}
                 style={{ background: "#1890ff", borderColor: "#1890ff" }}
               >
                 Search
               </Button>
-              <Button onClick={handleClear}>Clear Filters</Button>
+              <Button onClick={handleClear} loading={loading}>
+                Clear Filters
+              </Button>
             </Space>
           </Space>
         </div>
@@ -409,6 +469,27 @@ const Farmerorderlist = () => {
             </div>
           </div>
         </div>
+      </Modal>
+      {/* Status Change Confirmation Modal */}
+      <Modal
+        title="Confirm Status Change"
+        open={statusChangeModal}
+        onOk={handleStatusChangeConfirm}
+        onCancel={() => setStatusChangeModal(false)}
+        okText="Yes, Change Status"
+        cancelText="Cancel"
+        okButtonProps={{
+          style: {
+            backgroundColor: "#1890ff", // Primary color
+            borderColor: "#1890ff",
+            color: "white",
+          },
+        }}
+      >
+        <p>
+          Are you sure you want to change the order status to{" "}
+          {pendingStatusChange.newStatus}?
+        </p>
       </Modal>
     </div>
   );
