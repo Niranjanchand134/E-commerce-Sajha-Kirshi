@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { getUserDetailsById } from "../../../services/authService";
 import { useAuth } from "../../../Context/AuthContext";
 import { addToCart } from "../../../services/OtherServices/cartService";
+import { createChatRoom } from "../../../services/buyer/BuyerApiService";
 
 
 const ShopDetail = () => {
@@ -133,6 +134,23 @@ const ShopDetail = () => {
     );
   }
 
+  const handleChat = async ()=>{
+
+    const roomData = {
+      farmerId: parseInt(product.user.id),
+      buyerId: user.id,
+    };
+    console.log("click on the message button", roomData)
+
+    await createChatRoom(roomData);
+
+    setTimeout(()=>{
+      navigate("/message");
+    }, [1000]);
+    
+
+  }
+
   return (
     <>
       <Header />
@@ -197,7 +215,7 @@ const ShopDetail = () => {
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-3">
             <h5>Chat With the Farmer</h5>
-            <button className="bg-green-500 rounded text-white p-2 text-[16px] w-24">
+            <button onClick={handleChat} className="bg-green-500 rounded text-white p-2 text-[16px] w-24">
               Message
             </button>
           </div>

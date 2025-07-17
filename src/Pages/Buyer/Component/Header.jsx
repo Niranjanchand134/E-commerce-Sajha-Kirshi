@@ -5,6 +5,7 @@ import { Dropdown, Menu, Space } from "antd";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../Context/AuthContext";
 import { getCartItemCount } from "../../../services/OtherServices/cartService";
+import NotificationPopup from "../../../components/NotificationPopup";
 
 
 const Header = () => {
@@ -89,6 +90,9 @@ const Header = () => {
   const handleMessageClick = () => {
     navigate("/message");
   };
+  const handleNotificationClick = ()=>{
+    navigate("/notification");
+  }
 
   return (
     <nav className="sticky top-0 bg-white p-2 shadow-md z-50">
@@ -149,7 +153,8 @@ const Header = () => {
               </span>
             )}
           </div>
-          <i className="fa-solid fa-bell hover:text-black cursor-pointer"></i>
+          {/* <i onClick={handleNotificationClick} className="fa-solid fa-bell hover:text-black cursor-pointer"></i> */}
+          <NotificationPopup />
           <i
             onClick={handleMessageClick}
             className="fa-solid fa-message hover:text-black cursor-pointer"
