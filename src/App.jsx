@@ -36,6 +36,8 @@ import FarmerKYCDetail from "./Pages/Farmer/Parts/FarmerKYCDetails";
 import PaymentMethod from "./Pages/Buyer/Component/PaymentMethod";
 import OrderConfirmation from "./Pages/Buyer/Component/OrderConfirmation";
 import Notifications from "./components/Notifications";
+import SuperAdminLayout from "./Pages/SuperAdmin/pages/SuperAdminLayout";
+import SuperAdminHome from "./Pages/SuperAdmin/pages/SuperAdminHome";
 
 
 
@@ -82,6 +84,11 @@ const App = () => {
               <Route path="Farmerprofile" element={<FarmerProfile />} />
               <Route path="Farmereditproduct" element={<FarmerEditProduct />} />
             </Route>
+          </Route>
+
+          <Route path="/admin" element={<SuperAdminLayout />}>
+            <Route path="" element={<SuperAdminHome />} />
+            {/* <Route path="restaurant" element={<SupperAdminRestaurant />} /> */}
           </Route>
         </Routes>
       </BrowserRouter>
