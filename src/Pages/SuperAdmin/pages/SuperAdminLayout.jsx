@@ -9,11 +9,11 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
-// import ProfileDropdowns from "../../components/ProfileDropdowns";
 import { Content, Header } from "antd/es/layout/layout";
 // import NotificationDropdown from "../../components/NotificationDropdown";
 import Sider from "antd/es/layout/Sider";
 import SidebarMenulist from "../AdminComponent/SidebarMenulist";
+import ProfileDropdowns from "../../../components/ProfileDropdowns";
 
 const SuperAdminLayout = () => {
   const navigate = useNavigate();
@@ -49,7 +49,7 @@ const SuperAdminLayout = () => {
           >
             <div className="flex">
               {/* <img src={FoodOrderingLogo} className="w-20" /> */}
-              <p className="text-gray-800 text-lg font-bold mt-6">BhojXpress</p>
+              <p className="text-gray-800 text-lg font-bold mt-6">SajhaKrishi</p>
             </div>
             <SidebarMenulist />
           </Sider>
@@ -91,10 +91,10 @@ const SuperAdminLayout = () => {
               </Col>
 
               {/* Here i have commented */}
-              {/* <Col span={2}>
+              <Col span={2}>
               
                 <ProfileDropdowns logout={true} />
-              </Col> */}
+              </Col>
             </Row>
           </Header>
 

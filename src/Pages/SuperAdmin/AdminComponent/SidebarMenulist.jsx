@@ -36,16 +36,16 @@ const SidebarMenulist = () => {
         onClick={() => handleMenuClick("restaurant")}
         icon={<ProductOutlined style={{ fontSize: "20px" }} color="#080808" />}
       >
-        Restaurant
+        Farmer Kyc
       </Menu.Item>
-      {/* <Menu.Item
+      <Menu.Item
         key="user"
         className="text-base font-medium"
         onClick={() => handleMenuClick("users")}
         icon={< UsergroupDeleteOutlined  style={{ fontSize: "20px" }} color="#080808" />}
       >
-        Users
-      </Menu.Item> */}
+        Buyer Kyc
+      </Menu.Item>
       
     </Menu>
   );

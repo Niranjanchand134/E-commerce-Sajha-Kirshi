@@ -38,6 +38,8 @@ import OrderConfirmation from "./Pages/Buyer/Component/OrderConfirmation";
 import Notifications from "./components/Notifications";
 import SuperAdminLayout from "./Pages/SuperAdmin/pages/SuperAdminLayout";
 import SuperAdminHome from "./Pages/SuperAdmin/pages/SuperAdminHome";
+import SuperAdminFarmer from "./Pages/SuperAdmin/pages/superAdminFarmer";
+import SuperAdminBuyer from "./Pages/SuperAdmin/pages/SuperAdminBuyer";
 
 
 
@@ -87,8 +89,14 @@ const App = () => {
           </Route>
 
           <Route path="/admin" element={<SuperAdminLayout />}>
-            <Route path="" element={<SuperAdminHome />} />
-            {/* <Route path="restaurant" element={<SupperAdminRestaurant />} /> */}
+            <Route index element={<SuperAdminHome />} />
+            <Route path="farmer-kyc" element={<SuperAdminFarmer />} />
+            <Route
+              path="/admin/farmer-kyc/:id"
+              element={<SuperAdminFarmer />}
+            />
+            <Route path="buyer-kyc" element={<SuperAdminBuyer />} />
+            <Route path="buyer-kyc/:id" element={<SuperAdminBuyer />} />
           </Route>
         </Routes>
       </BrowserRouter>
