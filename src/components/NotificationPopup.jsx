@@ -14,6 +14,8 @@ const NotificationPopup = () => {
 
   // Fetch notifications with useCallback to memoize
   const fetchNotifications = useCallback(async () => {
+    if (!user) return;
+
     try {
       const response = await fetch("http://localhost:8080/api/notifications", {
         headers: {
@@ -27,9 +29,12 @@ const NotificationPopup = () => {
       console.error("Error fetching notifications:", error);
       message.error("Failed to load notifications");
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
+
+    if (!user) return;
+
     // Initial fetch
     fetchNotifications();
 
@@ -69,7 +74,7 @@ const NotificationPopup = () => {
         client.deactivate();
       }
     };
-  }, [user.id, fetchNotifications]);
+  }, [user, fetchNotifications]);
 
   const showDesktopNotification = (notification) => {
     if ("Notification" in window && Notification.permission === "granted") {

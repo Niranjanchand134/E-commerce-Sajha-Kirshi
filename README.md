@@ -30,4 +30,5 @@ If you are developing a production application, we recommend using TypeScript wi
 - npm i @react-oauth/google
 - npm i leaflet
 - npm i react-leaflet
+- npm i lucide-react
 
