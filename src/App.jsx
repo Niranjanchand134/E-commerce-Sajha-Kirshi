@@ -40,6 +40,7 @@ import SuperAdminLayout from "./Pages/SuperAdmin/pages/SuperAdminLayout";
 import SuperAdminHome from "./Pages/SuperAdmin/pages/SuperAdminHome";
 import SuperAdminFarmer from "./Pages/SuperAdmin/pages/superAdminFarmer";
 import SuperAdminBuyer from "./Pages/SuperAdmin/pages/SuperAdminBuyer";
+import AboutUs from "./Pages/Buyer/Component/AboutUs";
 
 
 
@@ -69,6 +70,7 @@ const App = () => {
           <Route path="Payment" element={<PaymentMethod />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/notification" element={<Notifications />} />
+          <Route path="/aboutUs" element={<AboutUs />} />
 
           {/* Farmer page */}
           <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
