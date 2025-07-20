@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import { useAuth } from "../../../Context/AuthContext";
+import { ErrorMessageToast } from "../../../utils/Tostify.util";
 
 const Buynow = () => {
   const { state } = useLocation();
@@ -16,6 +17,7 @@ const Buynow = () => {
       id: 1,
       productName: "Mustang ko Apple",
       price: 999,
+      discountPrice: 0,
       quantity: 1,
       imageUrl:
         "https://www.collinsdictionary.com/images/full/apple_158989157.jpg",
@@ -31,19 +33,38 @@ const Buynow = () => {
   };
 
   // Calculate totals
+  // Calculate totals
   const itemTotal = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) =>
+      sum +
+      (item.discountPrice
+        ? (item.price * item.quantity * (100 - item.discountPrice)) / 100
+        : item.price * item.quantity),
+    0
+  );
+  const discountAmount = items.reduce(
+    (sum, item) =>
+      sum +
+      (item.discountPrice
+        ? (item.price * item.quantity * item.discountPrice) / 100
+        : 0),
     0
   );
   const deliveryFee = 135;
-  const total = itemTotal + deliveryFee;
+  const total = itemTotal - discountAmount + deliveryFee;
 
   const handleProceedClick = () => {
-    // Pass order data to PaymentMethod page
+    if (!user || !user.id) {
+      ErrorMessageToast("Please log in to proceed with payment!");
+      navigate("/Buyer-login");
+      return;
+    }
+
     navigate("/Payment", {
       state: {
         checkoutItems: items,
         itemTotal,
+        discountAmount,
         deliveryFee,
         total,
       },
@@ -96,10 +117,21 @@ const Buynow = () => {
                   <p className="text-sm text-gray-600">
                     {getFormattedAddress(item.location)}
                   </p>
+                  {item.discountPrice > 0 && (
+                    <p className="text-sm text-green-500">
+                      {item.discountPrice}% off
+                    </p>
+                  )}
                 </div>
                 <div className="col-span-2 flex justify-between items-center">
                   <h5 className="text-green-500 font-semibold">
-                    Rs. {item.price * item.quantity}
+                    Rs.{" "}
+                    {(
+                      (item.price *
+                        item.quantity *
+                        (100 - (item.discountPrice || 0))) /
+                      100
+                    ).toFixed(2)}
                   </h5>
                   <p className="text-sm">Qty: {item.quantity}</p>
                 </div>
@@ -123,12 +155,21 @@ const Buynow = () => {
                   ({items.length} item{items.length > 1 ? "s" : ""})
                 </span>
               </p>
-              <h5>Rs. {itemTotal}</h5>
+              <h5>Rs. {itemTotal.toFixed(2)}</h5>
             </div>
+
+            {discountAmount > 0 && (
+              <div className="flex justify-between items-center mb-2">
+                <p>Discount</p>
+                <h5 className="text-green-500">
+                  -Rs. {discountAmount.toFixed(2)}
+                </h5>
+              </div>
+            )}
 
             <div className="flex justify-between items-center mb-2">
               <p>Delivery Fee</p>
-              <h5>Rs. {deliveryFee}</h5>
+              <h5>Rs. {deliveryFee.toFixed(2)}</h5>
             </div>
 
             <hr className="my-2" />
@@ -138,7 +179,9 @@ const Buynow = () => {
                 <p className="font-semibold">Total:</p>
                 <p className="text-sm text-gray-500">All Taxes included</p>
               </div>
-              <h5 className="text-red-500 text-lg font-bold">Rs. {total}</h5>
+              <h5 className="text-red-500 text-lg font-bold">
+                Rs. {total.toFixed(2)}
+              </h5>
             </div>
 
             <button

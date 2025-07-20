@@ -2,7 +2,7 @@ import { Space, Table, Button, Dropdown, Menu, Modal } from 'antd';
 import { createStyles } from "antd-style";
 import { FormOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
-import { getAllProduct } from '../../../services/authService';
+import { getAllProduct, getAllProductById } from '../../../services/authService';
 import { categoryChanges, searchProduct, StatusChanges, updateProductById } from '../../../services/farmer/farmerApiService';
 import FarmerEditProduct from '../Function/FarmerEditProduct';
 
@@ -100,7 +100,7 @@ const FarmerProducts = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const productData = await getAllProduct();
+        const productData = await getAllProductById();
         setFilteredData(productData);
         setError(null);
       } catch (err) {

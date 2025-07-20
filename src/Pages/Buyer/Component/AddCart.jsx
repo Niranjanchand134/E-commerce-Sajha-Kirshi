@@ -9,6 +9,8 @@ import Footer from "./Footer";
 import { useAuth } from "../../../Context/AuthContext";
 import cartService from "../../../services/OtherServices/cartService";
 import { useNavigate } from "react-router-dom";
+import { ErrorMessageToast } from "../../../utils/Tostify.util";
+import { getKycByUserId } from "../../../services/buyer/BuyerApiService";
 
 const ProductCard = ({
   item,
@@ -64,6 +66,10 @@ const ProductCard = ({
     }
   };
 
+  const discountedPrice = item.discountPrice
+    ? (item.price * (100 - item.discountPrice)) / 100
+    : item.price;
+
   return (
     <div className="flex items-center space-x-4 border-b pb-4 last:border-b-0">
       <input
@@ -83,10 +89,15 @@ const ProductCard = ({
       <div className="flex-1">
         <h5 className="font-semibold">{item.productName}</h5>
         <p className="text-sm text-gray-500">{item.description}</p>
+        {item.discountPrice > 0 && (
+          <p className="text-sm text-green-500">{item.discountPrice}% off</p>
+        )}
       </div>
       <div className="flex gap-4 items-center">
         <div className="flex flex-col items-center justify-between space-y-2">
-          <div className="text-green-500 font-semibold">Rs. {item.price}</div>
+          <div className="text-green-500 font-semibold">
+            Rs. {(discountedPrice * count).toFixed(2)}
+          </div>
           <div className="flex gap-4 items-center text-gray-500 text-xl">
             <button
               onClick={toggleLike}
@@ -134,7 +145,6 @@ const AddCart = () => {
     try {
       setLoading(true);
       const response = await cartService.getCartItems(user.id);
-      console.log("resp", response);
       const groupedItems = response.data.reduce((acc, item) => {
         const farm = item.farmName || "Unknown Farm";
         if (!acc[farm]) acc[farm] = [];
@@ -203,83 +213,202 @@ const AddCart = () => {
   };
 
   const handleCheckout = async () => {
+    if (!user || !user.id) {
+      ErrorMessageToast("Please log in to proceed to checkout!");
+      navigate("/Buyer-login");
+      return;
+    }
+
     if (selectedItems.length === 0) {
-      alert("Please select at least one item to proceed to checkout.");
+      ErrorMessageToast(
+        "Please select at least one item to proceed to checkout."
+      );
       return;
     }
 
     try {
-      // Filter selected items for checkout
+      const kycData = await getKycByUserId(user.id);
+      if (!kycData || !kycData.id) {
+        ErrorMessageToast("Please fill the KYC form before proceeding.");
+        setError("KYC not found");
+        return;
+      }
+
       const checkoutItems = cartItems
         .flatMap((farm) => farm.items)
-        .filter((item) => selectedItems.includes(item.id));
+        .filter((item) => selectedItems.includes(item.id))
+        .map((item) => ({
+          ...item,
+          discountPrice: item.discountPrice || 0, // Ensure discountPrice is included
+          price: item.discountPrice
+            ? (item.price * (100 - item.discountPrice)) / 100
+            : item.price, // Apply discount to price if needed
+        }));
 
-      // Call moveToCheckout (backend updates status to CHECKOUT)
-      // await cartService.moveToCheckout(user.id);
+      const itemTotal = checkoutItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+      const discountAmount = checkoutItems.reduce(
+        (sum, item) =>
+          sum +
+          (item.discountPrice
+            ? (item.price * item.quantity * item.discountPrice) / 100
+            : 0),
+        0
+      );
+      const deliveryFee = selectedItems.length > 0 ? 135 : 0;
+      const total = itemTotal - discountAmount + deliveryFee;
 
-      // Navigate to Buynow page with selected items
-      navigate("/buynow", { state: { checkoutItems } });
+      const productIds = checkoutItems.map((item) => item.productId || item.id);
+      await cartService.moveToCheckout(user.id, productIds);
+
+      navigate("/buynow", {
+        state: {
+          checkoutItems,
+          itemTotal,
+          discountAmount,
+          deliveryFee,
+          total,
+        },
+      });
     } catch (error) {
-      setError(error.message);
-      alert(`Checkout failed: ${error.message}`);
+      console.error("Checkout error details:", error);
+      if (error.status === 404) {
+        ErrorMessageToast("Please fill the KYC form before proceeding.");
+        setError("KYC not found");
+      } else {
+        const errorMessage =
+          error.message || "An error occurred during checkout.";
+        ErrorMessageToast(errorMessage);
+        setError(errorMessage);
+      }
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!user) return <div>Please log in to view your cart</div>;
+  const selectedCartItems = cartItems
+    .flatMap((farm) => farm.items)
+    .filter((item) => selectedItems.includes(item.id));
+
+  const itemTotal = selectedCartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const discountAmount = selectedCartItems.reduce(
+    (sum, item) =>
+      sum +
+      (item.discountPrice
+        ? (item.price * item.quantity * item.discountPrice) / 100
+        : 0),
+    0
+  );
+  const deliveryFee = selectedItems.length > 0 ? 135 : 0;
+  const total = itemTotal - discountAmount + deliveryFee;
+
+  if (loading) return <div className="text-center p-4">Loading...</div>;
+  if (error)
+    return <div className="text-center p-4 text-red-500">Error: {error}</div>;
+  if (!user)
+    return (
+      <div className="text-center p-4">Please log in to view your cart</div>
+    );
 
   return (
     <>
       <Header />
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <div className="w-full max-w-4xl space-y-10 p-4">
-          {cartItems.map((farm, index) => {
-            const farmItemIds = farm.items.map((item) => item.id);
-            const isFarmSelected = farmItemIds.every((id) =>
-              selectedItems.includes(id)
-            );
+      <div className="flex justify-center items-start min-h-screen bg-gray-50 py-8">
+        <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-6 px-4">
+          <div className="lg:w-2/3 space-y-10">
+            {cartItems.map((farm, index) => {
+              const farmItemIds = farm.items.map((item) => item.id);
+              const isFarmSelected = farmItemIds.every((id) =>
+                selectedItems.includes(id)
+              );
 
-            return (
-              <div key={index}>
-                <div className="flex items-center gap-1 mb-2">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox mb-1"
-                    checked={isFarmSelected}
-                    onChange={() => handleSelectFarm(farm.items)}
-                  />
-                  <h2 className="text-green-600 font-semibold text-lg">
-                    {farm.farm}
-                  </h2>
-                  <MdOutlineKeyboardArrowRight
-                    className="text-gray-400 text-xl mb-1"
-                    size={20}
-                  />
-                </div>
-                <div className="bg-white shadow-md rounded p-4 space-y-4">
-                  {farm.items.map((item) => (
-                    <ProductCard
-                      key={item.id}
-                      item={item}
-                      onUpdate={handleUpdate}
-                      onRemove={handleRemove}
-                      onToggleLike={handleToggleLike}
-                      isSelected={selectedItems.includes(item.id)}
-                      onSelect={handleSelectItem}
+              return (
+                <div key={index}>
+                  <div className="flex items-center gap-1 mb-2">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox mb-1"
+                      checked={isFarmSelected}
+                      onChange={() => handleSelectFarm(farm.items)}
                     />
-                  ))}
+                    <h2 className="text-green-600 font-semibold text-lg">
+                      {farm.farm}
+                    </h2>
+                    <MdOutlineKeyboardArrowRight
+                      className="text-gray-400 text-xl mb-1"
+                      size={20}
+                    />
+                  </div>
+                  <div className="bg-white shadow-md rounded p-4 space-y-4">
+                    {farm.items.map((item) => (
+                      <ProductCard
+                        key={item.id}
+                        item={item}
+                        onUpdate={handleUpdate}
+                        onRemove={handleRemove}
+                        onToggleLike={handleToggleLike}
+                        isSelected={selectedItems.includes(item.id)}
+                        onSelect={handleSelectItem}
+                      />
+                    ))}
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+          <div className="lg:w-1/3 bg-white rounded-lg shadow-sm p-6 sticky top-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Order Summary
+            </h2>
+            <div className="space-y-3 mb-4">
+              <div className="flex justify-between">
+                <span className="text-gray-600">
+                  Items ({selectedItems.length}{" "}
+                  {selectedItems.length === 1 ? "item" : "items"})
+                </span>
+                <span className="font-medium">Rs. {itemTotal.toFixed(2)}</span>
               </div>
-            );
-          })}
-          <button
-            onClick={handleCheckout}
-            className="bg-green-600 text-white px-4 py-2 rounded mt-4"
-            disabled={selectedItems.length === 0}
-          >
-            Proceed to Checkout
-          </button>
+              {discountAmount > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Discount</span>
+                  <span className="font-medium text-green-500">
+                    -Rs. {discountAmount.toFixed(2)}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-gray-600">Delivery Fee</span>
+                <span className="font-medium">
+                  Rs. {deliveryFee.toFixed(2)}
+                </span>
+              </div>
+            </div>
+            <div className="border-t border-gray-200 pt-3 mb-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-semibold text-gray-800">Total</p>
+                  <p className="text-xs text-gray-400">All taxes included</p>
+                </div>
+                <p className="text-lg font-bold text-green-600">
+                  Rs. {total.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleCheckout}
+              className={`w-full bg-green-600 text-white px-4 py-2 rounded mt-4 ${
+                selectedItems.length === 0
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-green-700"
+              }`}
+              disabled={selectedItems.length === 0}
+            >
+              Proceed to Checkout
+            </button>
+          </div>
         </div>
       </div>
       <Footer />

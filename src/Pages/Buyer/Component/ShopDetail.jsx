@@ -10,8 +10,11 @@ import { useNavigate } from "react-router-dom";
 import { getUserDetailsById } from "../../../services/authService";
 import { useAuth } from "../../../Context/AuthContext";
 import { addToCart } from "../../../services/OtherServices/cartService";
-import { createChatRoom } from "../../../services/buyer/BuyerApiService";
-
+import {
+  createChatRoom,
+  getKycByUserId,
+} from "../../../services/buyer/BuyerApiService";
+import { ErrorMessageToast } from "../../../utils/Tostify.util";
 
 const ShopDetail = () => {
   const navigate = useNavigate();
@@ -35,6 +38,7 @@ const ShopDetail = () => {
         setSelectedImage(
           productData.imagePaths[0] || "/assets/BuyersImg/Products/Onion.png"
         );
+        setQuantity(productData.minimumOrderQuantity || 1);
 
         const userDetails = await getUserDetailsById(productData.user.id);
         setUserData(userDetails);
@@ -82,14 +86,35 @@ const ShopDetail = () => {
     }
   };
 
-  const handleAddToCart = async () => {
+  const validateQuantity = () => {
+    if (!product) return false;
+    if (quantity < product.minimumOrderQuantity) {
+      ErrorMessageToast(
+        `Selected quantity must be at least ${product.minimumOrderQuantity} ${
+          product.unitOfMeasurement || "unit"
+        }.`
+      );
+      return false;
+    }
+    if (quantity > product.quantity) {
+      ErrorMessageToast(
+        `Selected quantity exceeds available stock of ${product.quantity} ${
+          product.unitOfMeasurement || "unit"
+        }.`
+      );
+      return false;
+    }
+    return true;
+  };
 
-    console.log(" to know the farmer id", product);
+  const handleAddToCart = async () => {
     if (!user) {
-      alert("Please log in to add items to cart!");
+      ErrorMessageToast("Please log in to add items to cart!");
       navigate("/Buyer-login");
       return;
     }
+
+    if (!validateQuantity()) return;
 
     try {
       const cartItem = {
@@ -98,57 +123,121 @@ const ShopDetail = () => {
         productId: parseInt(productId),
         productName: product.name,
         price: product.price,
+        discountPrice: product.discountPrice || 0, // Include discount percentage
         description: product.description,
         quantity: quantity,
         imageUrl: selectedImage,
         farmName: farmer?.farmName || "Unknown Farm",
         location: getFormattedAddress(farmer),
       };
-    console.log("here is the add to cart data to know the farmer id", cartItem);
-
 
       await addToCart(cartItem);
       alert("Product added to cart!");
       navigate("/addcart");
     } catch (error) {
       console.error("Failed to add to cart:", error);
-      alert(`Failed to add to cart: ${error.message}`);
+      ErrorMessageToast(`Failed to add to cart: ${error.message}`);
+      setError(error.message || "Failed to add to cart");
     }
   };
 
-  const handleBuynowClick = () => {
-    navigate("/buynow", {
-      state: { product, farmer, userData, quantity },
-    });
+  const handleBuynowClick = async () => {
+    if (!user || !user.id) {
+      ErrorMessageToast("Please log in to proceed with Buy Now!");
+      navigate("/Buyer-login");
+      return;
+    }
+
+    if (!product || !product.user || !product.user.id) {
+      ErrorMessageToast("Invalid product or farmer information.");
+      setError("Invalid product data");
+      return;
+    }
+
+    if (!validateQuantity()) return;
+
+    try {
+      const kycData = await getKycByUserId(user.id);
+      if (!kycData || !kycData.id) {
+        ErrorMessageToast("Please fill the KYC form before proceeding.");
+        setError("KYC not found");
+        return;
+      }
+
+      const checkoutItems = [
+        {
+          id: parseInt(productId),
+          farmerId: parseInt(product.user.id),
+          productId: parseInt(productId),
+          productName: product.name,
+          price: product.price,
+          discountPrice: product.discountPrice || 0,
+          quantity: quantity,
+          imageUrl: selectedImage,
+          farmName: farmer?.farmName || "Unknown Farm",
+          location: getFormattedAddress(farmer),
+        },
+      ];
+
+      navigate("/buynow", {
+        state: { checkoutItems },
+      });
+    } catch (error) {
+      console.error("Buy Now error:", error);
+      if (error.status === 404) {
+        ErrorMessageToast("Please fill the KYC form before proceeding.");
+        setError("KYC not found");
+      } else {
+        const errorMessage = error.message || "Failed to proceed to Buy Now.";
+        ErrorMessageToast(errorMessage);
+        setError(errorMessage);
+      }
+    }
+  };
+
+  const handleChat = async () => {
+    if (!user || !user.id) {
+      ErrorMessageToast("Please log in to chat with the farmer!");
+      navigate("/Buyer-login");
+      return;
+    }
+
+    if (!product || !product.user || !product.user.id) {
+      ErrorMessageToast("Invalid product or farmer information.");
+      setError("Invalid product data");
+      return;
+    }
+
+    try {
+      const kycData = await getKycByUserId(user.id);
+      if (!kycData || !kycData.id) {
+        ErrorMessageToast("Please fill the KYC form before proceeding.");
+        setError("KYC not found");
+        return;
+      }
+
+      const roomData = {
+        farmerId: parseInt(product.user.id),
+        buyerId: user.id,
+      };
+      await createChatRoom(roomData);
+
+      navigate("/message");
+    } catch (error) {
+      console.error("Chat initiation error:", error);
+      if (error.status === 404) {
+        ErrorMessageToast("Please fill the KYC form before proceeding.");
+        setError("KYC not found");
+      } else {
+        const errorMessage = error.message || "Failed to initiate chat.";
+        ErrorMessageToast(errorMessage);
+        setError(errorMessage);
+      }
+    }
   };
 
   if (loading) {
     return <div className="text-center p-4">Loading...</div>;
-  }
-
-  if (error || !product) {
-    return (
-      <div className="text-center p-4 text-red-500">
-        {error || "Product not found."}
-      </div>
-    );
-  }
-
-  const handleChat = async ()=>{
-
-    const roomData = {
-      farmerId: parseInt(product.user.id),
-      buyerId: user.id,
-    };
-    console.log("click on the message button", roomData)
-
-    await createChatRoom(roomData);
-
-    setTimeout(()=>{
-      navigate("/message");
-    }, [1000]);
-    
-
   }
 
   return (
@@ -172,11 +261,15 @@ const ShopDetail = () => {
           </div>
           <div className="flex text-green-500 gap-2">
             <h5>Rs. {product.price || "00.00"}</h5>
+            {product.discountPrice > 0 && (
+              <p className="text-sm mt-1 text-green-500">
+                {product.discountPrice}% off
+              </p>
+            )}
             <p className="text-sm mt-1">
               Per {product.unitOfMeasurement || "unit"}
             </p>
           </div>
-
           <hr className="mt-1" />
           <p className="w-full md:w-96 text-sm md:text-base">
             {product.description || "No description available."}
@@ -186,36 +279,69 @@ const ShopDetail = () => {
             <input
               type="number"
               placeholder={` /${product.unitOfMeasurement || "unit"}`}
-              className="w-full sm:w-20 border-2 border-solid border-gray px-2 py-1"
-              min={product.minimumOrderQuantity || 1}
+              className={`w-full sm:w-20 border-2 border-solid ${
+                quantity < product.minimumOrderQuantity ||
+                quantity > product.quantity
+                  ? "border-red-500"
+                  : "border-gray"
+              } px-2 py-1`}
+              min={1}
               value={quantity}
-              onChange={(e) =>
-                setQuantity(
-                  Math.max(
-                    product.minimumOrderQuantity || 1,
-                    parseInt(e.target.value) || 1
-                  )
-                )
-              }
+              onChange={(e) => {
+                const value =
+                  e.target.value === "" ? "" : parseInt(e.target.value);
+                setQuantity(value === "" ? "" : isNaN(value) ? 1 : value);
+              }}
+              onBlur={(e) => {
+                let value = parseInt(e.target.value) || 1;
+                value = Math.max(product.minimumOrderQuantity || 1, value);
+                value = Math.min(product.quantity || Infinity, value);
+                setQuantity(value);
+              }}
             />
+            <p className="text-xs text-gray-600 mt-1">
+              Minimum: {product.minimumOrderQuantity || 1}, Available:{" "}
+              {product.quantity || "N/A"} {product.unitOfMeasurement || "units"}
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 mt-4">
             <button
               onClick={handleAddToCart}
-              className="bg-green-600 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
+              disabled={
+                quantity < product.minimumOrderQuantity ||
+                quantity > product.quantity
+              }
+              className={`bg-green-600 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto ${
+                quantity < product.minimumOrderQuantity ||
+                quantity > product.quantity
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-green-700"
+              }`}
             >
               Add to cart
             </button>
             <button
               onClick={handleBuynowClick}
-              className="bg-[#EEC044] text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
+              disabled={
+                quantity < product.minimumOrderQuantity ||
+                quantity > product.quantity
+              }
+              className={`bg-[#EEC044] text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto ${
+                quantity < product.minimumOrderQuantity ||
+                quantity > product.quantity
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-yellow-600"
+              }`}
             >
               Buy Now
             </button>
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-3">
             <h5>Chat With the Farmer</h5>
-            <button onClick={handleChat} className="bg-green-500 rounded text-white p-2 text-[16px] w-24">
+            <button
+              onClick={handleChat}
+              className="bg-green-500 rounded text-white p-2 text-[16px] w-24"
+            >
               Message
             </button>
           </div>
@@ -226,7 +352,6 @@ const ShopDetail = () => {
             >
               ❮
             </button>
-
             <div
               ref={scrollRef}
               className="flex space-x-4 overflow-x-auto scroll-smooth px-8 no-scrollbar"
@@ -245,7 +370,6 @@ const ShopDetail = () => {
                 </div>
               ))}
             </div>
-
             <button
               onClick={() => scroll("right")}
               className="absolute right-0 z-10 bg-transparent text-gray-600 text-xl p-2"
@@ -255,7 +379,6 @@ const ShopDetail = () => {
           </div>
         </div>
       </div>
-
       <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-4 text-white my-8">
         <div className="bg-green-600 rounded w-64 p-4">
           <h4>About</h4>
@@ -273,23 +396,6 @@ const ShopDetail = () => {
           <p>{getFormattedAddress(farmer)}</p>
         </div>
       </div>
-
-      <div className="flex justify-center">
-        <iframe
-          title={`${farmer?.farmName || "Farm"} Location`}
-          src={
-            farmer?.mapUrl ||
-            "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3533.522068845213!2d85.31823907471563!3d27.670254826203855!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19ce1dace9ed%3A0xfb9c8b305818fb7d!2sKumaripati%2C%20Lalitpur!5e0!3m2!1sen!2snp!4v1747846965367!5m2!1sen!2snp"
-          }
-          width="820"
-          height="450"
-          style={{ border: 0 }}
-          allowFullScreen=""
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        ></iframe>
-      </div>
-
       <div className="flex flex-col items-center justify-center my-8">
         <div className="w-full max-w-4xl">
           <h3 className="text-xl font-semibold mb-4 text-left ml-6">
@@ -318,7 +424,6 @@ const ShopDetail = () => {
           </div>
         </div>
       </div>
-
       <Footer />
     </>
   );
