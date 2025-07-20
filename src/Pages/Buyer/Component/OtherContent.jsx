@@ -45,9 +45,9 @@ const OtherContent = () => {
             <div className="px-6 sm:px-6 md:px-10 lg:px-20 xl:px-60">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[
-                        { name: "Kevin Smith", img: "/assets/BuyersImg/Contentimg/person1.png" },
-                        { name: "Jessica Brown", img: "/assets/BuyersImg/Contentimg/person2.png" },
-                        { name: "David Martin", img: "/assets/BuyersImg/Contentimg/person3.png" }
+                        { name: "Kevin Smith", img: "https://c8.alamy.com/comp/KD0EGE/nepali-farmer-carrying-wheat-kathmandu-valley-nepal-KD0EGE.jpg" },
+                        { name: "Jessica Brown", img: "https://english.onlinekhabar.com/wp-content/uploads/2017/01/isard2.jpg" },
+                        { name: "David Martin", img: "https://i.pinimg.com/736x/2b/90/b7/2b90b75c737128ef4748d41d627c402f.jpg" }
                     ].map((person, idx) => (
                         <div
                             key={idx}
@@ -107,7 +107,7 @@ const OtherContent = () => {
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="text-center rounded w-full md:w-[250px]">
                     <div style={{ width: "100%", height: "150px" }}>
-                        <img src="/assets/BuyersImg/Contentimg/2p.png" alt="Onion" className="w-full h-[126px] object-cover"/>
+                        <img src="https://media.istockphoto.com/id/1350039123/photo/nepalese-plowing-a-field.jpg?s=612x612&w=0&k=20&c=IgpNRS0gY62_SuOCJykkAQ3aKuZ2DpqUtoWRFFeo5_o=" alt="Onion" className="w-full h-[126px] object-cover"/>
                         <div
                             style={{
                             backgroundColor: "#49A760",
@@ -127,7 +127,7 @@ const OtherContent = () => {
                 </div>
                 <div class="text-center rounded w-full md:w-[250px]">
                     <div style={{ width: "100%", height: "150px" }}>
-                        <img src="/assets/BuyersImg/Contentimg/3p.png" alt="Onion" className="w-full h-[126px] object-cover"/>
+                        <img src="https://assets-cdn.kathmandupost.com/uploads/source/news/2023/opinion/leadShutterstock1769145530-1685549421.jpg" alt="Onion" className="w-full h-[126px] object-cover"/>
                         <div
                             style={{
                             backgroundColor: "#49A760",

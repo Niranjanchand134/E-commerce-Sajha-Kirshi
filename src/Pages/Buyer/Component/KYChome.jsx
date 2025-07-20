@@ -45,14 +45,14 @@ const KYChome = () => {
     };
     return(
         <>
-        <Header/>
+        <Header />
         <div className="bg-[#4BAF47] h-64 flex justify-center">
             <div className="p-8 text-white w-full max-w-2xl space-y-4">
                 <h1 className="font-semibold leading-snug">Complete your KYC now & Get extra benefits</h1>
                 <button onClick={handleClick} className="bg-[#EFBE44] p-2 w-32 rounded-full">Fill KYC</button>
             </div>
             <div className="w-80 h-80 mt-8">
-                <img src="./assets/BuyersImg/KYCimg/kyc1.png" alt="kyc image" />
+                <img src="./assets/BuyersImg/KYCimg/kyc1.png" alt="KYC image" />
             </div>
         </div>
         <div className="flex justify-center p-8">
@@ -111,8 +111,7 @@ const KYChome = () => {
             </div>
             <div className="bg-[#4BAF47] h-48 flex justify-center">
                 <div className="p-8 text-white w-full max-w-3xl space-y-4">
-                    <h1 className="font-semibold leading-snug">Just a form away from all the exclusive 
-                        Sajha Krishi services.</h1>
+                    <h1 className="font-semibold leading-snug">Just a form away from all the exclusive Sajha Krishi services.</h1>
                 </div>
                 <div className=" flex items-center text-white text-2xl font-bold">
                     <button onClick={handleClick} className="bg-[#EFBE44] p-2 w-48 rounded-full">Fill KYC</button>
