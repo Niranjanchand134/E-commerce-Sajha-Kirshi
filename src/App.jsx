@@ -41,6 +41,9 @@ import SuperAdminHome from "./Pages/SuperAdmin/pages/SuperAdminHome";
 import SuperAdminFarmer from "./Pages/SuperAdmin/pages/superAdminFarmer";
 import SuperAdminBuyer from "./Pages/SuperAdmin/pages/SuperAdminBuyer";
 import AboutUs from "./Pages/Buyer/Component/AboutUs";
+import AccountPage from "./Pages/Buyer/Component/AccountPage";
+import AccountProfile from "./Pages/Buyer/Component/AccountProfile";
+import BuyerKycDetail from "./Pages/Buyer/Component/BuyerKycDetail";
 
 
 
@@ -71,6 +74,10 @@ const App = () => {
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/notification" element={<Notifications />} />
           <Route path="/aboutUs" element={<AboutUs />} />
+          <Route path="/kycDetails" element={<BuyerKycDetail />} />
+          <Route path="setting" element={<AccountPage />}>
+            <Route path="" element={<AccountProfile />} />
+          </Route>
 
           {/* Farmer page */}
           <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>

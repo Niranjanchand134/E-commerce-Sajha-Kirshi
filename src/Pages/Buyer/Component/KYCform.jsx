@@ -4,17 +4,19 @@ import { ErrorMessageToast, SuccesfulMessageToast } from "../../../utils/Tostify
 import Footer from "./Footer";
 import Header from "./Header";
 import React, { useState } from "react";
+import { useAuth } from "../../../Context/AuthContext";
 
 const KYCform = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
+  const {user} = useAuth();
 
   const navigate = useNavigate();
 
   // Form state
   const [formData, setFormData] = useState({
-    userId: 1, // You'll need to get this from authentication/context
+    userId: user.id, // You'll need to get this from authentication/context
     fullName: "",
     phoneNumber: "",
     email: "",

@@ -6,9 +6,9 @@ import { useAuth } from "../../../Context/AuthContext";
 import {
   createOrder,
   initiateEsewaPayment,
-  markAsCompleted,
   moveToCheckout,
 } from "../../../services/OtherServices/cartService";
+import { ErrorMessageToast } from "../../../utils/Tostify.util";
 
 const PaymentMethod = () => {
   const { state } = useLocation();
@@ -17,6 +17,7 @@ const PaymentMethod = () => {
   const {
     checkoutItems = [],
     itemTotal = 0,
+    discountAmount = 0,
     deliveryFee = 135,
     total = 0,
   } = state || {};
@@ -27,6 +28,7 @@ const PaymentMethod = () => {
       id: 1,
       productName: "Mustang ko Apple",
       price: 999,
+      discountPrice: 0,
       quantity: 1,
       imageUrl:
         "https://www.collinsdictionary.com/images/full/apple_158989157.jpg",
@@ -100,27 +102,30 @@ const PaymentMethod = () => {
   };
 
   const handleConfirmOrder = async () => {
+    if (!user || !user.id) {
+      ErrorMessageToast("Please log in to confirm the order!");
+      navigate("/Buyer-login");
+      return;
+    }
+
     if (!validateForm()) {
-      alert("Please fill in all required fields correctly.");
+      ErrorMessageToast("Please fill in all required fields correctly.");
       return;
     }
 
     setIsLoading(true);
     try {
-
-      console.log("Here is the Items Data at payment", items);
-      // Move selected items to checkout
       const productIds = items.map((item) => item.productId || item.id);
       await moveToCheckout(user.id, productIds);
 
-      // Prepare order data
       const orderData = {
         userId: user.id,
-        farmerId: items[0].farmerId,
+        farmerId: items[0]?.farmerId,
         items: items.map((item) => ({
           productId: item.productId || item.id,
           productName: item.productName,
           price: item.price,
+          discountPrice: item.discountPrice || 0,
           quantity: item.quantity,
           farmName: item.farmName,
           location: item.location,
@@ -142,17 +147,20 @@ const PaymentMethod = () => {
           paymentStatus: "PENDING",
           amount: Number(total.toFixed(2)),
         },
+        itemTotal: Number(itemTotal.toFixed(2)),
+        discountAmount: Number(discountAmount.toFixed(2)),
+        deliveryFee: Number(deliveryFee.toFixed(2)),
         totalAmount: Number(total.toFixed(2)),
         orderStatus: "PENDING",
       };
-      console.log("order data", orderData); 
 
       if (selectedMethod === "esewa") {
-        // Initiate eSewa payment
+        console.log("items", items);
+        
+        console.log("esewa", orderData)
         const response = await initiateEsewaPayment(orderData);
         const paymentRequest = response;
 
-        // Create form to submit to eSewa
         const form = document.createElement("form");
         form.method = "POST";
         form.action = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
@@ -180,18 +188,16 @@ const PaymentMethod = () => {
         }
 
         document.body.appendChild(form);
-        console.log("Submitting eSewa form with fields:", fields);
         form.submit();
       } else {
-        // Save order for Cash on Delivery
         const response = await createOrder(orderData);
-        // await markAsCompleted(user.id);
-        alert("Order confirmed with Cash on Delivery!");
+        await moveToCheckout(user.id, productIds); // Ensure items are marked for checkout
+        ErrorMessageToast("Order confirmed with Cash on Delivery!", "success");
         navigate("/order-confirmation", { state: { orderData: response } });
       }
     } catch (error) {
       console.error("Order confirmation error:", error);
-      alert(
+      ErrorMessageToast(
         `Order confirmation failed: ${
           error.response?.data?.message || error.message
         }`
@@ -220,11 +226,13 @@ const PaymentMethod = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium">
-                      Full Name
+                      Full Name *
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded p-2"
+                      className={`w-full border rounded p-2 ${
+                        errors.fullName ? "border-red-500" : "border-gray-300"
+                      }`}
                       value={deliveryInfo.fullName}
                       onChange={(e) =>
                         setDeliveryInfo({
@@ -239,11 +247,15 @@ const PaymentMethod = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium">
-                      Phone Number
+                      Phone Number *
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded p-2"
+                      className={`w-full border rounded p-2 ${
+                        errors.phoneNumber
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                       value={deliveryInfo.phoneNumber}
                       onChange={(e) =>
                         setDeliveryInfo({
@@ -264,7 +276,11 @@ const PaymentMethod = () => {
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded p-2"
+                      className={`w-full border rounded p-2 ${
+                        errors.alternatePhoneNumber
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                       value={deliveryInfo.alternatePhoneNumber}
                       onChange={(e) =>
                         setDeliveryInfo({
@@ -283,7 +299,9 @@ const PaymentMethod = () => {
                     <label className="block text-sm font-medium">Email</label>
                     <input
                       type="email"
-                      className="w-full border rounded p-2"
+                      className={`w-full border rounded p-2 ${
+                        errors.email ? "border-red-500" : "border-gray-300"
+                      }`}
                       value={deliveryInfo.email}
                       onChange={(e) =>
                         setDeliveryInfo({
@@ -298,11 +316,15 @@ const PaymentMethod = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium">
-                      Street Address/Tole
+                      Street Address/Tole *
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded p-2"
+                      className={`w-full border rounded p-2 ${
+                        errors.streetAddress
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                       value={deliveryInfo.streetAddress}
                       onChange={(e) =>
                         setDeliveryInfo({
@@ -323,7 +345,7 @@ const PaymentMethod = () => {
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded p-2"
+                      className="w-full border rounded p-2 border-gray-300"
                       value={deliveryInfo.wardNumber}
                       onChange={(e) =>
                         setDeliveryInfo({
@@ -335,11 +357,15 @@ const PaymentMethod = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium">
-                      Municipality
+                      Municipality *
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded p-2"
+                      className={`w-full border rounded p-2 ${
+                        errors.municipality
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                       value={deliveryInfo.municipality}
                       onChange={(e) =>
                         setDeliveryInfo({
@@ -356,11 +382,13 @@ const PaymentMethod = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium">
-                      District
+                      District *
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded p-2"
+                      className={`w-full border rounded p-2 ${
+                        errors.district ? "border-red-500" : "border-gray-300"
+                      }`}
                       value={deliveryInfo.district}
                       onChange={(e) =>
                         setDeliveryInfo({
@@ -379,7 +407,7 @@ const PaymentMethod = () => {
                     </label>
                     <input
                       type="text"
-                      className="w-full border rounded p-2"
+                      className="w-full border rounded p-2 border-gray-300"
                       value={deliveryInfo.landmark}
                       onChange={(e) =>
                         setDeliveryInfo({
@@ -394,7 +422,7 @@ const PaymentMethod = () => {
                       Delivery Instructions (Optional)
                     </label>
                     <textarea
-                      className="w-full border rounded p-2"
+                      className="w-full border rounded p-2 border-gray-300"
                       value={deliveryInfo.deliveryInstructions}
                       onChange={(e) =>
                         setDeliveryInfo({
@@ -415,8 +443,9 @@ const PaymentMethod = () => {
                             billingSameAsDelivery: e.target.checked,
                           })
                         }
+                        className="form-checkbox"
                       />
-                      <span className="ml-2">
+                      <span className="ml-2 text-sm">
                         Billing address same as delivery address
                       </span>
                     </label>
@@ -425,11 +454,15 @@ const PaymentMethod = () => {
                     <>
                       <div>
                         <label className="block text-sm font-medium">
-                          Billing Street Address
+                          Billing Street Address *
                         </label>
                         <input
                           type="text"
-                          className="w-full border rounded p-2"
+                          className={`w-full border rounded p-2 ${
+                            errors.billingStreetAddress
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          }`}
                           value={deliveryInfo.billingAddress.streetAddress}
                           onChange={(e) =>
                             setDeliveryInfo({
@@ -449,11 +482,15 @@ const PaymentMethod = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium">
-                          Billing Municipality
+                          Billing Municipality *
                         </label>
                         <input
                           type="text"
-                          className="w-full border rounded p-2"
+                          className={`w-full border rounded p-2 ${
+                            errors.billingMunicipality
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          }`}
                           value={deliveryInfo.billingAddress.municipality}
                           onChange={(e) =>
                             setDeliveryInfo({
@@ -473,11 +510,15 @@ const PaymentMethod = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium">
-                          Billing District
+                          Billing District *
                         </label>
                         <input
                           type="text"
-                          className="w-full border rounded p-2"
+                          className={`w-full border rounded p-2 ${
+                            errors.billingDistrict
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          }`}
                           value={deliveryInfo.billingAddress.district}
                           onChange={(e) =>
                             setDeliveryInfo({
@@ -499,6 +540,7 @@ const PaymentMethod = () => {
                   )}
                 </div>
 
+                {/* Payment Method Selection */}
                 <h4 className="text-lg font-semibold mt-6">
                   Select Payment Method
                 </h4>
@@ -507,7 +549,8 @@ const PaymentMethod = () => {
                     <div className="h-32 w-32 p-4 border">
                       <img
                         src="./assets/BuyersImg/images/esewa.png"
-                        alt="esewa img"
+                        alt="eSewa"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                     <div
@@ -525,7 +568,8 @@ const PaymentMethod = () => {
                     <div className="h-32 w-32 p-4 border">
                       <img
                         src="./assets/BuyersImg/images/delivery.png"
-                        alt="delivery img"
+                        alt="Cash on Delivery"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                     <div
@@ -546,6 +590,7 @@ const PaymentMethod = () => {
                   </p>
                 )}
 
+                {/* Payment Method Confirmation */}
                 <div className="mt-6">
                   {selectedMethod === "esewa" && (
                     <div className="bg-green-100 border-l-4 border-green-600 p-4 rounded">
@@ -620,48 +665,60 @@ const PaymentMethod = () => {
                           "https://www.collinsdictionary.com/images/full/apple_158989157.jpg"
                         }
                         alt={item.productName}
-                        className="w-16 h-16 object-cover rounded-lg mr-3"
+                        className="w-16 h-16 object-cover rounded mr-4"
                       />
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-800">
+                        <h5 className="font-semibold text-sm">
                           {item.productName}
-                        </h4>
-                        <p className="text-xs text-gray-500">{item.farmName}</p>
-                        <div className="flex justify-between mt-1">
-                          <span className="text-sm text-gray-500">
-                            Qty: {item.quantity}
-                          </span>
-                          <span className="font-medium text-green-600">
-                            Rs. {item.price * item.quantity}
-                          </span>
-                        </div>
+                        </h5>
+                        <p className="text-sm text-gray-600">{item.farmName}</p>
+                        <p className="text-sm text-gray-600">{item.location}</p>
+                        {item.discountPrice > 0 && (
+                          <p className="text-sm text-green-500">
+                            {item.discountPrice}% off
+                          </p>
+                        )}
+                        <p className="text-sm text-gray-600">
+                          Qty: {item.quantity}
+                        </p>
+                        <p className="text-sm font-semibold text-green-500">
+                          Rs.{" "}
+                          {(
+                            (item.price *
+                              item.quantity *
+                              (100 - (item.discountPrice || 0))) /
+                            100
+                          ).toFixed(2)}
+                        </p>
                       </div>
                     </div>
                   ))}
                 </div>
 
                 {/* Order Totals */}
-                <div className="space-y-3 mb-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">
-                      Items ({items.length}{" "}
-                      {items.length === 1 ? "item" : "items"})
-                    </span>
-                    <span className="font-medium">Rs. {itemTotal}</span>
+                <div className="border-t border-gray-200 pt-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-gray-600">
+                      Items ({items.length} item{items.length > 1 ? "s" : ""})
+                    </p>
+                    <p className="font-medium">Rs. {itemTotal.toFixed(2)}</p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Delivery Fee</span>
-                    <span className="font-medium">Rs. {deliveryFee}</span>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 pt-3 mb-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold text-gray-800">
-                        Total Amount
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between items-center mb-2">
+                      <p className="text-gray-600">Discount</p>
+                      <p className="font-medium text-green-500">
+                        -Rs. {discountAmount.toFixed(2)}
                       </p>
-                      <p className="text-xs text-gray-400">
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-gray-600">Delivery Fee</p>
+                    <p className="font-medium">Rs. {deliveryFee.toFixed(2)}</p>
+                  </div>
+                  <div className="flex justify-between items-center mt-4">
+                    <div>
+                      <p className="font-semibold text-gray-800">Total</p>
+                      <p className="text-xs text-gray-500">
                         All taxes included
                       </p>
                     </div>
@@ -671,45 +728,18 @@ const PaymentMethod = () => {
                   </div>
                 </div>
 
+                {/* Confirm Order Button */}
                 <button
                   onClick={handleConfirmOrder}
-                  disabled={isLoading}
-                  className={`w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center ${
-                    isLoading ? "opacity-70 cursor-not-allowed" : ""
+                  className={`w-full bg-green-600 text-white px-4 py-2 rounded mt-6 ${
+                    isLoading || !selectedMethod
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-green-700"
                   }`}
+                  disabled={isLoading || !selectedMethod}
                 >
-                  {isLoading ? (
-                    <>
-                      <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Processing...
-                    </>
-                  ) : (
-                    "Confirm Order"
-                  )}
+                  {isLoading ? "Processing..." : "Confirm Order"}
                 </button>
-
-                <div className="mt-4 text-center text-xs text-gray-400">
-                  By placing your order, you agree to our Terms and Conditions
-                </div>
               </div>
             </div>
           </div>

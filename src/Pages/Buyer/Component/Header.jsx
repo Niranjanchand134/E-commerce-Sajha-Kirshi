@@ -6,6 +6,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../Context/AuthContext";
 import { getCartItemCount } from "../../../services/OtherServices/cartService";
 import NotificationPopup from "../../../components/NotificationPopup";
+import { getKycByUserId } from "../../../services/buyer/BuyerApiService";
 
 
 const Header = () => {
@@ -39,6 +40,14 @@ const Header = () => {
     window.location.reload();
   };
 
+  const handleKycClick = async () =>{
+    const response = await getKycByUserId(user.id);
+    if (!response && !response.id){
+      navigate("/kyc")
+    }
+    navigate("/kycDetails");
+  }
+
   const handleCartClick = () => {
     navigate("/addcart");
   };
@@ -56,7 +65,7 @@ const Header = () => {
           label: "Profile",
           key: "profile",
           icon: <UserOutlined />,
-          onClick: () => navigate("/profilePage"),
+          onClick: () => navigate("/setting"),
         },
         {
           label: "Logout",
@@ -126,25 +135,47 @@ const Header = () => {
             >
               Home
             </li>
-            <li
-              className="hover:text-black cursor-pointer"
-              onClick={() => navigate("/aboutUs")}
-            >
-              About
-            </li>
+            {user !== null ? (
+              <></>
+            ) : (
+              <li
+                className="hover:text-black cursor-pointer"
+                onClick={() => navigate("/aboutUs")}
+              >
+                About
+              </li>
+            )}
+
             <li
               className="hover:text-black cursor-pointer"
               onClick={() => navigate("/Buyer-shop")}
             >
               Services
             </li>
-            <li className="hover:text-black cursor-pointer">Contact</li>
-            <li
-              className="hover:text-black cursor-pointer"
-              onClick={() => navigate("/KYC")}
-            >
-              KYC Form
-            </li>
+            {user !== null ? (
+              <></>
+            ) : (
+              <li className="hover:text-black cursor-pointer">Contact</li>
+            )}
+
+            {user !== null ? (
+              <>
+                <li
+                  className="hover:text-black cursor-pointer"
+                  onClick={handleKycClick}
+                >
+                  KYC Form
+                </li>
+                <li
+                  className="hover:text-black cursor-pointer"
+                  
+                >
+                  My Order
+                </li>
+              </>
+            ) : (
+              <></>
+            )}
           </ul>
         </div>
 
