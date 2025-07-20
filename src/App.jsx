@@ -35,6 +35,11 @@ import ResetPassword from "./Pages/Buyer/auth/ResetPassword";
 import FarmerKYCDetail from "./Pages/Farmer/Parts/FarmerKYCDetails";
 import PaymentMethod from "./Pages/Buyer/Component/PaymentMethod";
 import OrderConfirmation from "./Pages/Buyer/Component/OrderConfirmation";
+import Notifications from "./components/Notifications";
+import SuperAdminLayout from "./Pages/SuperAdmin/pages/SuperAdminLayout";
+import SuperAdminHome from "./Pages/SuperAdmin/pages/SuperAdminHome";
+import SuperAdminFarmer from "./Pages/SuperAdmin/pages/superAdminFarmer";
+import SuperAdminBuyer from "./Pages/SuperAdmin/pages/SuperAdminBuyer";
 
 
 
@@ -63,6 +68,7 @@ const App = () => {
           <Route path="reset-password" element={<ResetPassword />} />
           <Route path="Payment" element={<PaymentMethod />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
+          <Route path="/notification" element={<Notifications />} />
 
           {/* Farmer page */}
           <Route element={<ProtectedRoute allowedRoles={["farmer"]} />}>
@@ -80,6 +86,17 @@ const App = () => {
               <Route path="Farmerprofile" element={<FarmerProfile />} />
               <Route path="Farmereditproduct" element={<FarmerEditProduct />} />
             </Route>
+          </Route>
+
+          <Route path="/admin" element={<SuperAdminLayout />}>
+            <Route index element={<SuperAdminHome />} />
+            <Route path="farmer-kyc" element={<SuperAdminFarmer />} />
+            <Route
+              path="/admin/farmer-kyc/:id"
+              element={<SuperAdminFarmer />}
+            />
+            <Route path="buyer-kyc" element={<SuperAdminBuyer />} />
+            <Route path="buyer-kyc/:id" element={<SuperAdminBuyer />} />
           </Route>
         </Routes>
       </BrowserRouter>
