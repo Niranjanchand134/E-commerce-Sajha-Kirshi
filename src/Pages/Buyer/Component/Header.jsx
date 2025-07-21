@@ -47,12 +47,6 @@ const Header = () => {
     <Menu
       items={[
         {
-          label: "Manage my ad",
-          key: "manage my ads",
-          icon: <FormOutlined />,
-          onClick: () => navigate("/manageAd"),
-        },
-        {
           label: "Profile",
           key: "profile",
           icon: <UserOutlined />,
@@ -164,7 +158,7 @@ const Header = () => {
             {user !== null ? (
               <Dropdown overlay={menu} trigger={["hover"]}>
                 <a onClick={(e) => e.preventDefault()}>
-                  <Space>
+                  <Space className="text-green-700">
                     <UserOutlined />
                     {user.name}
                   </Space>
@@ -176,7 +170,7 @@ const Header = () => {
                   <i className="fa fa-user-plus mr-1"></i> SignUp
                 </NavLink>
 
-                <button className="btn btn-outline-success m-1 text-white">
+                <button className="btn btn-outline-success m-1">
                   <Dropdown menu={joinus} trigger={["click"]}>
                     <a
                       onClick={(e) => e.preventDefault()}
