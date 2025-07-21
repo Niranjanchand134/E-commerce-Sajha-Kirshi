@@ -12,7 +12,6 @@ const handleApiError = (error, operation) => {
   console.error(`Error in ${operation}:`, error);
 
   if (error.response) {
-    // Server responded with error status
     const { status, data } = error.response;
     switch (status) {
       case 400:
@@ -25,12 +24,10 @@ const handleApiError = (error, operation) => {
         throw new Error(data.message || `Server error: ${status}`);
     }
   } else if (error.request) {
-    // Network error
     throw new Error(
       "Network error. Please check your connection and try again."
     );
   } else {
-    // Other error
     throw new Error("An unexpected error occurred. Please try again.");
   }
 };
@@ -64,7 +61,14 @@ export const addToCart = async (data) => {
       throw new Error("Quantity must be a positive number");
     }
 
-    const response = await axios.post(`${BASE_URL}/addToCart`, data);
+    if (data.discountPrice && typeof data.discountPrice !== "number") {
+      throw new Error("discountPrice must be a number");
+    }
+
+    const response = await axios.post(`${BASE_URL}/addToCart`, {
+      ...data,
+      discountPrice: data.discountPrice || 0,
+    });
     return {
       success: true,
       data: response.data,
@@ -85,7 +89,10 @@ export const getCartItems = async (userId) => {
     const response = await axios.get(`${BASE_URL}/user/${userId}`);
     return {
       success: true,
-      data: response.data,
+      data: response.data.map((item) => ({
+        ...item,
+        discountPrice: item.discountPrice || 0,
+      })),
       message: "Cart items retrieved successfully",
     };
   } catch (error) {
@@ -101,15 +108,18 @@ export const updateCartItem = async (itemId, data) => {
     }
 
     if (
-      !data.quantity ||
-      typeof data.quantity !== "number" ||
-      data.quantity <= 0
+      data.quantity &&
+      (typeof data.quantity !== "number" || data.quantity <= 0)
     ) {
       throw new Error("Valid quantity is required");
     }
 
     if (data.price && (typeof data.price !== "number" || data.price <= 0)) {
       throw new Error("Price must be a positive number");
+    }
+
+    if (data.discountPrice && typeof data.discountPrice !== "number") {
+      throw new Error("discountPrice must be a number");
     }
 
     const response = await axios.patch(`${BASE_URL}/update/${itemId}`, data);
@@ -213,8 +223,7 @@ export const getCartSummary = async (userId) => {
   }
 };
 
-
-
+// 9. Move to checkout
 export const moveToCheckout = async (userId, productIds) => {
   try {
     if (
@@ -240,6 +249,7 @@ export const moveToCheckout = async (userId, productIds) => {
   }
 };
 
+// 10. Mark as completed
 export const markAsCompleted = async (userId) => {
   try {
     if (!userId || typeof userId !== "number") {
@@ -341,12 +351,22 @@ export const getCartStatistics = async (userId) => {
     const count =
       countResult.status === "fulfilled" ? countResult.value.data : 0;
 
+    const discountAmount = items.reduce(
+      (sum, item) =>
+        sum +
+        (item.discountPrice
+          ? (item.price * item.quantity * item.discountPrice) / 100
+          : 0),
+      0
+    );
+
     return {
       success: true,
       data: {
         items,
         total,
         count,
+        discountAmount,
         uniqueProducts: items.length,
         averagePrice: items.length > 0 ? total / count : 0,
         isEmpty: items.length === 0,
@@ -390,6 +410,10 @@ export const validateCartItemData = (data) => {
     errors.push("Valid quantity is required");
   }
 
+  if (data.discountPrice && typeof data.discountPrice !== "number") {
+    errors.push("discountPrice must be a number");
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -418,6 +442,68 @@ export const retryApiCall = async (
   throw lastError;
 };
 
+// 16. Create order
+export const createOrder = async (orderData) => {
+  try {
+    const response = await fetch("/api/orders/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...orderData,
+        items: orderData.items.map((item) => ({
+          ...item,
+          discountPrice: item.discountPrice || 0,
+        })),
+      }),
+    });
+    if (!response.ok) throw new Error("Failed to create order");
+    return response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+// 17. Initiate eSewa payment
+export const initiateEsewaPayment = async (orderData) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/orders/initiate-esewa`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...orderData,
+          items: orderData.items.map((item) => ({
+            ...item,
+            discountPrice: item.discountPrice || 0,
+          })),
+        }),
+      }
+    );
+    if (!response.ok) throw new Error("Failed to initiate eSewa payment");
+    return response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+// 18. Get order by ID
+export const getOrderById = async (orderId) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/orders/${orderId}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    if (!response.ok) throw new Error("Failed to fetch order details");
+    return response.json();
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 // Export all functions as default object
 export default {
   addToCart,
@@ -435,55 +521,7 @@ export default {
   getCartStatistics,
   validateCartItemData,
   retryApiCall,
+  createOrder,
+  initiateEsewaPayment,
+  getOrderById,
 };
-
-
-
-export async function createOrder(orderData) {
-  try {
-    const response = await fetch("/api/orders/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(orderData),
-    });
-    if (!response.ok) throw new Error("Failed to create order");
-    return response.json();
-  } catch (error) {
-    throw new Error(error.message);
-  }
-}
-
-export const initiateEsewaPayment = async(orderData)=>{
-  try {
-    const response = await fetch(
-      `http://localhost:8080/api/orders/initiate-esewa`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-      }
-    );
-    if (!response.ok) throw new Error("Failed to initiate eSewa payment");
-    return response.json();
-  } catch (error) {
-    throw new Error(error.message);
-  }
-}
-
-export const getOrderById = async (orderId) => {
-  try {
-    const response = await fetch(
-      `http://localhost:8080/api/orders/${orderId}`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-    if (!response.ok) throw new Error("Failed to fetch order details");
-    return response.json();
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-

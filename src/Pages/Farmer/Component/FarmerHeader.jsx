@@ -63,16 +63,7 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
           <i className="fa-solid fa-magnifying-glass mr-2"></i>Search
         </span>
       </Menu.Item>
-      <Menu.Item key="cart">
-        <span>
-          <i className="fa-solid fa-cart-shopping mr-2"></i>Cart
-        </span>
-      </Menu.Item>
-      <Menu.Item key="bell">
-        <span>
-          <i className="fa-solid fa-bell mr-2"></i>Notifications
-        </span>
-      </Menu.Item>
+      
       <Menu.Item key="profile">
         <span>
           <i className="fa-solid fa-user-circle mr-2"></i>
@@ -125,7 +116,6 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
               />
             )}
           </div>
-          <i className="fa-solid fa-cart-shopping hover:text-black cursor-pointer"></i>
           <i className="fa-solid fa-bell hover:text-black cursor-pointer"></i>
         </div>
 
