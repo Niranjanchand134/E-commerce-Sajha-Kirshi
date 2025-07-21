@@ -44,6 +44,7 @@ import AboutUs from "./Pages/Buyer/Component/AboutUs";
 import AccountPage from "./Pages/Buyer/Component/AccountPage";
 import AccountProfile from "./Pages/Buyer/Component/AccountProfile";
 import BuyerKycDetail from "./Pages/Buyer/Component/BuyerKycDetail";
+import Contact from "./Pages/Buyer/Component/contact";
 
 
 
@@ -74,6 +75,7 @@ const App = () => {
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/notification" element={<Notifications />} />
           <Route path="/aboutUs" element={<AboutUs />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/kycDetails" element={<BuyerKycDetail />} />
           <Route path="setting" element={<AccountPage />}>
             <Route path="" element={<AccountProfile />} />

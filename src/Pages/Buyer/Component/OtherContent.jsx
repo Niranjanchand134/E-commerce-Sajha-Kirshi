@@ -4,25 +4,31 @@ const OtherContent = () => {
     return(
         <>
         {/*cart*/}
-        <div className="flex pr-60 pl-60 justify-between gap-4">
-            <div className="text-center">
+        <div className=""> 
+        <div className="absolute z-20 -mt-40 flex pr-60 pl-60 justify-between gap-4">
+            <div className=" text-center">
                 <img src="/assets/BuyersImg/Contentimg/cart1.png" alt="cart" className="object-cover "/>
-                <button className="mt-4 bg-green-500 hover:bg-green-500 text-white font-semibold px-3 py-2 rounded ">
+                <div className="absolute z-40 -mt-20 ml-8">
+                <button className=" bg-green-500 text-white font-semibold px-3 py-2 rounded ">
                     Order Now
                 </button>
+                </div>
             </div>
             <div className="text-center">
                 <img src="/assets/BuyersImg/Contentimg/cart2.png" alt="cart" className="object-cover"/>
-                    <button className="mt-4 bg-green-500 hover:bg-blue-500 text-white font-semibold px-3 py-2 rounded">
+                <div className="absolute z-40 -mt-20 ml-8">
+                    <button className=" bg-green-500 text-white font-semibold px-3 py-2 rounded">
                         Order Now
                     </button>
+                </div>
             </div>
-        </div><br/>
-        <div  className="flex items-center justify-center text-center"
+        </div>
+        
+        <div  className="relative overflow-hidden z-10 mt-44 flex items-center justify-center text-center"
             style={{
                 height: "300px", width:"100%",backgroundSize: "cover", backgroundPosition: "center",
                 backgroundImage:
-                    "url('https://img.freepik.com/premium-photo/variety-vegetables-fruits-sale-market-nicosia-cyprus-closeup-view-with-details_771335-22607.jpg')",
+                    "url('/assets/BuyersImg/images/section-03.png')",
             }}
         >
             <div className="text-white items-center p-4 w-full">
@@ -33,6 +39,7 @@ const OtherContent = () => {
                     Shop Now
                 </button>
             </div>
+        </div>
         </div>
         {/*end cart */}
 

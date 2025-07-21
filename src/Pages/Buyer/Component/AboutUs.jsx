@@ -12,6 +12,9 @@ import {
   Heart,
 } from "lucide-react";
 import { Button, Card } from "antd";
+import Footer from "./Footer";
+import Header from "./Header";
+import { useNavigate } from "react-router-dom";
 
 // Import images
 import heroImage from "../../../assets/image/Hero pic.jpg";
@@ -25,6 +28,15 @@ const AboutUs = () => {
   const visionRef = useRef(null);
   const featuresRef = useRef(null);
   const usersRef = useRef(null);
+  const navigate = useNavigate();
+  
+  const hanglefarmerregister = () => {
+      navigate("/Farmer-register");
+  };
+
+  const hanglebuyerregister = () => {
+      navigate("/Buyer-register");
+  };
 
   useEffect(() => {
     const observerOptions = {
@@ -117,6 +129,8 @@ const AboutUs = () => {
   ];
 
   return (
+    <>
+    <Header/>
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section
@@ -140,16 +154,18 @@ const AboutUs = () => {
             <Button
               type="primary"
               size="large"
-              className="text-lg px-8 py-4 bg-[#16a34a] hover:bg-[#16a34a]  shadow-nature flex items-center"
+              onClick={hanglefarmerregister}
+              className="!bg-[#16a34a] !border-[#16a34a] !text-white hover:!bg-green-600 hover:!border-green-600 hover:!text-white shadow-nature flex items-center text-lg px-8 py-4"
             >
               <Users className="mr-2 h-5 w-5" />
               Register as Farmer
             </Button>
             <Button
               size="large"
-              className="text-lg px-8 py-4 border-[#16a34a] text-[#16a34a] hover:bg-green-500 focus:bg-green-500 hover:text-[#16a34a]-foreground flex items-center"
+              onClick={hanglebuyerregister}
+              className="!bg-transparent !text-[#16a34a] !border-[#16a34a] hover:!bg-green-600 hover:!text-white flex items-center text-lg px-8 py-4"
             >
-              <Building className="mr-2 h-5 w-5 " />
+              <Building className="mr-2 h-5 w-5" />
               Register as Buyer
             </Button>
           </div>
@@ -303,14 +319,14 @@ const AboutUs = () => {
             <Button
               type="primary"
               size="large"
-              className="text-lg px-8 py-4 bg-background text-[#16a34a] hover:bg-green-500! flex items-center"
+              className="!bg-background !text-[#16a34a] !border-[#16a34a] hover:!bg-green-600 hover:!text-white flex items-center text-lg px-8 py-4"
             >
               <Users className="mr-2 h-5 w-5" />
               Get Started as Farmer
             </Button>
             <Button
               size="large"
-              className="text-lg px-8 py-4 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary flex items-center"
+              className="!bg-transparent !text-white !border-white hover:!bg-green-600 hover:!text-white flex items-center text-lg px-8 py-4"
             >
               <Building className="mr-2 h-5 w-5" />
               Start Buying Today
@@ -319,6 +335,8 @@ const AboutUs = () => {
         </div>
       </section>
     </div>
+    <Footer/>
+    </>
   );
 };
 

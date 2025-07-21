@@ -195,15 +195,9 @@ const NotificationPopup = () => {
       overlayStyle={{ padding: 0 }}
     >
       <Badge count={unreadCount} overflowCount={9}>
-        <Avatar
-          icon={<BellOutlined />}
-          style={{
-            cursor: "pointer",
-            backgroundColor: "transparent",
-            color: "#000",
-            fontSize: "18px",
-          }}
-        />
+        <i
+          className="fa-solid fa-bell text-xl text-gray-700 hover:text-black cursor-pointer"
+        ></i>
       </Badge>
     </Popover>
   );
