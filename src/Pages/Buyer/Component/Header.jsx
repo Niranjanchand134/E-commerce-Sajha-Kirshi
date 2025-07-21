@@ -52,6 +52,10 @@ const Header = () => {
     navigate("/addcart");
   };
 
+  const handleMyorderClick = () => {
+    navigate("/Myorderspage");
+  };
+
   const menu = (
     <Menu
       items={[
@@ -93,7 +97,7 @@ const Header = () => {
   const handleMessageClick = () => {
     navigate("/message");
   };
- 
+
 
   return (
     <nav className="sticky top-0 bg-white p-2 shadow-md z-50">
@@ -160,7 +164,7 @@ const Header = () => {
                 </li>
                 <li
                   className="hover:text-black cursor-pointer"
-                  
+                  onClick={handleMyorderClick}
                 >
                   My Order
                 </li>
