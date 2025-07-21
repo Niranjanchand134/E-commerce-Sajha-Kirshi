@@ -149,7 +149,7 @@ const Header = () => {
             {user !== null ? (
               <></>
             ) : (
-              <li className="hover:text-black cursor-pointer">Contact</li>
+              <li className="hover:text-black cursor-pointer" onClick={() => navigate("/contact")}>Contact</li>
             )}
 
             {user !== null ? (
@@ -174,7 +174,6 @@ const Header = () => {
         </div>
 
         <div className="hidden lg:flex items-center space-x-4 text-xl text-gray-700">
-          <i className="fa-solid fa-magnifying-glass hover:text-black cursor-pointer"></i>
           <div className="relative cursor-pointer" onClick={handleCartClick}>
             <i className="fa-solid fa-cart-shopping hover:text-black text-xl"></i>
             {cartCount > 0 && (
@@ -183,8 +182,8 @@ const Header = () => {
               </span>
             )}
           </div>
-          {/* <i onClick={handleNotificationClick} className="fa-solid fa-bell hover:text-black cursor-pointer"></i> */}
-          <NotificationPopup />
+          {/* <i onClick={() => navigate("/NotificationPopup")} className="fa-solid fa-bell hover:text-black cursor-pointer"></i> */}
+          <NotificationPopup/>
           <i
             onClick={handleMessageClick}
             className="fa-solid fa-message hover:text-black cursor-pointer"
