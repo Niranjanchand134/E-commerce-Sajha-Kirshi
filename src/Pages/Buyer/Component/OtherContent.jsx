@@ -4,25 +4,31 @@ const OtherContent = () => {
     return(
         <>
         {/*cart*/}
-        <div className="flex pr-60 pl-60 justify-between gap-4">
-            <div className="text-center">
+        <div className=""> 
+        <div className="absolute z-20 -mt-40 flex pr-60 pl-60 justify-between gap-4">
+            <div className=" text-center">
                 <img src="/assets/BuyersImg/Contentimg/cart1.png" alt="cart" className="object-cover "/>
-                <button className="mt-4 bg-green-500 hover:bg-green-500 text-white font-semibold px-3 py-2 rounded ">
+                <div className="absolute z-40 -mt-20 ml-8">
+                <button className=" bg-green-500 text-white font-semibold px-3 py-2 rounded ">
                     Order Now
                 </button>
+                </div>
             </div>
             <div className="text-center">
                 <img src="/assets/BuyersImg/Contentimg/cart2.png" alt="cart" className="object-cover"/>
-                    <button className="mt-4 bg-green-500 hover:bg-blue-500 text-white font-semibold px-3 py-2 rounded">
+                <div className="absolute z-40 -mt-20 ml-8">
+                    <button className=" bg-green-500 text-white font-semibold px-3 py-2 rounded">
                         Order Now
                     </button>
+                </div>
             </div>
-        </div><br/>
-        <div  className="flex items-center justify-center text-center"
+        </div>
+        
+        <div  className="relative overflow-hidden z-10 mt-44 flex items-center justify-center text-center"
             style={{
                 height: "300px", width:"100%",backgroundSize: "cover", backgroundPosition: "center",
                 backgroundImage:
-                    "url('https://img.freepik.com/premium-photo/variety-vegetables-fruits-sale-market-nicosia-cyprus-closeup-view-with-details_771335-22607.jpg')",
+                    "url('/assets/BuyersImg/images/section-03.png')",
             }}
         >
             <div className="text-white items-center p-4 w-full">
@@ -33,6 +39,7 @@ const OtherContent = () => {
                     Shop Now
                 </button>
             </div>
+        </div>
         </div>
         {/*end cart */}
 
@@ -45,9 +52,9 @@ const OtherContent = () => {
             <div className="px-6 sm:px-6 md:px-10 lg:px-20 xl:px-60">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[
-                        { name: "Kevin Smith", img: "/assets/BuyersImg/Contentimg/person1.png" },
-                        { name: "Jessica Brown", img: "/assets/BuyersImg/Contentimg/person2.png" },
-                        { name: "David Martin", img: "/assets/BuyersImg/Contentimg/person3.png" }
+                        { name: "Kevin Smith", img: "https://c8.alamy.com/comp/KD0EGE/nepali-farmer-carrying-wheat-kathmandu-valley-nepal-KD0EGE.jpg" },
+                        { name: "Jessica Brown", img: "https://english.onlinekhabar.com/wp-content/uploads/2017/01/isard2.jpg" },
+                        { name: "David Martin", img: "https://i.pinimg.com/736x/2b/90/b7/2b90b75c737128ef4748d41d627c402f.jpg" }
                     ].map((person, idx) => (
                         <div
                             key={idx}
@@ -107,7 +114,7 @@ const OtherContent = () => {
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="text-center rounded w-full md:w-[250px]">
                     <div style={{ width: "100%", height: "150px" }}>
-                        <img src="/assets/BuyersImg/Contentimg/2p.png" alt="Onion" className="w-full h-[126px] object-cover"/>
+                        <img src="https://media.istockphoto.com/id/1350039123/photo/nepalese-plowing-a-field.jpg?s=612x612&w=0&k=20&c=IgpNRS0gY62_SuOCJykkAQ3aKuZ2DpqUtoWRFFeo5_o=" alt="Onion" className="w-full h-[126px] object-cover"/>
                         <div
                             style={{
                             backgroundColor: "#49A760",
@@ -127,7 +134,7 @@ const OtherContent = () => {
                 </div>
                 <div class="text-center rounded w-full md:w-[250px]">
                     <div style={{ width: "100%", height: "150px" }}>
-                        <img src="/assets/BuyersImg/Contentimg/3p.png" alt="Onion" className="w-full h-[126px] object-cover"/>
+                        <img src="https://assets-cdn.kathmandupost.com/uploads/source/news/2023/opinion/leadShutterstock1769145530-1685549421.jpg" alt="Onion" className="w-full h-[126px] object-cover"/>
                         <div
                             style={{
                             backgroundColor: "#49A760",

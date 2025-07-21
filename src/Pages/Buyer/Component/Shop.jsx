@@ -164,9 +164,9 @@ const Shop = () => {
 
         {/* Content Layout */}
         <div className="p-4 max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-start gap-6">
+          <div className="flex flex-col md:flex-row items-start justify-content-center gap-6">
             {/* Sidebar Categories */}
-            <aside className="w-full md:w-1/4 bg-white border rounded-lg p-4">
+            {/* <aside className="w-full md:w-1/4 bg-white border rounded-lg p-4">
               <h2 className="text-lg font-semibold mb-4">Categories</h2>
               <ul className="space-y-2">
                 {categories.map((cat, index) => (
@@ -199,7 +199,7 @@ const Shop = () => {
                   </li>
                 ))}
               </ul>
-            </aside>
+            </aside> */}
 
             {/* Product Grid */}
             <div className="w-full md:w-3/4 bg-white rounded-lg">
