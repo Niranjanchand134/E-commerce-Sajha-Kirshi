@@ -2,12 +2,16 @@ import React, { useEffect, useState } from "react";
 import Footer from "./Footer";
 import Header from "./Header";
 import { Pagination } from "antd";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { getAllProduct } from "../../../services/authService";
 import { getDetailsByUserId } from "../../../services/farmer/farmerApiService";
 
 const Shop = () => {
-  const [categoryFilter, setCategoryFilter] = useState("All");
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const urlCategory = queryParams.get("category") || "All";
+
+  const [locationFilter, setLocationFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [openIndex, setOpenIndex] = useState(null);
@@ -15,21 +19,43 @@ const Shop = () => {
   const [products, setProduct] = useState([]);
   const [farmerDetails, setFarmerDetails] = useState({});
 
-  const handleCategoryChanges = (e) => setCategoryFilter(e.target.value);
+  const handleLocationChanges = (e) => setLocationFilter(e.target.value);
   const handleStatusChanges = (e) => setStatusFilter(e.target.value);
   const toggleCategory = (index) =>
     setOpenIndex(openIndex === index ? null : index);
 
   const productsPerPage = 9;
 
-  // Filter products based on search term and filters
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    // Add more filter logic here if needed for category and status
-    return matchesSearch;
-  });
+  // Filter and sort products based on search term, location, URL category, and sorting
+  const filteredProducts = products
+    .filter((product) => {
+      const matchesSearch = product.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      // Location filter (based on farmer's district)
+      const matchesLocation =
+        locationFilter === "All" ||
+        locationFilter === "Location" ||
+        farmerDetails[product.user.id]?.district
+          ?.toLowerCase()
+          .includes(locationFilter.toLowerCase());
+
+      // URL category filter (based on product name)
+      const matchesCategory =
+        urlCategory === "All" ||
+        product.name.toLowerCase().includes(urlCategory.toLowerCase());
+
+      return matchesSearch && matchesLocation && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (statusFilter === "lower-higher") {
+        return a.price - b.price;
+      } else if (statusFilter === "higher-lower") {
+        return b.price - a.price;
+      }
+      return 0; // Default sorting (no change)
+    });
 
   const indexOfLast = currentPage * productsPerPage;
   const indexOfFirst = indexOfLast - productsPerPage;
@@ -94,15 +120,15 @@ const Shop = () => {
             <div className="relative w-full sm:w-auto">
               <select
                 className="appearance-none w-full max-w-full sm:w-48 border border-gray-300 rounded-xl bg-green-500 text-white px-4 py-2 pr-8 focus:outline-none"
-                value={categoryFilter}
-                onChange={handleCategoryChanges}
+                value={locationFilter}
+                onChange={handleLocationChanges}
               >
-                <option>Location</option>
-                <option value="vegetables">Kathmandu</option>
-                <option value="fruits">Pokhara</option>
-                <option value="grains">Lalitpur</option>
-                <option value="dairy">Bhaktapur</option>
-                <option value="meat">Darchula</option>
+                <option value="All">Location</option>
+                <option value="Kathmandu">Kathmandu</option>
+                <option value="Pokhara">Pokhara</option>
+                <option value="Lalitpur">Lalitpur</option>
+                <option value="Bhaktapur">Bhaktapur</option>
+                <option value="Chitwan">Chitwan</option>
               </select>
               <div className="pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 text-white text-xs">
                 ▼
@@ -125,10 +151,9 @@ const Shop = () => {
                 value={statusFilter}
                 onChange={handleStatusChanges}
               >
-                <option>Default sorting</option>
-                <option value="Active">Active</option>
-                <option value="Pause">Pause</option>
-                <option value="Inactive">Inactive</option>
+                <option value="All">Default sorting</option>
+                <option value="lower-higher">Lower-Higher</option>
+                <option value="higher-lower">Higher-Lower</option>
               </select>
               <div className="pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 text-black text-xs">
                 ▼
@@ -160,7 +185,7 @@ const Shop = () => {
                       </span>
                     </button>
                     {openIndex === index && (
-                      <ul className=" mt-2 text-sm text-gray-500 space-y-2 text-[16px]">
+                      <ul className="mt-2 text-sm text-gray-500 space-y-2 text-[16px]">
                         {cat.subItems.map((item, i) => (
                           <li
                             key={i}
@@ -177,7 +202,7 @@ const Shop = () => {
             </aside>
 
             {/* Product Grid */}
-            <div className="w-full md:w-3/4 bg-white rounded-lg ">
+            <div className="w-full md:w-3/4 bg-white rounded-lg">
               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {currentProducts.length > 0 ? (
                   currentProducts.map((product) => (
