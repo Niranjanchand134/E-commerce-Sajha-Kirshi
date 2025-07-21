@@ -35,7 +35,6 @@ import ResetPassword from "./Pages/Buyer/auth/ResetPassword";
 import FarmerKYCDetail from "./Pages/Farmer/Parts/FarmerKYCDetails";
 import PaymentMethod from "./Pages/Buyer/Component/PaymentMethod";
 import OrderConfirmation from "./Pages/Buyer/Component/OrderConfirmation";
-import Notifications from "./components/Notifications";
 import SuperAdminLayout from "./Pages/SuperAdmin/pages/SuperAdminLayout";
 import SuperAdminHome from "./Pages/SuperAdmin/pages/SuperAdminHome";
 import SuperAdminFarmer from "./Pages/SuperAdmin/pages/superAdminFarmer";
@@ -74,7 +73,6 @@ const App = () => {
           <Route path="reset-password" element={<ResetPassword />} />
           <Route path="Payment" element={<PaymentMethod />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
-          <Route path="/notification" element={<Notifications />} />
           <Route path="/aboutUs" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/kycDetails" element={<BuyerKycDetail />} />

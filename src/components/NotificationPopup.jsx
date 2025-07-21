@@ -123,7 +123,7 @@ const NotificationPopup = () => {
   };
 
   const content = (
-    <div style={{ width: 350 }}>
+    <div style={{ width: 350, maxHeight: 400, overflowY: "auto" }}>
       <div
         style={{
           display: "flex",
