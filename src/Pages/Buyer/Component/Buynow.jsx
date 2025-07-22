@@ -34,24 +34,30 @@ const Buynow = () => {
 
   // Calculate totals
   // Calculate totals
-  const itemTotal = items.reduce(
-    (sum, item) =>
-      sum +
-      (item.discountPrice
-        ? (item.price * item.quantity * (100 - item.discountPrice)) / 100
-        : item.price * item.quantity),
+  // const itemTotal = items.reduce(
+  //   (sum, item) =>
+  //     sum +
+  //     (item.discountPrice
+  //       ? (item.price * item.quantity * (100 - item.discountPrice)) / 100
+  //       : item.price * item.quantity),
+  //   0
+  // );
+  const originalTotal = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
     0
   );
+
   const discountAmount = items.reduce(
     (sum, item) =>
-      sum +
-      (item.discountPrice
-        ? (item.price * item.quantity * item.discountPrice) / 100
-        : 0),
+      item.discountPrice
+        ? sum + (item.price * item.quantity * item.discountPrice) / 100
+        : sum,
     0
   );
+
+  const itemTotal = originalTotal - discountAmount;
   const deliveryFee = 135;
-  const total = itemTotal - discountAmount + deliveryFee;
+  const total = itemTotal + deliveryFee;
 
   const handleProceedClick = () => {
     if (!user || !user.id) {
@@ -148,6 +154,7 @@ const Buynow = () => {
               </a>
             </div>
 
+            {/* // Change items total display to: */}
             <div className="flex justify-between items-center mb-2">
               <p>
                 Items Total{" "}
@@ -155,9 +162,9 @@ const Buynow = () => {
                   ({items.length} item{items.length > 1 ? "s" : ""})
                 </span>
               </p>
-              <h5>Rs. {itemTotal.toFixed(2)}</h5>
+              <h5>Rs. {originalTotal.toFixed(2)}</h5>
             </div>
-
+            {/* // Add discount display */}
             {discountAmount > 0 && (
               <div className="flex justify-between items-center mb-2">
                 <p>Discount</p>
@@ -166,14 +173,12 @@ const Buynow = () => {
                 </h5>
               </div>
             )}
-
+            
             <div className="flex justify-between items-center mb-2">
               <p>Delivery Fee</p>
               <h5>Rs. {deliveryFee.toFixed(2)}</h5>
             </div>
-
             <hr className="my-2" />
-
             <div className="flex justify-between items-center">
               <div>
                 <p className="font-semibold">Total:</p>
@@ -183,7 +188,6 @@ const Buynow = () => {
                 Rs. {total.toFixed(2)}
               </h5>
             </div>
-
             <button
               onClick={handleProceedClick}
               className="bg-green-600 p-2 font-semibold text-white w-full rounded hover:bg-green-700 transition mt-4"

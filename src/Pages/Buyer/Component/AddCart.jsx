@@ -145,6 +145,7 @@ const AddCart = () => {
     try {
       setLoading(true);
       const response = await cartService.getCartItems(user.id);
+      console.log("Fetched cart items:", response.data);
       const groupedItems = response.data.reduce((acc, item) => {
         const farm = item.farmName || "Unknown Farm";
         if (!acc[farm]) acc[farm] = [];
@@ -239,29 +240,29 @@ const AddCart = () => {
         .filter((item) => selectedItems.includes(item.id))
         .map((item) => ({
           ...item,
-          discountPrice: item.discountPrice || 0, // Ensure discountPrice is included
-          price: item.discountPrice
-            ? (item.price * (100 - item.discountPrice)) / 100
-            : item.price, // Apply discount to price if needed
+          price: item.price, // already discounted
+          discountAmount: item.originalPrice
+            ? (item.originalPrice - item.price) * item.quantity
+            : 0,
         }));
 
-      const itemTotal = checkoutItems.reduce(
+      const itemTotal = selectedCartItems.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
       );
-      const discountAmount = checkoutItems.reduce(
+
+      const discountAmount = selectedCartItems.reduce(
         (sum, item) =>
-          sum +
-          (item.discountPrice
-            ? (item.price * item.quantity * item.discountPrice) / 100
-            : 0),
+          item.originalPrice
+            ? sum + (item.originalPrice - item.price) * item.quantity
+            : sum,
         0
       );
       const deliveryFee = selectedItems.length > 0 ? 135 : 0;
       const total = itemTotal - discountAmount + deliveryFee;
 
       const productIds = checkoutItems.map((item) => item.productId || item.id);
-      await cartService.moveToCheckout(user.id, productIds);
+      // await cartService.moveToCheckout(user.id, productIds);
 
       navigate("/buynow", {
         state: {
@@ -290,28 +291,30 @@ const AddCart = () => {
     .flatMap((farm) => farm.items)
     .filter((item) => selectedItems.includes(item.id));
 
-  const itemTotal = selectedCartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const discountAmount = selectedCartItems.reduce(
-    (sum, item) =>
-      sum +
-      (item.discountPrice
-        ? (item.price * item.quantity * item.discountPrice) / 100
-        : 0),
-    0
-  );
+  // Replace existing calculations with:
+  const itemTotal = selectedCartItems.reduce((sum, item) => {
+    const discountedPrice = item.discountPrice
+      ? (item.price * (100 - item.discountPrice)) / 100
+      : item.price;
+    return sum + discountedPrice * item.quantity;
+  }, 0);
+
+  const discountAmount = selectedCartItems.reduce((sum, item) => {
+    return item.discountPrice
+      ? sum + (item.price * item.quantity * item.discountPrice) / 100
+      : sum;
+  }, 0);
+
   const deliveryFee = selectedItems.length > 0 ? 135 : 0;
-  const total = itemTotal - discountAmount + deliveryFee;
+  const total = itemTotal + deliveryFee;
 
   if (loading) return <div className="text-center p-4">Please Login first..</div>;
-  if (error)
-    return <div className="text-center p-4 text-red-500">Error: {error}</div>;
-  if (!user)
-    return (
-      <div className="text-center p-4">Please log in to view your cart</div>
-    );
+  // if (error)
+  //   return <div className="text-center p-4 text-red-500">Error: {error}</div>;
+  // if (!user)
+  //   return (
+  //     <div className="text-center p-4">Please log in to view your cart</div>
+  //   );
 
   return (
     <>

@@ -117,13 +117,18 @@ const ShopDetail = () => {
     if (!validateQuantity()) return;
 
     try {
+      const discountedPrice = product.discountPrice
+        ? (product.price * (100 - product.discountPrice)) / 100
+        : product.price;
+
       const cartItem = {
         userId: user.id,
         farmerId: parseInt(product.user.id),
         productId: parseInt(productId),
         productName: product.name,
-        price: product.price,
-        discountPrice: product.discountPrice || 0, // Include discount percentage
+        price: discountedPrice, // 💥 Now this is discounted price
+        originalPrice: product.price, // Optional: if you want to keep original price too
+        discountPercentage: product.discountPrice || 0, // Optional
         description: product.description,
         quantity: quantity,
         imageUrl: selectedImage,
@@ -131,8 +136,8 @@ const ShopDetail = () => {
         location: getFormattedAddress(farmer),
       };
 
+
       await addToCart(cartItem);
-      alert("Product added to cart!");
       navigate("/addcart");
     } catch (error) {
       console.error("Failed to add to cart:", error);
