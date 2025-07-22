@@ -36,7 +36,6 @@ const Scroll = () => {
             <img src="/assets/BuyersImg/images/item1.png" alt="Organic Products" className="w-12 h-12" />
             <div>
               <h5 className="font-bold text-sm">Organic Products</h5>
-              <p className="text-xs text-gray-600">Money Back Guarantee</p>
             </div>
           </div>
 
@@ -45,7 +44,6 @@ const Scroll = () => {
             <img src="/assets/BuyersImg/images/item2.png" alt="Easy Shopping" className="w-12 h-12" />
             <div>
               <h5 className="font-bold text-sm">Easy Shopping</h5>
-              <p className="text-xs text-gray-600">On All Orders Over $45.00</p>
             </div>
           </div>
 
@@ -53,8 +51,7 @@ const Scroll = () => {
           <div className="flex items-center gap-2 text-center sm:text-left">
             <img src="/assets/BuyersImg/images/item3.png" alt="Direct From The Farm" className="w-12 h-12" />
             <div>
-              <h5 className="font-bold text-sm">Direct From The Farm</h5>
-              <p className="text-xs text-gray-600">Find Your Nearest Store</p>
+              <h5 className="font-bold text-sm">Easy Payment</h5>
             </div>
           </div>
         </div>

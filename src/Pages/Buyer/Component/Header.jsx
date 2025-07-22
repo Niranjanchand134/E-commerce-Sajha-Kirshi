@@ -145,7 +145,7 @@ const Header = () => {
               className="hover:text-black cursor-pointer"
               onClick={() => navigate("/Buyer-shop")}
             >
-              Services
+              Products
             </li>
             {user !== null ? (
               <></>

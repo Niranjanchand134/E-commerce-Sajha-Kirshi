@@ -8,19 +8,9 @@ const OtherContent = () => {
         <div className="absolute z-20 -mt-40 flex pr-60 pl-60 justify-between gap-4">
             <div className=" text-center">
                 <img src="/assets/BuyersImg/Contentimg/cart1.png" alt="cart" className="object-cover "/>
-                <div className="absolute z-40 -mt-20 ml-8">
-                <button className=" bg-green-500 text-white font-semibold px-3 py-2 rounded ">
-                    Order Now
-                </button>
-                </div>
             </div>
             <div className="text-center">
                 <img src="/assets/BuyersImg/Contentimg/cart2.png" alt="cart" className="object-cover"/>
-                <div className="absolute z-40 -mt-20 ml-8">
-                    <button className=" bg-green-500 text-white font-semibold px-3 py-2 rounded">
-                        Order Now
-                    </button>
-                </div>
             </div>
         </div>
         
@@ -44,7 +34,7 @@ const OtherContent = () => {
         {/*end cart */}
 
         {/*top farmers */}
-        <div className="bg-[#E9F1EE] p-4">
+        {/* <div className="bg-[#E9F1EE] p-4">
             <div className="text-center p-4">
                 <p className="text-[#EEC044]">Customer's</p>
                 <h2 className="font-bold">Meet Our Farmers</h2>
@@ -66,13 +56,13 @@ const OtherContent = () => {
                                 backgroundPosition: "center",
                             }}
                         >
-                            {/* Bottom bar with button */}
+                            Bottom bar with button
                             <div className="absolute bottom-0 right-0 left-0 p-2 flex justify-end items-end bg-gradient-to-t from-black/60 to-transparent">
                                 <div className="relative inline-block">
-                                    {/* Icon overlapping the left of button */}
+                                    Icon overlapping the left of button
                                     <i className="fa-solid fa-share-nodes bg-green-500 text-white p-2 rounded absolute -left-5 top-1/2 transform -translate-y-1/2 z-10"></i>
 
-                                    {/* Button */}
+                                    Button
                                     <button className="bg-white px-6 py-2 text-black rounded-l-lg shadow pl-8">
                                         {person.name}
                                     </button>
@@ -82,12 +72,12 @@ const OtherContent = () => {
                     ))}
                 </div>
             </div>
-        </div>
+        </div> */}
         {/*end top farmers */}
 
 
         {/*our blog */}
-        <div className="text-center p-4">
+        {/* <div className="text-center p-4">
             <p className="text-[#EEC044]">Latest News</p>
             <h2 className="font-bold">Check out our blog posts</h2>
         </div>
@@ -153,7 +143,7 @@ const OtherContent = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> */}
         {/*end our blog */}
 
         <div className="flex flex-col lg:flex-row bg-green-500 mt-10">

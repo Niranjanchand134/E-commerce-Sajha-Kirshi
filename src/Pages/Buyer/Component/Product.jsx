@@ -42,13 +42,13 @@ const Product = () => {
   return (
     <>
       <div>
-        <div className="text-center p-2">
+        {/* <div className="text-center p-2">
           <p className="text-[#EEC044]">Recently Added</p>
-          <h2 className="font-bold">Products</h2>
-        </div>
+          
+        </div> */}
 
-        <div className="flex justify-around items-center flex-wrap mb-4 ">
-          <h2>Listings</h2>
+        <div className="flex justify-around items-center flex-wrap mb-4 my-24 ">
+          <h2 className="font-bold">Recently Added Products</h2>
           <Link to="buyer-shop" className="m-2 text-black">
             View All <RightOutlined />
           </Link>

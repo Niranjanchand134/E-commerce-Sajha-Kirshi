@@ -58,7 +58,7 @@ const Contact = () => {
             In case you are trying to get in touch with us regarding any issues or inquiries,
             email us at <br />
             <a className="text-blue-800" href="/">
-              niranjachand134@gmail.com
+              sajhakrishi@gmail.com
             </a>
           </p>
           <h2 className="text-2xl font-bold mb-4">Contact Details</h2>
