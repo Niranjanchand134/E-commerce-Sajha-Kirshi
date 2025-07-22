@@ -91,12 +91,7 @@ const Product = () => {
 
                         {product.discountPrice && (
                           <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                            {Math.round(
-                              ((product.price - product.discountPrice) /
-                                product.price) *
-                                100
-                            )}
-                            % OFF
+                            {product.discountPrice}% OFF
                           </span>
                         )}
                       </div>
@@ -115,6 +110,7 @@ const Product = () => {
 
                       {/* Pricing - Compact */}
                       <div className="flex items-center gap-1.5">
+                        {/* Discounted price (shown in red if there's any discount) */}
                         <span
                           className={`font-medium ${
                             product.discountPrice
@@ -122,12 +118,25 @@ const Product = () => {
                               : "text-gray-900"
                           }`}
                         >
-                          Rs {product.discountPrice || product.price}
+                          Rs{" "}
+                          {product.discountPrice
+                            ? Math.round(
+                                product.price *
+                                  (1 - product.discountPrice / 100)
+                              )
+                            : product.price}
                         </span>
+
+                        {/* Original price with line-through (shown only if discounted) */}
                         {product.discountPrice && (
-                          <span className="text-xs text-gray-400 line-through">
-                            Rs {product.price}
-                          </span>
+                          <>
+                            <span className="text-xs text-gray-400 line-through">
+                              Rs {product.price}
+                            </span>
+                            <span className="text-xs bg-red-100 text-red-600 px-1 rounded">
+                              {product.discountPrice}% OFF
+                            </span>
+                          </>
                         )}
                       </div>
 
@@ -186,8 +195,6 @@ const Product = () => {
           </div>
         </div>
       </div>
-
-      
     </>
   );
 };

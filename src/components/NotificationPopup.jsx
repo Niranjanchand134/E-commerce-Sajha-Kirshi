@@ -168,14 +168,14 @@ const NotificationPopup = () => {
           </List.Item>
         )}
       />
-      <div style={{ textAlign: "center", padding: "10px 0" }}>
+      {/* <div style={{ textAlign: "center", padding: "10px 0" }}>
         <Button
           type="link"
           onClick={() => (window.location.href = "/notifications")}
         >
           View all notifications
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 

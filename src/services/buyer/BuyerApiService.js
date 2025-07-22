@@ -43,7 +43,6 @@ export const createChatRoom = async (data)=>{
   }
 };
 
-
 export const getKycByUserId = async (userId) => {
   try {
     const response = await axios.get(
@@ -52,7 +51,13 @@ export const getKycByUserId = async (userId) => {
     return response.data; // Returns the BuyerKycDTO
   } catch (error) {
     console.error("Error fetching KYC details:", error);
-    // Throw error with status and message
+
+    // For 404, return null instead of throwing
+    if (error.response?.status === 404) {
+      return null;
+    }
+
+    // For other errors, still throw
     throw {
       status: error.response?.status,
       message: error.response?.data || "Failed to fetch KYC details",

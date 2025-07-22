@@ -63,23 +63,26 @@ const App = () => {
           <Route path="Buyer-login" element={<Login />} />
           <Route path="Buyer-register" element={<Register />} />
           <Route path="Farmer-register" element={<FarmerRegister />} />
-          <Route path="KYC" element={<KYChome />} />
-          <Route path="KYC-Form" element={<KYCform />} />
           <Route path="websocket" element={<WebSocketClient />} />
           <Route path="message" element={<BuyerChatBox />} />
-          <Route path="buynow" element={<Buynow />} />
           <Route path="addcart" element={<AddCart />} />
           <Route path="forgetpassword" element={<ForgetPassword />} />
           <Route path="verifyOTP" element={<VerifyOTP />} />
           <Route path="reset-password" element={<ResetPassword />} />
-          <Route path="Payment" element={<PaymentMethod />} />
-          <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/aboutUs" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/kycDetails" element={<BuyerKycDetail />} />
-              <Route path="Myorderspage" element={<MyOrdersPage />} />
-          <Route path="setting" element={<AccountPage />}>
-            <Route path="" element={<AccountProfile />} />
+
+          <Route element={<ProtectedRoute allowedRoles={["buyer"]} />}>
+            <Route path="KYC" element={<KYChome />} />
+            <Route path="KYC-Form" element={<KYCform />} />
+            <Route path="Payment" element={<PaymentMethod />} />
+            <Route path="buynow" element={<Buynow />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
+            <Route path="/kycDetails" element={<BuyerKycDetail />} />
+            <Route path="Myorderspage" element={<MyOrdersPage />} />
+            <Route path="setting" element={<AccountPage />}>
+              <Route path="" element={<AccountProfile />} />
+            </Route>
           </Route>
 
           {/* Farmer page */}
