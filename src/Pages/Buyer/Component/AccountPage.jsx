@@ -1,74 +1,80 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Outlet, Route, Routes, useNavigate } from "react-router";
+import React, { useEffect, useState } from "react";
+import { Outlet, useNavigate } from "react-router";
 import { Modal } from "antd";
-import { SuccesfulMessageToast } from "../../../utils/Tostify.util";
-import { useAuth } from "../../../Context/AuthContext";
 import AccountSidebar from "./AccountSidebar";
+import Header from "./Header";
 
 const AccountPage = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { user } = useAuth()
 
-  const handleUserLogout = () => {
-    setIsModalOpen(true);
-  };
+  const handleUserLogout = () => setIsModalOpen(true);
+
   const handleOk = () => {
     localStorage.removeItem("is_Login");
     setIsModalOpen(false);
     navigate("/");
-    SuccesfulMessageToast("Logout Successfully");
     window.location.reload();
-  };
-  const handleCancel = () => {
-    setIsModalOpen(false);
   };
 
   useEffect(() => {
     if (localStorage.getItem("is_Login") === "0") {
       navigate("/login");
     }
-  });
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-white">
-      <main className="pt-16">
-        {/* Account Header */}
-        <div className="border-b border-gray-200">
-          <div className="container mx-auto px-14 py-6">
-            <div className="flex flex-wrap items-center justify-between">
-              <h1 className="text-3xl font-semibold text-gray-800">
-                Profile Settings
-              </h1>
-
-              {/* Plain JSX Button with Tailwind CSS */}
-              <button
-                onClick={handleUserLogout}
-                className="mt-4 sm:mt-0 bg-[#ffb700] hover:bg-[#ffa600] text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ffb700] focus:ring-offset-2 transition-colors"
-              >
-                Logout
-              </button>
+    <>
+    <Header/>
+      <div className="min-h-screen bg-gray-50">
+        <main className="pt-6">
+          {/* Account Header */}
+          <div className="bg-white shadow-sm">
+            <div className="container mx-auto px-4 sm:px-6 py-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-800">
+                    Account Settings
+                  </h1>
+                  <p className="text-gray-500 mt-1">
+                    Manage your profile information
+                  </p>
+                </div>
+                <button
+                  onClick={handleUserLogout}
+                  className="mt-4 sm:mt-0 px-4 py-2 bg-[#16A34A] hover:bg-[#12803A] text-white rounded-lg font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Account Content */}
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row">
-            <AccountSidebar />
-            <div className="flex-1 p-4 md:p-6">
-              <Outlet />
+          {/* Account Content */}
+          <div className="px-4  py-4">
+            <div className="flex flex-col md:flex-row gap-2">
+              <AccountSidebar />
+              <div className="flex-1">
+                <Outlet />
+              </div>
             </div>
           </div>
-        </div>
-      </main>
-      <Modal
-        title="Are you sure want to logout!"
-        open={isModalOpen}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      ></Modal>
-    </div>
+        </main>
+
+        <Modal
+          title="Confirm Logout"
+          open={isModalOpen}
+          onOk={handleOk}
+          onCancel={() => setIsModalOpen(false)}
+          okText="Logout"
+          okButtonProps={{
+            className: "bg-[#16A34A] hover:bg-[#12803A] border-none",
+          }}
+        >
+          <p>Are you sure you want to logout?</p>
+        </Modal>
+      </div>
+    </>
   );
 };
 

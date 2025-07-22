@@ -35,7 +35,6 @@ import ResetPassword from "./Pages/Buyer/auth/ResetPassword";
 import FarmerKYCDetail from "./Pages/Farmer/Parts/FarmerKYCDetails";
 import PaymentMethod from "./Pages/Buyer/Component/PaymentMethod";
 import OrderConfirmation from "./Pages/Buyer/Component/OrderConfirmation";
-import Notifications from "./components/Notifications";
 import SuperAdminLayout from "./Pages/SuperAdmin/pages/SuperAdminLayout";
 import SuperAdminHome from "./Pages/SuperAdmin/pages/SuperAdminHome";
 import SuperAdminFarmer from "./Pages/SuperAdmin/pages/superAdminFarmer";
@@ -59,28 +58,31 @@ const App = () => {
           {/* Buyer page */}
           <Route path="/" element={<Landing />} />
           <Route path="Buyer-shop" element={<Shop />} />
+          <Route path="/shop" element={<Shop />} />
           <Route path="shopdetail/:productId" element={<ShopDetail />} />
           <Route path="Buyer-login" element={<Login />} />
           <Route path="Buyer-register" element={<Register />} />
           <Route path="Farmer-register" element={<FarmerRegister />} />
-          <Route path="KYC" element={<KYChome />} />
-          <Route path="KYC-Form" element={<KYCform />} />
           <Route path="websocket" element={<WebSocketClient />} />
           <Route path="message" element={<BuyerChatBox />} />
-          <Route path="buynow" element={<Buynow />} />
           <Route path="addcart" element={<AddCart />} />
           <Route path="forgetpassword" element={<ForgetPassword />} />
           <Route path="verifyOTP" element={<VerifyOTP />} />
           <Route path="reset-password" element={<ResetPassword />} />
-          <Route path="Payment" element={<PaymentMethod />} />
-          <Route path="/order-confirmation" element={<OrderConfirmation />} />
-          <Route path="/notification" element={<Notifications />} />
           <Route path="/aboutUs" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/kycDetails" element={<BuyerKycDetail />} />
-              <Route path="Myorderspage" element={<MyOrdersPage />} />
-          <Route path="setting" element={<AccountPage />}>
-            <Route path="" element={<AccountProfile />} />
+
+          <Route element={<ProtectedRoute allowedRoles={["buyer"]} />}>
+            <Route path="KYC" element={<KYChome />} />
+            <Route path="KYC-Form" element={<KYCform />} />
+            <Route path="Payment" element={<PaymentMethod />} />
+            <Route path="buynow" element={<Buynow />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
+            <Route path="/kycDetails" element={<BuyerKycDetail />} />
+            <Route path="Myorderspage" element={<MyOrdersPage />} />
+            <Route path="setting" element={<AccountPage />}>
+              <Route path="" element={<AccountProfile />} />
+            </Route>
           </Route>
 
           {/* Farmer page */}

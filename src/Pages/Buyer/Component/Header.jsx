@@ -40,13 +40,22 @@ const Header = () => {
     window.location.reload();
   };
 
-  const handleKycClick = async () =>{
-    const response = await getKycByUserId(user.id);
-    if (!response && !response.id){
-      navigate("/kyc")
+  const handleKycClick = async () => {
+    try {
+      const response = await getKycByUserId(user.id);
+      // If we get a response and it has an id, navigate to KYC details
+      if (response && response.id) {
+        navigate("/kycDetails");
+      } else {
+        // If response doesn't have id, navigate to KYC form
+        navigate("/kyc");
+      }
+    } catch (error) {
+      // If API call fails (404 or any other error), navigate to KYC form
+      console.log("KYC not found, redirecting to KYC form");
+      navigate("/kyc");
     }
-    navigate("/kycDetails");
-  }
+  };
 
   const handleCartClick = () => {
     navigate("/addcart");
@@ -82,14 +91,14 @@ const Header = () => {
   const joinus = {
     items: [
       {
-        label: "Farmer Register",
+        label: "Register as Farmer",
         key: "seller",
         onClick: () => navigate("/Farmer-register"),
       },
       {
-        label: "Join as a Delivery Partner",
-        key: "delivery",
-        onClick: () => navigate("/Farmerlayout/Farmerdashboard"),
+        label: "Register as Buyer",
+        key: "buyer",
+        onClick: () => navigate("/Buyer-register"),
       },
     ],
   };
@@ -97,6 +106,7 @@ const Header = () => {
   const handleMessageClick = () => {
     navigate("/message");
   };
+
 
   return (
     <nav className="sticky top-0 bg-white p-2 shadow-md z-50">
@@ -183,7 +193,6 @@ const Header = () => {
               </span>
             )}
           </div>
-          {/* <i onClick={() => navigate("/NotificationPopup")} className="fa-solid fa-bell hover:text-black cursor-pointer"></i> */}
           <NotificationPopup/>
           <i
             onClick={handleMessageClick}
