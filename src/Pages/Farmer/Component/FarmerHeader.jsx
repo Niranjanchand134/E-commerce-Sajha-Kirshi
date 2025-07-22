@@ -100,7 +100,7 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
       <div className="hidden lg:flex items-center space-x-6 gap-6 text-xl text-gray-700">
         {/* Icons */}
         <div className="flex items-center space-x-4">
-          <div
+          {/* <div
             className="relative inline-block"
             onMouseEnter={() => setShowSearch(true)}
             onMouseLeave={() => setShowSearch(false)}
@@ -115,7 +115,7 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
                 autoFocus
               />
             )}
-          </div>
+          </div> */}
           <i className="fa-solid fa-bell hover:text-black cursor-pointer"></i>
         </div>
 

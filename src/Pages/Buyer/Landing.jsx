@@ -10,13 +10,13 @@ import { useNavigate } from "react-router-dom";
 const Landing = () => {
   const navigate = useNavigate();
   const categories = [
-    { name: "Apple", image: "/assets/BuyersImg/images/apple.png" },
-    { name: "Potato", image: "/assets/BuyersImg/images/potato.png" },
-    { name: "Cauli Flower", image: "/assets/BuyersImg/images/cauli.png" },
-    { name: "Tomato", image: "/assets/BuyersImg/images/tomato.png" },
-    { name: "Carrot", image: "/assets/BuyersImg/images/carrot.png" },
-    { name: "Lemon", image: "/assets/BuyersImg/images/lemon.png" },
-    { name: "Corn", image: "/assets/BuyersImg/images/corn.png" },
+    { name: "Fruits", image: "/assets/BuyersImg/images/apple.png" },
+    { name: "Vegetables", image: "/assets/BuyersImg/images/potato.png" },
+    { name: "Grains", image: "/assets/BuyersImg/images/cauli.png" },
+    { name: "Tubers", image: "/assets/BuyersImg/images/tomato.png" },
+    { name: "Root Crops", image: "/assets/BuyersImg/images/carrot.png" },
+    { name: "Citrus", image: "/assets/BuyersImg/images/lemon.png" },
+    { name: "Spices & Herbs", image: "/assets/BuyersImg/images/corn.png" },
   ];
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const Landing = () => {
       <Carousel />
 
       {/* Category Section */}
-      <div className="my-8 px-4">
+      <div className="mt-24 px-4">
         <div className="mx-auto max-w-screen-lg">
           <h3 className="text-2xl ml-4 font-bold text-gray-800 mb-4">
             Shop by Categories

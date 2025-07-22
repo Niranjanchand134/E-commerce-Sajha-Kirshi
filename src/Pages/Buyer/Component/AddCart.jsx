@@ -308,7 +308,7 @@ const AddCart = () => {
   const deliveryFee = selectedItems.length > 0 ? 135 : 0;
   const total = itemTotal + deliveryFee;
 
-  if (loading) return <div className="text-center p-4">Loading...</div>;
+  if (loading) return <div className="text-center p-4">Please Login first..</div>;
   // if (error)
   //   return <div className="text-center p-4 text-red-500">Error: {error}</div>;
   // if (!user)
@@ -407,7 +407,7 @@ const AddCart = () => {
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:bg-green-700"
               }`}
-              disabled={selectedItems.length === 0}
+              // disabled={selectedItems.length === 0}
             >
               Proceed to Checkout
             </button>

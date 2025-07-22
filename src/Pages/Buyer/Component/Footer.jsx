@@ -52,19 +52,18 @@ const Footer = () => {
               <li className="flex items-center gap-2"><i class="fa-solid fa-envelope"/>niranjachand134@gmail.com</li>
               <li className="flex items-center gap-2"><i class="fa-solid fa-location-dot"/>80 broklyn golden street line Kumaripati, Lalitpur</li>
             </ul>
-            <form className="flex pl-8">
+            {/* <form className="flex pl-8">
               <input type="email" placeholder="Enter your email" className="px-2 py-2 rounded-l-lg text-black" />
               <button type="submit" className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-r-lg transition duration-300">
                 <i class="fa-solid fa-paper-plane"></i>
               </button>
-            </form>
+            </form> */}
           </div>
         </div>
       </footer>
 
       <div className="bg-[#1F1E17] text-gray-400 text-sm text-center px-4 md:flex md:justify-around md:items-center">
         <p>© All Copyright 2024 by @ Niranjan Chand</p>
-        <p>Terms of Use | Privacy Policy</p>
       </div>
     </>
   );
