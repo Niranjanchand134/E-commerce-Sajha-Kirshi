@@ -48,12 +48,12 @@ const Header = () => {
         navigate("/kycDetails");
       } else {
         // If response doesn't have id, navigate to KYC form
-        navigate("/kyc");
+        navigate("/KYC");
       }
     } catch (error) {
       // If API call fails (404 or any other error), navigate to KYC form
       console.log("KYC not found, redirecting to KYC form");
-      navigate("/kyc");
+      navigate("/KYC");
     }
   };
 

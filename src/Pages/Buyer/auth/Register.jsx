@@ -29,7 +29,7 @@ const Register = () => {
     number: "",
     email: "",
     password: "",
-    role: "user",
+    role: "buyer",
   });
 
   const [errors, setErrors] = useState({});
