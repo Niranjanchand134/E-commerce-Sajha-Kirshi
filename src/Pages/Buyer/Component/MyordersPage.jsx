@@ -3,6 +3,7 @@ import Footer from "./Footer";
 import Header from "./Header";
 import { useAuth } from "../../../Context/AuthContext";
 import { ErrorMessageToast } from "../../../utils/Tostify.util";
+import { useNavigate } from "react-router-dom";
 
 const MyOrdersPage = () => {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ const MyOrdersPage = () => {
   const [reviewText, setReviewText] = useState("");
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -36,7 +38,7 @@ const MyOrdersPage = () => {
         setOrders(data);
       } catch (error) {
         setError(error.message);
-        ErrorMessageToast("Failed to fetch orders: " + error.message);
+        // ErrorMessageToast("Failed to fetch orders: " + error.message);
       } finally {
         setLoading(false);
       }
@@ -147,6 +149,10 @@ const MyOrdersPage = () => {
     }
   };
 
+  const handleNavigation = ()=>{
+    navigate("/Buyer-shop");
+  }
+
   if (loading) {
     return (
       <>
@@ -181,14 +187,14 @@ const MyOrdersPage = () => {
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900">
-            Error loading orders
+            Please Order the Product
           </h3>
-          <p className="mt-2 text-gray-600">{error}</p>
+          <p className="mt-2 text-gray-600">No Order Available</p>
           <button
-            onClick={() => window.location.reload()}
+          onClick={handleNavigation}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            Try Again
+            Buy Now
           </button>
         </div>
         <Footer />
