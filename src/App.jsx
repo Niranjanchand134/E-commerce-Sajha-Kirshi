@@ -43,7 +43,7 @@ import AboutUs from "./Pages/Buyer/Component/AboutUs";
 import AccountPage from "./Pages/Buyer/Component/AccountPage";
 import AccountProfile from "./Pages/Buyer/Component/AccountProfile";
 import BuyerKycDetail from "./Pages/Buyer/Component/BuyerKycDetail";
-import Contact from "./Pages/Buyer/Component/contact";
+import Contact from "./Pages/Buyer/Component/Contact";
 import MyOrdersPage from "./Pages/Buyer/Component/MyordersPage";
 
 

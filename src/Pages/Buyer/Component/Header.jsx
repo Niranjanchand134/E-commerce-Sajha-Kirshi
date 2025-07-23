@@ -48,12 +48,12 @@ const Header = () => {
         navigate("/kycDetails");
       } else {
         // If response doesn't have id, navigate to KYC form
-        navigate("/kyc");
+        navigate("/KYC");
       }
     } catch (error) {
       // If API call fails (404 or any other error), navigate to KYC form
       console.log("KYC not found, redirecting to KYC form");
-      navigate("/kyc");
+      navigate("/KYC");
     }
   };
 
@@ -201,7 +201,7 @@ const Header = () => {
 
           <div className="buttons d-flex align-items-center text-center gap-3">
             {user !== null ? (
-              <Dropdown overlay={menu} trigger={["hover"]}>
+              <Dropdown overlay={menu} trigger={["click"]}>
                 <a onClick={(e) => e.preventDefault()}>
                   <Space className="text-green-700">
                     <UserOutlined />
