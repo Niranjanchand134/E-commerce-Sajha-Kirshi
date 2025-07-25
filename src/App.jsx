@@ -45,6 +45,7 @@ import AccountProfile from "./Pages/Buyer/Component/AccountProfile";
 import BuyerKycDetail from "./Pages/Buyer/Component/BuyerKycDetail";
 import Contact from "./Pages/Buyer/Component/contact";
 import MyOrdersPage from "./Pages/Buyer/Component/MyordersPage";
+import ErrorPage_404 from "./Pages/Buyer/Component/ErrorPage_404";
 
 
 
@@ -71,6 +72,7 @@ const App = () => {
           <Route path="reset-password" element={<ResetPassword />} />
           <Route path="/aboutUs" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/errorPage" element={<ErrorPage_404 />} />
 
           <Route element={<ProtectedRoute allowedRoles={["buyer"]} />}>
             <Route path="KYC" element={<KYChome />} />

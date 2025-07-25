@@ -294,121 +294,123 @@ const FarmerProducts = () => {
 
   return (
     <>
-      <div className="flex items-center gap-4 ml-4 mb-4 bg-white flex-wrap">
-        {/* Category Filter */}
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">
-            Category
-          </label>
-          <select
-            className="border border-gray-300 rounded-full w-32 px-2 py-2 focus:outline-none"
-            value={categoryFilter}
-            onChange={handleCategoryChanges}
-          >
-            <option>All</option>
-            <option value="vegetables">Vegetables</option>
-            <option value="fruits">Fruits</option>
-            <option value="grains">Grains</option>
-            <option value="dairy">Dairy</option>
-            <option value="meat">Meat</option>
-          </select>
-        </div>
-
-        {/* Status Filter */}
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-700 mb-2 ml-2">
-            Status
-          </label>
-          <select
-            className="border border-gray-300 w-32 rounded-full px-2 py-2 focus:outline-none"
-            value={statusFilter}
-            onChange={handleStatusChanges}
-          >
-            <option>All</option>
-            <option value="Active">Active</option>
-            <option value="Pause">Pause</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-
-        {/* Search */}
-        <div className="flex flex-col flex-1 min-w-[200px]">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Search product name..."
-              className="border border-gray-300 rounded-full px-4 py-2 mt-4 w-80 focus:outline-none"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button
-              onClick={handleSearchItem}
-              className="bg-green-500 text-white px-6 py-2 mt-4 rounded-full hover:bg-green-600 transition duration-200"
+      <div className='px-4 py-4 '>
+        <div className="flex items-center gap-4 ml-4 mb-4 bg-white flex-wrap">
+          {/* Category Filter */}
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700 mb-2 ml-2">
+              Category
+            </label>
+            <select
+              className="border border-gray-300 rounded-full w-32 px-2 py-2 focus:outline-none"
+              value={categoryFilter}
+              onChange={handleCategoryChanges}
             >
-              Search
-            </button>
+              <option>All</option>
+              <option value="vegetables">Vegetables</option>
+              <option value="fruits">Fruits</option>
+              <option value="grains">Grains</option>
+              <option value="dairy">Dairy</option>
+              <option value="meat">Meat</option>
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700 mb-2 ml-2">
+              Status
+            </label>
+            <select
+              className="border border-gray-300 w-32 rounded-full px-2 py-2 focus:outline-none"
+              value={statusFilter}
+              onChange={handleStatusChanges}
+            >
+              <option>All</option>
+              <option value="Active">Active</option>
+              <option value="Pause">Pause</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          {/* Search */}
+          <div className="flex flex-col flex-1 min-w-[200px]">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Search product name..."
+                className="border border-gray-300 rounded-full px-4 py-2 mt-4 w-80 focus:outline-none"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button
+                onClick={handleSearchItem}
+                className="bg-green-500 text-white px-6 py-2 mt-4 rounded-full hover:bg-green-600 transition duration-200"
+              >
+                Search
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <hr />
+        <hr />
 
-      <div>
-        <Table
-          className={styles.customTable}
-          columns={columns}
-          dataSource={filteredData}
-          rowKey="id"
-          scroll={{ x: "max-content", y: 56 * 5 }}
-          loading={loading}
-        />
-      </div>
-
-      {/* Modal Popup for Editing Product */}
-      <Modal
-        title="Edit Product"
-        open={isModalVisible}
-        onCancel={() => handleModalClose()} // Close without updating
-        footer={null}
-        width={800}
-        destroyOnClose
-      >
-        {selectedProduct && (
-          <FarmerEditProduct
-            product={selectedProduct}
-            onClose={handleModalClose}
+        <div>
+          <Table
+            className={styles.customTable}
+            columns={columns}
+            dataSource={filteredData}
+            rowKey="id"
+            scroll={{ x: "max-content", y: 56 * 5 }}
+            loading={loading}
           />
-        )}
-      </Modal>
-
-      {/* Custom Delete Confirmation Modal */}
-      <Modal
-        title="Confirm Deletion"
-        open={isDeleteModalVisible}
-        onCancel={() => {
-          setIsDeleteModalVisible(false);
-          setDeleteProductId(null);
-        }}
-        onOk={handleDeleteConfirm}
-        okText="Yes, Delete"
-        okType="danger"
-        cancelText="Cancel"
-        centered
-      >
-        <div className="text-center">
-          <ExclamationCircleOutlined
-            style={{ fontSize: 40, color: "#faad14", marginBottom: 16 }}
-          />
-          <p className="text-lg font-semibold">
-            Are you sure you want to delete this product?
-          </p>
-          {deleteProductId && (
-            <p className="text-gray-500">
-              Product ID: <strong>{deleteProductId}</strong>
-            </p>
-          )}
         </div>
-      </Modal>
+
+        {/* Modal Popup for Editing Product */}
+        <Modal
+          title="Edit Product"
+          open={isModalVisible}
+          onCancel={() => handleModalClose()} // Close without updating
+          footer={null}
+          width={800}
+          destroyOnClose
+        >
+          {selectedProduct && (
+            <FarmerEditProduct
+              product={selectedProduct}
+              onClose={handleModalClose}
+            />
+          )}
+        </Modal>
+
+        {/* Custom Delete Confirmation Modal */}
+        <Modal
+          title="Confirm Deletion"
+          open={isDeleteModalVisible}
+          onCancel={() => {
+            setIsDeleteModalVisible(false);
+            setDeleteProductId(null);
+          }}
+          onOk={handleDeleteConfirm}
+          okText="Yes, Delete"
+          okType="danger"
+          cancelText="Cancel"
+          centered
+        >
+          <div className="text-center">
+            <ExclamationCircleOutlined
+              style={{ fontSize: 40, color: "#faad14", marginBottom: 16 }}
+            />
+            <p className="text-lg font-semibold">
+              Are you sure you want to delete this product?
+            </p>
+            {deleteProductId && (
+              <p className="text-gray-500">
+                Product ID: <strong>{deleteProductId}</strong>
+              </p>
+            )}
+          </div>
+        </Modal>
+      </div>
     </>
   );
 };

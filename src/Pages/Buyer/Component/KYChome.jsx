@@ -6,11 +6,7 @@ import { FaLaptop, FaUserEdit, FaCheckCircle, FaUsers, FaUserCircle, FaMapMarker
 
 
 const infoItems = [
-  {
-    icon: <FaUsers className="text-3xl text-green-700" />,
-    title: "Family information",
-    description: "Father, mother, grandfather & spouse name",
-  },
+  
   {
     icon: <FaUserCircle className="text-3xl text-green-700" />,
     title: "Personal information",

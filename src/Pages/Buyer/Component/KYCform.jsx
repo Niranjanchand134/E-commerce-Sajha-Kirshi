@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { BuyerKycForm } from "../../../services/buyer/BuyerApiService";
-import { ErrorMessageToast, SuccesfulMessageToast } from "../../../utils/Tostify.util";
+import {
+  ErrorMessageToast,
+  SuccesfulMessageToast,
+} from "../../../utils/Tostify.util";
 import Footer from "./Footer";
 import Header from "./Header";
 import React, { useState } from "react";
@@ -10,13 +13,13 @@ const KYCform = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
-  const {user} = useAuth();
+  const { user } = useAuth();
 
   const navigate = useNavigate();
 
   // Form state
   const [formData, setFormData] = useState({
-    userId: user.id, // You'll need to get this from authentication/context
+    userId: user.id,
     fullName: "",
     phoneNumber: "",
     email: "",
@@ -50,6 +53,51 @@ const KYCform = () => {
     { step: 3, label: "Identification and Business Info" },
   ];
 
+  // Cloudinary image upload function
+  const handleImageUpload = async (file, type) => {
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "SajhaKrishi");
+    data.append("cloud_name", "dtwunctra");
+
+    try {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dtwunctra/image/upload",
+        {
+          method: "POST",
+          body: data,
+        }
+      );
+      const result = await response.json();
+
+      // Update the corresponding image path in the form state
+      if (type === "profile") {
+        setFormData((prev) => ({
+          ...prev,
+          profilePhotoPath: result.url,
+        }));
+      } else if (type === "citizenshipFront") {
+        setFormData((prev) => ({
+          ...prev,
+          citizenshipFrontImagePath: result.url,
+        }));
+      } else if (type === "citizenshipBack") {
+        setFormData((prev) => ({
+          ...prev,
+          citizenshipBackImagePath: result.url,
+        }));
+      } else if (type === "panCard") {
+        setFormData((prev) => ({ ...prev, panCardImagePath: result.url }));
+      }
+
+      return result.url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      ErrorMessageToast("Failed to upload image. Please try again.");
+      return null;
+    }
+  };
+
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -59,8 +107,8 @@ const KYCform = () => {
     }));
   };
 
-  // Handle image uploads
-  const handleImageChange = (e, imageType) => {
+  // Handle image uploads with Cloudinary integration
+  const handleImageChange = async (e, imageType) => {
     const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
@@ -68,25 +116,19 @@ const KYCform = () => {
       switch (imageType) {
         case "profile":
           setProfileImage(imageUrl);
-          setFormData((prev) => ({ ...prev, profilePhotoPath: file.name }));
+          await handleImageUpload(file, "profile");
           break;
         case "citizenshipFront":
           setCitizenshipFrontImage(imageUrl);
-          setFormData((prev) => ({
-            ...prev,
-            citizenshipFrontImagePath: file.name,
-          }));
+          await handleImageUpload(file, "citizenshipFront");
           break;
         case "citizenshipBack":
           setCitizenshipBackImage(imageUrl);
-          setFormData((prev) => ({
-            ...prev,
-            citizenshipBackImagePath: file.name,
-          }));
+          await handleImageUpload(file, "citizenshipBack");
           break;
         case "panCard":
           setPanCardImage(imageUrl);
-          setFormData((prev) => ({ ...prev, panCardImagePath: file.name }));
+          await handleImageUpload(file, "panCard");
           break;
       }
     }
@@ -139,14 +181,16 @@ const KYCform = () => {
         ward: formData.ward ? parseInt(formData.ward) : null,
       };
 
+      console.log("Submitting KYC data:", submitData);
       const response = await BuyerKycForm(submitData);
       SuccesfulMessageToast("KYC form submitted successfully!");
-      navigate("/")
-      // Optionally reset form or redirect
-      // setFormData({...initialFormData});
+      navigate("/");
     } catch (error) {
-      ErrorMessageToast("Failed to save kyc")
-    } 
+      console.error("Error submitting KYC:", error);
+      ErrorMessageToast("Failed to save kyc");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Navigate to next step or submit
@@ -157,6 +201,7 @@ const KYCform = () => {
       handleSubmit();
     }
   };
+
   return (
     <>
       <Header />
@@ -268,8 +313,7 @@ const KYCform = () => {
                           : "bg-white"
                       }`}
                     >
-                      {" "}
-                      Male{" "}
+                      Male
                     </button>
                     <button
                       type="button"
@@ -282,8 +326,7 @@ const KYCform = () => {
                           : "bg-white"
                       }`}
                     >
-                      {" "}
-                      Female{" "}
+                      Female
                     </button>
                     <button
                       type="button"
@@ -296,8 +339,7 @@ const KYCform = () => {
                           : "bg-white"
                       }`}
                     >
-                      {" "}
-                      Other{" "}
+                      Other
                     </button>
                   </div>
                 </div>
@@ -442,20 +484,6 @@ const KYCform = () => {
                     id="ward"
                     name="ward"
                     value={formData.ward}
-                    onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
-                  />
-                </div>
-
-                <div className="flex flex-col w-full mt-3">
-                  <label htmlFor="tole" className="mb-1">
-                    Tole / Street
-                  </label>
-                  <input
-                    type="text"
-                    id="tole"
-                    name="tole"
-                    value={formData.tole}
                     onChange={handleInputChange}
                     className="border rounded p-2 w-full"
                   />
@@ -651,10 +679,8 @@ const KYCform = () => {
           )}
         </div>
 
-
         {/* Navigation Buttons */}
         <div className="text-center p-4 md:p-8">
-          <h4 className="text-green-500 p-2">Have doubts? Worry not!</h4>
           <div className="flex gap-3 justify-center">
             <button
               disabled={currentStep === 1}
@@ -680,6 +706,6 @@ const KYCform = () => {
       <Footer />
     </>
   );
-}
+};
 
 export default KYCform;

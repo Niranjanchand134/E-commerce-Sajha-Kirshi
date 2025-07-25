@@ -24,7 +24,7 @@ const FarmerHomePage = () => {
         <Content
           style={{
             margin: "24px 16px",
-            padding: 24,
+            padding: 0,
             overflowY: "auto", // Makes Content scrollable
             height: "calc(100vh - 64px)", // Assuming header height is 64px
             background: colorBgContainer,
