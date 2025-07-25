@@ -355,7 +355,7 @@ const Farmerorderlist = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div>
+    <div className="px-4 py-4">
       <div className="top-filter">
         <Title level={3}>All Order List</Title>
         <div

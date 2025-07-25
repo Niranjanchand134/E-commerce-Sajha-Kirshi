@@ -128,7 +128,7 @@ const FarmerDashboard = () => {
 
   return (
     <>
-      <div className="flex justify-center py-6">
+      <div className="flex justify-center py-8 px-22">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-center">
           <div className="bg-[#FE9596] w-80 h-48 flex flex-col justify-center items-center rounded-sm shadow-md">
             <h4 className="text-white">Total Products Listed</h4>
