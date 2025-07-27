@@ -36,6 +36,7 @@ const SuperAdminHome = () => {
   const [modalShow, setModalShow] = useState(false);
   const [declineModal, setDeclineModal] = useState(false);
   const [kycViewModal, setKycViewModal] = useState(false);
+  const [farmerKycModal, setFarmerKycModal] = useState(false);
   const [selectedKyc, setSelectedKyc] = useState(null);
   const [modalType, setModalType] = useState("");
   const [searchName, setSearchName] = useState("");
@@ -68,12 +69,12 @@ const SuperAdminHome = () => {
     try {
       if (type === "farmer") {
         const response = await axios.get(
-          `http://localhost:8080/api/admin/farmer-kyc/${record.id}`
+          `http://localhost:8080/api/farmer/getFarmerKYCDetails/${record}`
         );
         setSelectedKyc(response.data);
         setFarmerKycId(record.id); // Set ID for approve/decline
         setModalType("farmer");
-        setKycViewModal(true);
+        setFarmerKycModal(true);
       } else {
         const response = await axios.get(
           `http://localhost:8080/api/admin/buyer-kyc/${record.id}`
@@ -176,6 +177,7 @@ const SuperAdminHome = () => {
     setModalShow(false);
     setDeclineModal(false);
     setKycViewModal(false);
+    setFarmerKycModal(false)
     setSelectedKyc(null);
     setFarmerKycId(null);
     setBuyerKycId(null);
@@ -207,30 +209,75 @@ const SuperAdminHome = () => {
       align: "center",
     },
     {
+      title: "Status",
+      dataIndex: "kycStatus",
+      align: "center",
+      render: (status) => {
+        const normalizedStatus = status?.toUpperCase();
+        return (
+          <Tag
+            color={
+              normalizedStatus === "APPROVED"
+                ? "green"
+                : normalizedStatus === "PENDING"
+                ? "orange"
+                : "red"
+            }
+          >
+            {status}
+          </Tag>
+        );
+      },
+    },
+    {
       title: "Action",
       key: "action",
       align: "center",
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            type="primary"
-            onClick={() => handleView(record, "farmer")} // Use handleView instead of navigate
-            style={{ background: "#1890ff", borderColor: "#1890ff" }}
-          >
-            View
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => handleRequestApprove(record, "farmer")}
-            style={{ background: "#1890ff", borderColor: "#1890ff" }}
-          >
-            Approve
-          </Button>
-          <Button danger onClick={() => handleDeclineRequest(record, "farmer")}>
-            Decline
-          </Button>
-        </Space>
-      ),
+      render: (_, record) => {
+        // Normalize status for consistent comparison
+        const normalizedStatus = record.kycStatus?.toUpperCase();
+        console.log(
+          "Farmer record status:",
+          record.kycStatus,
+          "Normalized:",
+          normalizedStatus
+        );
+
+        return (
+          <Space size="middle">
+            <Button
+              type="primary"
+              onClick={() => handleView(record.userId, "farmer")}
+              style={{ background: "#1890ff", borderColor: "#1890ff" }}
+            >
+              View
+            </Button>
+
+            {/* Only show Approve button if status is not Approved */}
+            {normalizedStatus !== "APPROVED" && (
+              <Button
+                type="primary"
+                onClick={() => handleRequestApprove(record, "farmer")}
+                style={{ background: "#52c41a", borderColor: "#52c41a" }}
+                disabled={normalizedStatus === "REJECTED"}
+              >
+                Approve
+              </Button>
+            )}
+
+            {/* Only show Decline button if status is not Rejected */}
+            {normalizedStatus !== "REJECTED" && (
+              <Button
+                danger
+                onClick={() => handleDeclineRequest(record, "farmer")}
+                disabled={normalizedStatus === "APPROVED"}
+              >
+                Decline
+              </Button>
+            )}
+          </Space>
+        );
+      },
     },
   ];
 
@@ -256,30 +303,75 @@ const SuperAdminHome = () => {
       align: "center",
     },
     {
+      title: "Status",
+      dataIndex: "kycStatus",
+      align: "center",
+      render: (status) => {
+        const normalizedStatus = status?.toUpperCase();
+        return (
+          <Tag
+            color={
+              normalizedStatus === "APPROVED"
+                ? "green"
+                : normalizedStatus === "PENDING"
+                ? "orange"
+                : "red"
+            }
+          >
+            {status}
+          </Tag>
+        );
+      },
+    },
+    {
       title: "Action",
       key: "action",
       align: "center",
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            type="primary"
-            onClick={() => handleView(record, "buyer")}
-            style={{ background: "#1890ff", borderColor: "#1890ff" }}
-          >
-            View
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => handleRequestApprove(record, "buyer")}
-            style={{ background: "#1890ff", borderColor: "#1890ff" }}
-          >
-            Approve
-          </Button>
-          <Button danger onClick={() => handleDeclineRequest(record, "buyer")}>
-            Decline
-          </Button>
-        </Space>
-      ),
+      render: (_, record) => {
+        // Normalize status for consistent comparison
+        const normalizedStatus = record.kycStatus?.toUpperCase();
+        console.log(
+          "Buyer record status:",
+          record.kycStatus,
+          "Normalized:",
+          normalizedStatus
+        );
+
+        return (
+          <Space size="middle">
+            <Button
+              type="primary"
+              onClick={() => handleView(record, "buyer")}
+              style={{ background: "#1890ff", borderColor: "#1890ff" }}
+            >
+              View
+            </Button>
+
+            {/* Only show Approve button if status is not APPROVED */}
+            {normalizedStatus !== "APPROVED" && (
+              <Button
+                type="primary"
+                onClick={() => handleRequestApprove(record, "buyer")}
+                style={{ background: "#52c41a", borderColor: "#52c41a" }}
+                disabled={normalizedStatus === "REJECTED"}
+              >
+                Approve
+              </Button>
+            )}
+
+            {/* Only show Decline button if status is not REJECTED */}
+            {normalizedStatus !== "REJECTED" && (
+              <Button
+                danger
+                onClick={() => handleDeclineRequest(record, "buyer")}
+                disabled={normalizedStatus === "APPROVED"}
+              >
+                Decline
+              </Button>
+            )}
+          </Space>
+        );
+      },
     },
   ];
 
@@ -513,7 +605,7 @@ const SuperAdminHome = () => {
       />
       <Modal
         title={`Farmer KYC Details - ${selectedKyc?.userName || ""}`}
-        open={kycViewModal}
+        open={farmerKycModal}
         onCancel={handleCancel}
         footer={[
           <Button key="cancel" onClick={handleCancel}>
@@ -524,7 +616,7 @@ const SuperAdminHome = () => {
             type="primary"
             onClick={handleApprove}
             style={{ background: "#52c41a", borderColor: "#52c41a" }}
-            disabled={selectedKyc?.kycStatus !== "PENDING"}
+            disabled={selectedKyc?.kycStatus !== "Pending"}
           >
             Approve
           </Button>,
@@ -532,7 +624,7 @@ const SuperAdminHome = () => {
             key="decline"
             danger
             onClick={handleDecline}
-            disabled={selectedKyc?.kycStatus !== "PENDING"}
+            disabled={selectedKyc?.kycStatus !== "Pending"}
           >
             Decline
           </Button>,
@@ -542,20 +634,29 @@ const SuperAdminHome = () => {
         {selectedKyc && (
           <div className="kyc-details-container">
             <div className="kyc-header">
-              <Avatar size={64} icon={<UserOutlined />} />
+              <Avatar
+                size={64}
+                src={selectedKyc.profileImagePath}
+                icon={<UserOutlined />}
+              />
               <div className="kyc-title">
                 <h3>{selectedKyc.farmName}</h3>
                 <Tag
                   color={
-                    selectedKyc.kycStatus === "PENDING"
+                    selectedKyc.kycStatus === "Pending"
                       ? "orange"
-                      : selectedKyc.kycStatus === "APPROVED"
+                      : selectedKyc.kycStatus === "Approved"
                       ? "green"
                       : "red"
                   }
                 >
                   {selectedKyc.kycStatus}
                 </Tag>
+                {selectedKyc.verified && (
+                  <Tag color="blue" icon={<CheckCircleOutlined />}>
+                    Verified
+                  </Tag>
+                )}
               </div>
             </div>
 
@@ -575,40 +676,60 @@ const SuperAdminHome = () => {
                     {selectedKyc.userEmail}
                   </Descriptions.Item>
                   <Descriptions.Item label="Citizenship Number" span={2}>
-                    {selectedKyc.citizenshipNumber} (Issued:{" "}
-                    {selectedKyc.citizenshipIssuedDistrict})
-                  </Descriptions.Item>
-                  <Descriptions.Item label="PAN Number">
-                    {selectedKyc.panNumber}
+                    {selectedKyc.citizenshipNumber}
+                    {selectedKyc.citizenshipIssuedDistrict && (
+                      <span>
+                        {" "}
+                        (Issued: {selectedKyc.citizenshipIssuedDistrict})
+                      </span>
+                    )}
                   </Descriptions.Item>
                   <Descriptions.Item label="Address" span={2}>
-                    {selectedKyc.permanentAddress}, {selectedKyc.tole}, Ward{" "}
-                    {selectedKyc.wardNumber}
+                    {selectedKyc.permanentAddress}
+                    {selectedKyc.tole && <span>, {selectedKyc.tole}</span>}
+                    {selectedKyc.wardNumber && (
+                      <span>, Ward {selectedKyc.wardNumber}</span>
+                    )}
                     <br />
                     {selectedKyc.municipality}, {selectedKyc.district},{" "}
                     {selectedKyc.province}
                   </Descriptions.Item>
+                  <Descriptions.Item label="Years of Experience">
+                    {selectedKyc.yearsOfExperience} years
+                  </Descriptions.Item>
                 </Descriptions>
 
-                <div className="document-images">
-                  <Image.PreviewGroup>
-                    <Image
-                      width={200}
-                      src={selectedKyc.citizenshipFrontImagePath}
-                      alt="Citizenship Front"
-                    />
-                    <Image
-                      width={200}
-                      src={selectedKyc.citizenshipBackImagePath}
-                      alt="Citizenship Back"
-                    />
-                    <Image
-                      width={200}
-                      src={selectedKyc.panCardImagePath}
-                      alt="PAN Card"
-                    />
-                  </Image.PreviewGroup>
-                </div>
+                {/* Document Images - Only show if available */}
+                {(selectedKyc.citizenshipFrontImagePath ||
+                  selectedKyc.citizenshipBackImagePath ||
+                  selectedKyc.panCardImagePath) && (
+                  <div className="document-images">
+                    <h4>Documents:</h4>
+                    <Image.PreviewGroup>
+                      {selectedKyc.citizenshipFrontImagePath && (
+                        <Image
+                          width={200}
+                          src={selectedKyc.citizenshipFrontImagePath}
+                          alt="Citizenship Front"
+                        />
+                      )}
+                      {selectedKyc.citizenshipBackImagePath && (
+                        <Image
+                          width={200}
+                          src={selectedKyc.citizenshipBackImagePath}
+                          alt="Citizenship Back"
+                        />
+                      )}
+                      {selectedKyc.panCardImagePath && (
+                        <Image
+                          width={200}
+                          src={selectedKyc.panCardImagePath}
+                          alt="PAN Card"
+                        />
+                      )}
+                    </Image.PreviewGroup>
+                  </div>
+                )}
               </TabPane>
 
               <TabPane tab="Farm Details" key="2">
@@ -623,44 +744,71 @@ const SuperAdminHome = () => {
                     {selectedKyc.farmSize} {selectedKyc.farmSizeUnit}
                   </Descriptions.Item>
                   <Descriptions.Item label="Years of Experience">
-                    {selectedKyc.yearsOfExperience}
+                    {selectedKyc.yearsOfExperience} years
                   </Descriptions.Item>
                   <Descriptions.Item label="Primary Crops" span={2}>
                     {selectedKyc.primaryCrops}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Annual Capacity" span={2}>
+                  <Descriptions.Item
+                    label="Annual Production Capacity"
+                    span={2}
+                  >
                     {selectedKyc.annualProductionCapacity}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Description" span={2}>
-                    <div className="description-box">
-                      {selectedKyc.description}
-                    </div>
-                  </Descriptions.Item>
                 </Descriptions>
+
+                {/* Certifications Image */}
+                {selectedKyc.certifications && (
+                  <div className="certification-section">
+                    <h4>Certifications:</h4>
+                    <Image
+                      width={300}
+                      src={selectedKyc.certifications}
+                      alt="Certifications"
+                      className="certification-image"
+                    />
+                  </div>
+                )}
               </TabPane>
 
-              <TabPane tab="Bank Details" key="3">
+              <TabPane tab="Payment Details" key="3">
                 <Descriptions bordered column={2}>
-                  <Descriptions.Item label="Bank Name">
-                    {selectedKyc.bankName}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Branch">
-                    {selectedKyc.branchName}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Account Name">
-                    {selectedKyc.accountName}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="Account Number">
-                    {selectedKyc.accountNumber}
-                  </Descriptions.Item>
                   <Descriptions.Item label="eSewa ID">
                     {selectedKyc.esewaId || "N/A"}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Khalti ID">
-                    {selectedKyc.khaltiId || "N/A"}
+                  <Descriptions.Item label="Bank Details">
+                    {selectedKyc.bankName || "N/A"}
                   </Descriptions.Item>
                 </Descriptions>
+
+                {/* eSewa QR Code */}
+                {selectedKyc.esewaQrImagePath && (
+                  <div className="payment-qr-section">
+                    <h4>eSewa QR Code:</h4>
+                    <Image
+                      width={200}
+                      src={selectedKyc.esewaQrImagePath}
+                      alt="eSewa QR Code"
+                      className="qr-image"
+                    />
+                  </div>
+                )}
               </TabPane>
+
+              {/* Show rejection reason if status is rejected */}
+              {selectedKyc.kycStatus === "Rejected" &&
+                selectedKyc.rejectionReason && (
+                  <TabPane tab="Rejection Details" key="4">
+                    <div className="rejection-section">
+                      <Alert
+                        message="KYC Rejected"
+                        description={selectedKyc.rejectionReason}
+                        type="error"
+                        showIcon
+                      />
+                    </div>
+                  </TabPane>
+                )}
             </Tabs>
 
             <style jsx>{`
@@ -676,16 +824,45 @@ const SuperAdminHome = () => {
               .kyc-title {
                 flex: 1;
               }
+              .kyc-title h3 {
+                margin: 0;
+                margin-bottom: 8px;
+              }
               .document-images {
                 margin-top: 20px;
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
               }
-              .description-box {
-                padding: 10px;
-                background: #f5f5f5;
-                border-radius: 4px;
+              .document-images h4 {
+                margin-bottom: 10px;
+                color: #1890ff;
+              }
+              .document-images .ant-image {
+                margin-right: 10px;
+                margin-bottom: 10px;
+              }
+              .certification-section {
+                margin-top: 20px;
+              }
+              .certification-section h4 {
+                margin-bottom: 10px;
+                color: #1890ff;
+              }
+              .certification-image {
+                border: 1px solid #d9d9d9;
+                border-radius: 6px;
+              }
+              .payment-qr-section {
+                margin-top: 20px;
+              }
+              .payment-qr-section h4 {
+                margin-bottom: 10px;
+                color: #1890ff;
+              }
+              .qr-image {
+                border: 1px solid #d9d9d9;
+                border-radius: 6px;
+              }
+              .rejection-section {
+                padding: 20px 0;
               }
             `}</style>
           </div>
@@ -724,7 +901,7 @@ const SuperAdminHome = () => {
             <div className="kyc-header">
               <Avatar
                 size={64}
-                src={selectedKyc.profilePhotoPath}
+                src={selectedKyc.certifications}
                 icon={<UserOutlined />}
               />
               <div className="kyc-title">
