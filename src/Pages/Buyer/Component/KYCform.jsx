@@ -33,19 +33,16 @@ const KYCform = () => {
     streetAddress: "",
     landmark: "",
     citizenshipNumber: "",
-    citizenshipFrontImagePath: "",
-    citizenshipBackImagePath: "",
     panNumber: "",
-    panCardImagePath: "",
+    businessRegistrationImagePath: "",
   });
 
   // Image states
   const [profileImage, setProfileImage] = useState(
     "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
   );
-  const [citizenshipFrontImage, setCitizenshipFrontImage] = useState(null);
-  const [citizenshipBackImage, setCitizenshipBackImage] = useState(null);
-  const [panCardImage, setPanCardImage] = useState(null);
+  const [businessRegistrationImagePath, setBusinessRegistrationImagePath] =
+    useState(null);
 
   const steps = [
     { step: 1, label: "Personal Information" },
@@ -76,18 +73,11 @@ const KYCform = () => {
           ...prev,
           profilePhotoPath: result.url,
         }));
-      } else if (type === "citizenshipFront") {
+      }  else if (type === "businessRegistrationImage") {
         setFormData((prev) => ({
           ...prev,
-          citizenshipFrontImagePath: result.url,
+          businessRegistrationImagePath: result.url,
         }));
-      } else if (type === "citizenshipBack") {
-        setFormData((prev) => ({
-          ...prev,
-          citizenshipBackImagePath: result.url,
-        }));
-      } else if (type === "panCard") {
-        setFormData((prev) => ({ ...prev, panCardImagePath: result.url }));
       }
 
       return result.url;
@@ -118,18 +108,12 @@ const KYCform = () => {
           setProfileImage(imageUrl);
           await handleImageUpload(file, "profile");
           break;
-        case "citizenshipFront":
-          setCitizenshipFrontImage(imageUrl);
-          await handleImageUpload(file, "citizenshipFront");
+        
+        case "businessRegistrationImage":
+          setBusinessRegistrationImagePath(imageUrl);
+          await handleImageUpload(file, "businessRegistrationImage");
           break;
-        case "citizenshipBack":
-          setCitizenshipBackImage(imageUrl);
-          await handleImageUpload(file, "citizenshipBack");
-          break;
-        case "panCard":
-          setPanCardImage(imageUrl);
-          await handleImageUpload(file, "panCard");
-          break;
+        
       }
     }
   };
@@ -143,18 +127,11 @@ const KYCform = () => {
         );
         setFormData((prev) => ({ ...prev, profilePhotoPath: "" }));
         break;
-      case "citizenshipFront":
-        setCitizenshipFrontImage(null);
-        setFormData((prev) => ({ ...prev, citizenshipFrontImagePath: "" }));
+      case "businessRegistrationImage":
+        setBusinessRegistrationImagePath(null);
+        setFormData((prev) => ({ ...prev, businessRegistrationImagePath: "" }));
         break;
-      case "citizenshipBack":
-        setCitizenshipBackImage(null);
-        setFormData((prev) => ({ ...prev, citizenshipBackImagePath: "" }));
-        break;
-      case "panCard":
-        setPanCardImage(null);
-        setFormData((prev) => ({ ...prev, panCardImagePath: "" }));
-        break;
+      
     }
   };
 
@@ -253,142 +230,221 @@ const KYCform = () => {
         {/* Form Content */}
         <div className="mt-8">
           {currentStep === 1 && (
-            <div>
-              <h2 className="text-lg mb-4">1. Personal Information</h2>
-              <label htmlFor="fullName" className="mb-1">
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                className="border rounded p-2 w-full mb-2"
-                required
-              />
-              <div className="flex flex-col md:flex-row gap-4 mt-3">
-                <div className="flex flex-col w-full">
-                  <label htmlFor="phoneNumber" className="mb-1">
-                    Mobile Number
+            <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-sm">
+              {/* Section Header */}
+              <div className="mb-8">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-green-600 font-semibold">1</span>
+                  </div>
+                  <h2 className="text-2xl font-semibold text-gray-800">
+                    Personal Information
+                  </h2>
+                </div>
+                <p className="text-gray-600 ml-11">
+                  Tell us about yourself to get started
+                </p>
+              </div>
+
+              {/* Form Content */}
+              <div className="space-y-6">
+                {/* Full Name */}
+                <div>
+                  <label
+                    htmlFor="fullName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Full Name <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="tel"
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    value={formData.fullName}
                     onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    placeholder="Enter your full name"
                     required
                   />
                 </div>
 
-                <div className="flex flex-col w-full">
-                  <label htmlFor="email" className="mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex flex-col w-full mt-3">
-                  <label className="mb-1">Gender</label>
-                  <div className="flex border rounded">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, gender: "Male" }))
-                      }
-                      className={`px-4 py-2 ${
-                        formData.gender === "Male"
-                          ? "bg-green-500 rounded text-white"
-                          : "bg-white"
-                      }`}
+                {/* Contact Info Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Mobile Number */}
+                  <div>
+                    <label
+                      htmlFor="phoneNumber"
+                      className="block text-sm font-medium text-gray-700 mb-1"
                     >
-                      Male
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, gender: "Female" }))
-                      }
-                      className={`px-4 py-2 ${
-                        formData.gender === "Female"
-                          ? "bg-green-500 rounded text-white"
-                          : "bg-white"
-                      }`}
+                      Mobile Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      placeholder="+977 98XXXXXXXX"
+                      required
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-700 mb-1"
                     >
-                      Female
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, gender: "Other" }))
-                      }
-                      className={`px-4 py-2 ${
-                        formData.gender === "Other"
-                          ? "bg-green-500 rounded text-white"
-                          : "bg-white"
-                      }`}
-                    >
-                      Other
-                    </button>
+                      Email Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      placeholder="your@email.com"
+                      required
+                    />
                   </div>
                 </div>
 
-                <div className="flex flex-col w-full mt-3">
-                  <label htmlFor="dateOfBirth" className="mb-1">
-                    Birth Date
-                  </label>
-                  <input
-                    type="date"
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
-                    required
-                  />
+                {/* Gender and Birth Date Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Gender */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Gender <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {["Male", "Female", "Other"].map((genderOption) => (
+                        <button
+                          key={genderOption}
+                          type="button"
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              gender: genderOption,
+                            }))
+                          }
+                          className={`py-2.5 px-4 rounded-lg border transition-all ${
+                            formData.gender === genderOption
+                              ? "bg-green-500 text-white border-green-500"
+                              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                          }`}
+                        >
+                          {genderOption}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Birth Date */}
+                  <div>
+                    <label
+                      htmlFor="dateOfBirth"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Birth Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      id="dateOfBirth"
+                      name="dateOfBirth"
+                      value={formData.dateOfBirth}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      required
+                    />
+                  </div>
                 </div>
 
-                <div className="flex flex-col w-full mt-3">
-                  <h2 className="text-lg">Profile Photo Upload</h2>
-                  <div className="flex flex-col md:flex-row items-center gap-6">
-                    <div className="w-32 h-32 rounded overflow-hidden border border-gray-300">
-                      <img
-                        src={profileImage}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                      />
+                {/* Profile Photo Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Profile Photo
+                  </label>
+                  <div className="flex flex-col md:flex-row items-center gap-6 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-300 transition-colors">
+                    <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-gray-100 shadow-sm">
+                      {profileImage ? (
+                        <img
+                          src={profileImage}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                          <svg
+                            className="w-12 h-12 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1}
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            />
+                          </svg>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="grid grid-rows-2 gap-4">
-                      <label className="cursor-pointer mt-1">
+                    <div className="flex flex-col gap-3">
+                      <label className="cursor-pointer">
                         <input
                           type="file"
                           accept="image/*"
                           onChange={(e) => handleImageChange(e, "profile")}
                           className="hidden"
                         />
-                        <span className="px-4 py-2 bg-green-500 text-white rounded text-sm">
-                          Upload
+                        <span className="inline-flex items-center px-4 py-2.5 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors">
+                          <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                            />
+                          </svg>
+                          {profileImage ? "Change Photo" : "Upload Photo"}
                         </span>
                       </label>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage("profile")}
-                        className="px-3 py-2 border border-black text-black rounded text-sm hover:bg-green-500 hover:text-white transition"
-                      >
-                        Remove
-                      </button>
+
+                      {profileImage && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage("profile")}
+                          className="inline-flex items-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                        >
+                          <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                          Remove
+                        </button>
+                      )}
+
+                      <p className="text-xs text-gray-500">
+                        JPEG or PNG, max 5MB
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -543,15 +599,12 @@ const KYCform = () => {
               <div className="mt-6">
                 <div className="flex flex-col md:flex-row justify-between gap-6">
                   <div className="flex flex-col gap-4">
-                    <h2 className="text-lg">
-                      Citizen Card Image{" "}
-                      <span className="text-gray-500">(Front)</span>
-                    </h2>
+                    <h2 className="text-lg">Business Registration Image </h2>
                     <div className="flex flex-col md:flex-row items-center gap-6">
                       <div className="w-32 h-32 rounded overflow-hidden border border-gray-300">
-                        {citizenshipFrontImage ? (
+                        {businessRegistrationImagePath ? (
                           <img
-                            src={citizenshipFrontImage}
+                            src={businessRegistrationImagePath}
                             alt="Citizenship Front"
                             className="w-full h-full object-cover"
                           />
@@ -568,7 +621,7 @@ const KYCform = () => {
                             type="file"
                             accept="image/*"
                             onChange={(e) =>
-                              handleImageChange(e, "citizenshipFront")
+                              handleImageChange(e, "businessRegistrationImage")
                             }
                             className="hidden"
                           />
@@ -578,100 +631,16 @@ const KYCform = () => {
                         </label>
                         <button
                           type="button"
-                          onClick={() => handleRemoveImage("citizenshipFront")}
-                          disabled={!citizenshipFrontImage}
+                          onClick={() =>
+                            handleRemoveImage("businessRegistrationImage")
+                          }
+                          disabled={!businessRegistrationImagePath}
                           className="px-3 py-2 border border-black text-black rounded text-sm hover:bg-green-500 hover:text-white transition disabled:opacity-50"
                         >
                           Remove
                         </button>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="flex flex-col gap-4">
-                    <h2 className="text-lg">Pan Card Image</h2>
-                    <div className="flex flex-col md:flex-row items-center gap-6">
-                      <div className="w-32 h-32 rounded overflow-hidden border border-gray-300">
-                        {panCardImage ? (
-                          <img
-                            src={panCardImage}
-                            alt="PAN Card"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                            No Image
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="grid grid-rows-2 gap-4">
-                        <label className="cursor-pointer mt-1">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleImageChange(e, "panCard")}
-                            className="hidden"
-                          />
-                          <span className="px-4 py-2 bg-green-500 text-white rounded text-sm">
-                            Upload
-                          </span>
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage("panCard")}
-                          disabled={!panCardImage}
-                          className="px-3 py-2 border border-black text-black rounded text-sm hover:bg-green-500 hover:text-white transition disabled:opacity-50"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6">
-                <h2 className="text-lg mb-4">
-                  Citizen Card Image{" "}
-                  <span className="text-gray-500">(Back)</span>
-                </h2>
-                <div className="flex flex-col md:flex-row items-center gap-6">
-                  <div className="w-32 h-32 rounded overflow-hidden border border-gray-300">
-                    {citizenshipBackImage ? (
-                      <img
-                        src={citizenshipBackImage}
-                        alt="Citizenship Back"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                        No Image
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="grid grid-rows-2 gap-4">
-                    <label className="cursor-pointer mt-1">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          handleImageChange(e, "citizenshipBack")
-                        }
-                        className="hidden"
-                      />
-                      <span className="px-4 py-2 bg-green-500 text-white rounded text-sm">
-                        Upload
-                      </span>
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage("citizenshipBack")}
-                      disabled={!citizenshipBackImage}
-                      className="px-3 py-2 border border-black text-black rounded text-sm hover:bg-green-500 hover:text-white transition disabled:opacity-50"
-                    >
-                      Remove
-                    </button>
                   </div>
                 </div>
               </div>

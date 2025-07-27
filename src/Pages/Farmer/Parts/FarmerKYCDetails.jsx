@@ -39,52 +39,41 @@ const FarmerKYCDetail = ({ farmerData }) => {
     tole,
     kycStatus,
     verified,
+    profileImagePath,
 
     // Farm Details
     farmName,
-    description,
-    gpsCoordinates,
     farmSize,
     farmSizeUnit,
     primaryCrops,
-    seasonalCalendar,
     annualProductionCapacity,
 
     // Experience Details
     yearsOfExperience,
     farmingType,
     certifications,
-    supportingDocsPath,
 
-    // Bank Details
-    accountName,
-    accountNumber,
-    bankName,
-    branchName,
-    panNumber,
-    panCardImagePath,
+    // Payment Details
     esewaId,
+    esewaQrImagePath,
+
+    // Additional fields
+    rejectionReason,
   } = farmerData;
 
   // Status configuration
   const getStatusConfig = (status, isVerified) => {
-    if (status === "APPROVED" && isVerified) {
+    if (status === "APPROVED" || status === "Approved") {
       return {
         icon: CheckCircle,
-        text: "Verified & Approved",
-        bgGradient: "from-emerald-500 to-green-600",
+        text: isVerified ? "Verified & Approved" : "Approved",
+        bgGradient: isVerified
+          ? "from-emerald-500 to-green-600"
+          : "from-blue-500 to-indigo-600",
         textColor: "text-white",
-        pulse: true,
+        pulse: isVerified,
       };
-    } else if (status === "APPROVED") {
-      return {
-        icon: CheckCircle,
-        text: "Approved",
-        bgGradient: "from-blue-500 to-indigo-600",
-        textColor: "text-white",
-        pulse: false,
-      };
-    } else if (status === "PENDING") {
+    } else if (status === "PENDING" || status === "Pending") {
       return {
         icon: Clock,
         text: "Under Review",
@@ -92,11 +81,19 @@ const FarmerKYCDetail = ({ farmerData }) => {
         textColor: "text-white",
         pulse: true,
       };
-    } else {
+    } else if (status === "REJECTED" || status === "Rejected") {
       return {
         icon: XCircle,
-        text: "Needs Review",
+        text: "Rejected",
         bgGradient: "from-red-500 to-rose-600",
+        textColor: "text-white",
+        pulse: false,
+      };
+    } else {
+      return {
+        icon: Clock,
+        text: "Needs Review",
+        bgGradient: "from-gray-500 to-gray-600",
         textColor: "text-white",
         pulse: false,
       };
@@ -184,7 +181,7 @@ const FarmerKYCDetail = ({ farmerData }) => {
     { id: "personal", label: "Personal Info", icon: User },
     { id: "farm", label: "Farm Details", icon: Sprout },
     { id: "experience", label: "Experience", icon: Award },
-    { id: "financial", label: "Financial", icon: CreditCard },
+    { id: "payment", label: "Payment Info", icon: CreditCard },
   ];
 
   return (
@@ -195,8 +192,16 @@ const FarmerKYCDetail = ({ farmerData }) => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             {/* Profile Info */}
             <div className="flex items-start space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <User className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
+                {profileImagePath ? (
+                  <img
+                    src={profileImagePath}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-8 h-8 text-white" />
+                )}
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">{userName}</h1>
@@ -278,11 +283,15 @@ const FarmerKYCDetail = ({ farmerData }) => {
                 <DataCard
                   icon={Calendar}
                   label="Date of Birth"
-                  value={new Date(dateOfBirth).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  value={
+                    dateOfBirth
+                      ? new Date(dateOfBirth).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "Not provided"
+                  }
                 />
                 <DataCard icon={User} label="Gender" value={gender} />
                 <DataCard
@@ -305,7 +314,7 @@ const FarmerKYCDetail = ({ farmerData }) => {
                 <DataCard
                   icon={MapPin}
                   label="Ward Number"
-                  value={wardNumber}
+                  value={wardNumber?.toString()}
                 />
                 <DataCard icon={MapPin} label="Tole" value={tole} />
               </div>
@@ -315,7 +324,9 @@ const FarmerKYCDetail = ({ farmerData }) => {
                   Permanent Address
                 </h3>
                 <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-gray-800">{permanentAddress}</p>
+                  <p className="text-gray-800">
+                    {permanentAddress || "Not provided"}
+                  </p>
                 </div>
               </div>
 
@@ -326,20 +337,11 @@ const FarmerKYCDetail = ({ farmerData }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-3">
-                      Citizenship Front
+                      Profile Image
                     </p>
                     <ImageViewer
-                      src={citizenshipFrontImagePath}
+                      src={profileImagePath}
                       alt="Citizenship Front"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-3">
-                      Citizenship Back
-                    </p>
-                    <ImageViewer
-                      src={citizenshipBackImagePath}
-                      alt="Citizenship Back"
                     />
                   </div>
                 </div>
@@ -364,14 +366,13 @@ const FarmerKYCDetail = ({ farmerData }) => {
                 accent
               />
               <DataCard
-                icon={MapPin}
-                label="GPS Coordinates"
-                value={gpsCoordinates}
-              />
-              <DataCard
                 icon={Award}
                 label="Farm Size"
-                value={`${farmSize} ${farmSizeUnit}`}
+                value={
+                  farmSize && farmSizeUnit
+                    ? `${farmSize} ${farmSizeUnit}`
+                    : "Not provided"
+                }
               />
               <DataCard
                 icon={Sprout}
@@ -380,24 +381,10 @@ const FarmerKYCDetail = ({ farmerData }) => {
                 accent
               />
               <DataCard
-                icon={Calendar}
-                label="Seasonal Calendar"
-                value={seasonalCalendar}
-              />
-              <DataCard
                 icon={Award}
-                label="Annual Production"
+                label="Annual Production Capacity"
                 value={annualProductionCapacity}
               />
-            </div>
-
-            <div>
-              <h3 className="text-lg font-medium text-gray-800 mb-4">
-                Farm Description
-              </h3>
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
-                <p className="text-gray-800 leading-relaxed">{description}</p>
-              </div>
             </div>
           </div>
         )}
@@ -409,12 +396,15 @@ const FarmerKYCDetail = ({ farmerData }) => {
               <Award className="w-6 h-6 mr-3 text-green-600" />
               Experience & Certifications
             </h2>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <DataCard
                 icon={Calendar}
                 label="Years of Experience"
-                value={`${yearsOfExperience} years`}
+                value={
+                  yearsOfExperience
+                    ? `${yearsOfExperience} years`
+                    : "Not provided"
+                }
                 accent
               />
               <DataCard
@@ -428,68 +418,65 @@ const FarmerKYCDetail = ({ farmerData }) => {
               <h3 className="text-lg font-medium text-gray-800 mb-4">
                 Certifications
               </h3>
-              <div className="bg-gray-50 rounded-xl p-6">
-                <p className="text-gray-800">
-                  {certifications || "No certifications provided"}
-                </p>
-              </div>
+
+              {certifications ? (
+                <div className="max-w-2xl">
+                  <ImageViewer
+                    src={certifications}
+                    alt="Farmer Certifications"
+                    className="w-full"
+                  />
+                </div>
+              ) : (
+                <div className="bg-gray-50 rounded-xl p-6 text-center">
+                  <Award className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-500">No certifications uploaded</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Payment Information Tab */}
+        {activeTab === "payment" && (
+          <div className="bg-white rounded-3xl shadow-xl p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+              <CreditCard className="w-6 h-6 mr-3 text-green-600" />
+              Payment Information
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <DataCard icon={Phone} label="eSewa ID" value={esewaId} accent />
             </div>
 
-            {supportingDocsPath && (
+            {esewaQrImagePath && (
               <div>
                 <h3 className="text-lg font-medium text-gray-800 mb-4">
-                  Supporting Documents
+                  eSewa QR Code
                 </h3>
-                <ImageViewer
-                  src={supportingDocsPath}
-                  alt="Supporting Documents"
-                />
+                <div className="max-w-md">
+                  <ImageViewer src={esewaQrImagePath} alt="eSewa QR Code" />
+                </div>
+              </div>
+            )}
+
+            {!esewaId && !esewaQrImagePath && (
+              <div className="bg-gray-50 rounded-xl p-6 text-center">
+                <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-500">No payment information provided</p>
               </div>
             )}
           </div>
         )}
 
-        {/* Financial Tab */}
-        {activeTab === "financial" && (
-          <div className="bg-white rounded-3xl shadow-xl p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-              <CreditCard className="w-6 h-6 mr-3 text-green-600" />
-              Financial Information
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              <DataCard
-                icon={User}
-                label="Account Name"
-                value={accountName}
-                accent
-              />
-              <DataCard
-                icon={CreditCard}
-                label="Account Number"
-                value={accountNumber}
-              />
-              <DataCard icon={Building} label="Bank Name" value={bankName} />
-              <DataCard icon={MapPin} label="Branch Name" value={branchName} />
-              <DataCard
-                icon={CreditCard}
-                label="PAN Number"
-                value={panNumber}
-                accent
-              />
-              <DataCard icon={Phone} label="eSewa ID" value={esewaId} />
-            </div>
-
-            {panCardImagePath && (
-              <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-4">
-                  PAN Card
-                </h3>
-                <div className="max-w-md">
-                  <ImageViewer src={panCardImagePath} alt="PAN Card" />
-                </div>
-              </div>
-            )}
+        {/* Rejection Reason (if applicable) */}
+        {rejectionReason && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-6 mt-6">
+            <h3 className="text-lg font-medium text-red-800 mb-2 flex items-center">
+              <XCircle className="w-5 h-5 mr-2" />
+              Rejection Reason
+            </h3>
+            <p className="text-red-700">{rejectionReason}</p>
           </div>
         )}
       </div>
