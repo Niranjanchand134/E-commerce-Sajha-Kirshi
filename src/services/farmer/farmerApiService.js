@@ -15,40 +15,46 @@ export const deleteProductById = async (id) => {
 };
 
 
-export const updateProductById = async (id, data)=>{
+export const updateProductById = async (id, data) => {
+  const token = localStorage.getItem("token");
 
-    const token = localStorage.getItem("token");
+  try {
+    const response = await axios.patch(
+      `http://localhost:8080/farmer/product/${id}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    try{
-        const response = await axios.patch(
-            `http://localhost:8080/farmer/product/${id}`,
-            data,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error(
+        "Failed to update",
+        error.response.status,
+        error.response.data
+      );
 
-          return response.data;
+      // Handle validation errors specifically
+      if (
+        error.response.status === 400 &&
+        error.response.data?.error === "VALIDATION_ERROR"
+      ) {
+        throw new Error(error.response.data.message);
+      }
+
+      throw new Error(
+        error.response.data?.message || "Failed to Change Status"
+      );
+    } else {
+      throw new Error("Request failed. Please try again later.");
     }
-    catch (error){
-        if (error.response) {
-          console.error(
-            "failed to update",
-            error.response.status,
-            error.response.data
-          );
-          throw new Error(error.response.data?.message || "Failed to Change Status");
-        } else {
-          // console.error("Error with request:", error.message);
-          throw new Error("Request failed. Please try again later.");
-        }
-    }
-
-    
-}
+  }
+};
 
 export const categoryChanges = async (category) => {
   const token = localStorage.getItem("token");

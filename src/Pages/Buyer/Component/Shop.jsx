@@ -240,12 +240,7 @@ const Shop = () => {
 
                             {product.discountPrice && (
                               <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                {Math.round(
-                                  ((product.price - product.discountPrice) /
-                                    product.price) *
-                                    100
-                                )}
-                                % OFF
+                                {product.discountPrice}% OFF
                               </span>
                             )}
                           </div>
@@ -264,17 +259,22 @@ const Shop = () => {
 
                           {/* Pricing - Compact */}
                           <div className="flex items-center gap-1.5">
-                            <span
-                              className={`font-medium ${
-                                product.discountPrice
-                                  ? "text-red-600"
-                                  : "text-gray-900"
-                              }`}
-                            >
-                              Rs {product.discountPrice || product.price}
-                            </span>
-                            {product.discountPrice && (
-                              <span className="text-xs text-gray-400 line-through">
+                            {product.discountPrice ? (
+                              <>
+                                <span className="text-red-600 font-medium">
+                                  Rs{" "}
+                                  {(
+                                    product.price -
+                                    (product.price * product.discountPrice) /
+                                      100
+                                  ).toFixed(2)}
+                                </span>
+                                <span className="text-gray-500 line-through ml-2">
+                                  Rs {product.price}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-gray-900 font-medium">
                                 Rs {product.price}
                               </span>
                             )}

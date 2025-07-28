@@ -8,12 +8,26 @@ import {
   Descriptions,
 } from "antd";
 import { useEffect, useState } from "react";
-import { filterOrders, getOrderList, updateOrder } from "../../../services/farmer/farmerApiService";
+import { useNavigate } from "react-router-dom"; // Add this import
+import {
+  filterOrders,
+  getOrderList,
+  updateOrder,
+} from "../../../services/farmer/farmerApiService";
+
+import { createChatRoom } from "../../../services/buyer/BuyerApiService";
+import { useAuth } from "../../../Context/AuthContext";
+import {
+  ErrorMessageToast,
+  SuccesfulMessageToast,
+
+} from "../../../utils/Tostify.util";
 
 const { RangePicker } = DatePicker;
 const { Title } = Typography;
 
 const Farmerorderlist = () => {
+  const navigate = useNavigate(); // Add this hook
   const [orderViewModal, setOrderViewModal] = useState(false);
   const [orderDetails, setOrderDetails] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -27,6 +41,8 @@ const Farmerorderlist = () => {
     newStatus: null,
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const {user} = useAuth();
 
   const orderItems = (order) => [
     {
@@ -88,7 +104,7 @@ const Farmerorderlist = () => {
   const itemColumns = [
     {
       title: "Item Name",
-      dataIndex: "productName", // Updated to match response
+      dataIndex: "productName",
       key: "productName",
     },
     {
@@ -151,12 +167,36 @@ const Farmerorderlist = () => {
         });
       }
 
+      SuccesfulMessageToast(
+        `Order status updated to ${updatedOrder.orderStatus}`
+      );
       setStatusChangeModal(false);
       setPendingStatusChange({ orderId: null, newStatus: null });
     } catch (error) {
       console.error("Failed to update status:", error);
-      alert(`Failed to update order status: ${error.message}`);
+      ErrorMessageToast(`Failed to update order status: ${error.message}`);
       setStatusChangeModal(false);
+    }
+  };
+
+  // Updated handleChat function to accept order record
+  const handleChat = async (orderRecord) => {
+    try {
+      const roomData = {
+        farmerId: parseInt(user.id), // Use farmerId from order
+        buyerId: parseInt(orderRecord.userId), // Use userId as buyerId from order
+      };
+
+      console.log("Creating chat room with data:", roomData);
+      await createChatRoom(roomData);
+
+      SuccesfulMessageToast("Chat room created successfully!");
+      navigate("/Farmerlayout/Farmerchatbox");
+    } catch (error) {
+      console.error("Chat initiation error:", error);
+      const errorMessage = error.message || "Failed to create message room";
+      ErrorMessageToast(errorMessage);
+      setError(errorMessage);
     }
   };
 
@@ -264,9 +304,9 @@ const Farmerorderlist = () => {
           </Button>
           <Button
             type="primary"
-            onClick={() => showModal(record)}
-            className="view-button"
-            style={{ background: "#1890ff", borderColor: "#1890ff" }}
+            onClick={() => handleChat(record)} // Pass the record to handleChat
+            className="message-button"
+            style={{ background: "#52c41a", borderColor: "#52c41a" }}
           >
             Message
           </Button>
@@ -311,10 +351,10 @@ const Farmerorderlist = () => {
 
       const response = await filterOrders(params);
       setFilteredOrders(response);
-      message.success("Orders filtered successfully");
+      SuccesfulMessageToast("Orders filtered successfully");
     } catch (error) {
       console.error("Error filtering orders:", error);
-      message.error("Failed to filter orders");
+      ErrorMessageToast("Failed to filter orders");
     } finally {
       setLoading(false);
     }
@@ -328,10 +368,10 @@ const Farmerorderlist = () => {
       setLoading(true);
       const response = await getOrderList();
       setFilteredOrders(response);
-      message.success("Filters cleared");
+      SuccesfulMessageToast("Filters cleared");
     } catch (error) {
       console.error("Error clearing filters:", error);
-      message.error("Failed to clear filters");
+      ErrorMessageToast("Failed to clear filters");
     } finally {
       setLoading(false);
     }
@@ -347,12 +387,11 @@ const Farmerorderlist = () => {
       })
       .catch((error) => {
         console.error("Error fetching orders:", error);
+        ErrorMessageToast("Failed to load orders");
         setOrderDetails([]);
         setFilteredOrders([]);
       });
   }, []);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="px-4 py-4">
@@ -384,12 +423,6 @@ const Farmerorderlist = () => {
                 { value: "DELIVERED", label: "Delivered" },
                 { value: "CANCELLED", label: "Cancelled" },
               ]}
-            />
-
-            <RangePicker
-              style={{ width: 250 }}
-              value={dateRange}
-              onChange={(dates) => setDateRange(dates)}
             />
 
             <Input
@@ -470,6 +503,7 @@ const Farmerorderlist = () => {
           </div>
         </div>
       </Modal>
+
       {/* Status Change Confirmation Modal */}
       <Modal
         title="Confirm Status Change"
@@ -480,7 +514,7 @@ const Farmerorderlist = () => {
         cancelText="Cancel"
         okButtonProps={{
           style: {
-            backgroundColor: "#1890ff", // Primary color
+            backgroundColor: "#1890ff",
             borderColor: "#1890ff",
             color: "white",
           },
