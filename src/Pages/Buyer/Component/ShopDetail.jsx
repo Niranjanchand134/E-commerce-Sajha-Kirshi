@@ -126,9 +126,9 @@ const ShopDetail = () => {
         farmerId: parseInt(product.user.id),
         productId: parseInt(productId),
         productName: product.name,
-        price: discountedPrice, // 💥 Now this is discounted price
-        originalPrice: product.price, // Optional: if you want to keep original price too
-        discountPercentage: product.discountPrice || 0, // Optional
+        price: discountedPrice, 
+        originalPrice: product.price, 
+        discountPercentage: product.discountPrice || 0, 
         description: product.description,
         quantity: quantity,
         imageUrl: selectedImage,
@@ -166,6 +166,11 @@ const ShopDetail = () => {
       if (!kycData || !kycData.id) {
         ErrorMessageToast("Please fill the KYC form before proceeding.");
         setError("KYC not found");
+        return;
+      }
+      else if (!kycData.verified) {
+        ErrorMessageToast("KYC is not verified. Please Wait for Approval");
+        setError("KYC not verified");
         return;
       }
 

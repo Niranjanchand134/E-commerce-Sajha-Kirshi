@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { BuyerKycForm } from "../../../services/buyer/BuyerApiService";
-import { ErrorMessageToast, SuccesfulMessageToast } from "../../../utils/Tostify.util";
+import {
+  ErrorMessageToast,
+  SuccesfulMessageToast,
+} from "../../../utils/Tostify.util";
 import Footer from "./Footer";
 import Header from "./Header";
 import React, { useState } from "react";
@@ -10,8 +13,7 @@ const KYCform = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
-  const {user} = useAuth();
-  const [errors, setErrors] = useState({});
+  const { user } = useAuth();
 
   const navigate = useNavigate();
 
@@ -31,19 +33,16 @@ const KYCform = () => {
     streetAddress: "",
     landmark: "",
     citizenshipNumber: "",
-    citizenshipFrontImagePath: "",
-    citizenshipBackImagePath: "",
     panNumber: "",
-    panCardImagePath: "",
+    businessRegistrationImagePath: "",
   });
 
   // Image states
   const [profileImage, setProfileImage] = useState(
     "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
   );
-  const [citizenshipFrontImage, setCitizenshipFrontImage] = useState(null);
-  const [citizenshipBackImage, setCitizenshipBackImage] = useState(null);
-  const [panCardImage, setPanCardImage] = useState(null);
+  const [businessRegistrationImagePath, setBusinessRegistrationImagePath] =
+    useState(null);
 
   const steps = [
     { step: 1, label: "Personal Information" },
@@ -51,42 +50,42 @@ const KYCform = () => {
     { step: 3, label: "Identification and Business Info" },
   ];
 
-  // Validation rules for each step
-  const validateStep = (step) => {
-    const newErrors = {};
-    
-    if (step === 1) {
-      if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
-      if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
-      else if (!/^\d{10}$/.test(formData.phoneNumber)) newErrors.phoneNumber = "Invalid phone number (10 digits required)";
-      if (!formData.email.trim()) newErrors.email = "Email is required";
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Invalid email format";
-      if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
-      if (!formData.gender) newErrors.gender = "Gender is required";
-      if (!formData.profilePhotoPath) newErrors.profilePhoto = "Profile photo is required";
-    }
-    
-    if (step === 2) {
-      if (!formData.province) newErrors.province = "Province is required";
-      if (!formData.district) newErrors.district = "District is required";
-      if (!formData.municipality) newErrors.municipality = "Municipality is required";
-      if (!formData.streetAddress) newErrors.streetAddress = "Street address is required";
-      if (!formData.ward) newErrors.ward = "Ward number is required";
-      else if (isNaN(formData.ward) || formData.ward < 1 || formData.ward > 35) {
-        newErrors.ward = "Ward must be between 1-35";
+  // Cloudinary image upload function
+  const handleImageUpload = async (file, type) => {
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "SajhaKrishi");
+    data.append("cloud_name", "dtwunctra");
+
+    try {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dtwunctra/image/upload",
+        {
+          method: "POST",
+          body: data,
+        }
+      );
+      const result = await response.json();
+
+      // Update the corresponding image path in the form state
+      if (type === "profile") {
+        setFormData((prev) => ({
+          ...prev,
+          profilePhotoPath: result.url,
+        }));
+      }  else if (type === "businessRegistrationImage") {
+        setFormData((prev) => ({
+          ...prev,
+          businessRegistrationImagePath: result.url,
+        }));
       }
+
+      return result.url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      ErrorMessageToast("Failed to upload image. Please try again.");
+      return null;
     }
-    
-    if (step === 3) {
-      if (!formData.citizenshipNumber) newErrors.citizenshipNumber = "Citizenship number is required";
-      if (!formData.panNumber) newErrors.panNumber = "PAN number is required";
-      if (!formData.citizenshipFrontImagePath) newErrors.citizenshipFrontImage = "Citizenship front image is required";
-      if (!formData.citizenshipBackImagePath) newErrors.citizenshipBackImage = "Citizenship back image is required";
-      if (!formData.panCardImagePath) newErrors.panCardImage = "PAN card image is required";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   // Handle input changes
@@ -96,84 +95,25 @@ const KYCform = () => {
       ...prev,
       [name]: value,
     }));
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = {...prev};
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
   };
 
-  // Handle image uploads
-  const handleImageChange = (e, imageType) => {
+  // Handle image uploads with Cloudinary integration
+  const handleImageChange = async (e, imageType) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type and size
-      if (!file.type.match('image.*')) {
-        ErrorMessageToast("Please upload an image file");
-        return;
-      }
-      if (file.size > 2 * 1024 * 1024) { // 2MB limit
-        ErrorMessageToast("Image size should be less than 2MB");
-        return;
-      }
-
       const imageUrl = URL.createObjectURL(file);
 
       switch (imageType) {
         case "profile":
           setProfileImage(imageUrl);
-          setFormData((prev) => ({ ...prev, profilePhotoPath: file.name }));
-          if (errors.profilePhoto) {
-            setErrors(prev => {
-              const newErrors = {...prev};
-              delete newErrors.profilePhoto;
-              return newErrors;
-            });
-          }
+          await handleImageUpload(file, "profile");
           break;
-        case "citizenshipFront":
-          setCitizenshipFrontImage(imageUrl);
-          setFormData((prev) => ({
-            ...prev,
-            citizenshipFrontImagePath: file.name,
-          }));
-          if (errors.citizenshipFrontImage) {
-            setErrors(prev => {
-              const newErrors = {...prev};
-              delete newErrors.citizenshipFrontImage;
-              return newErrors;
-            });
-          }
+        
+        case "businessRegistrationImage":
+          setBusinessRegistrationImagePath(imageUrl);
+          await handleImageUpload(file, "businessRegistrationImage");
           break;
-        case "citizenshipBack":
-          setCitizenshipBackImage(imageUrl);
-          setFormData((prev) => ({
-            ...prev,
-            citizenshipBackImagePath: file.name,
-          }));
-          if (errors.citizenshipBackImage) {
-            setErrors(prev => {
-              const newErrors = {...prev};
-              delete newErrors.citizenshipBackImage;
-              return newErrors;
-            });
-          }
-          break;
-        case "panCard":
-          setPanCardImage(imageUrl);
-          setFormData((prev) => ({ ...prev, panCardImagePath: file.name }));
-          if (errors.panCardImage) {
-            setErrors(prev => {
-              const newErrors = {...prev};
-              delete newErrors.panCardImage;
-              return newErrors;
-            });
-          }
-          break;
+        
       }
     }
   };
@@ -186,23 +126,12 @@ const KYCform = () => {
           "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
         );
         setFormData((prev) => ({ ...prev, profilePhotoPath: "" }));
-        setErrors(prev => ({...prev, profilePhoto: "Profile photo is required"}));
         break;
-      case "citizenshipFront":
-        setCitizenshipFrontImage(null);
-        setFormData((prev) => ({ ...prev, citizenshipFrontImagePath: "" }));
-        setErrors(prev => ({...prev, citizenshipFrontImage: "Citizenship front image is required"}));
+      case "businessRegistrationImage":
+        setBusinessRegistrationImagePath(null);
+        setFormData((prev) => ({ ...prev, businessRegistrationImagePath: "" }));
         break;
-      case "citizenshipBack":
-        setCitizenshipBackImage(null);
-        setFormData((prev) => ({ ...prev, citizenshipBackImagePath: "" }));
-        setErrors(prev => ({...prev, citizenshipBackImage: "Citizenship back image is required"}));
-        break;
-      case "panCard":
-        setPanCardImage(null);
-        setFormData((prev) => ({ ...prev, panCardImagePath: "" }));
-        setErrors(prev => ({...prev, panCardImage: "PAN card image is required"}));
-        break;
+      
     }
   };
 
@@ -212,10 +141,14 @@ const KYCform = () => {
     setSubmitMessage("");
 
     try {
-      // Final validation before submission
-      if (!validateStep(currentStep)) {
-        setIsSubmitting(false);
-        return;
+      // Validate required fields
+      if (
+        !formData.fullName ||
+        !formData.phoneNumber ||
+        !formData.email ||
+        !formData.dateOfBirth
+      ) {
+        throw new Error("Please fill in all required fields");
       }
 
       // Convert phone number to integer
@@ -225,30 +158,25 @@ const KYCform = () => {
         ward: formData.ward ? parseInt(formData.ward) : null,
       };
 
+      console.log("Submitting KYC data:", submitData);
       const response = await BuyerKycForm(submitData);
       SuccesfulMessageToast("KYC form submitted successfully!");
-      navigate("/")
+      navigate("/");
     } catch (error) {
+      console.error("Error submitting KYC:", error);
       ErrorMessageToast("Failed to save kyc");
+    } finally {
       setIsSubmitting(false);
-    } 
+    }
   };
 
   // Navigate to next step or submit
   const handleNext = () => {
-    // Validate current step before proceeding
-    if (validateStep(currentStep)) {
-      if (currentStep < steps.length) {
-        setCurrentStep(currentStep + 1);
-      } else {
-        handleSubmit();
-      }
+    if (currentStep < steps.length) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      handleSubmit();
     }
-  };
-
-  // Helper function to check if a field has error
-  const hasError = (fieldName) => {
-    return errors[fieldName] ? "border-red-500" : "";
   };
 
   return (
@@ -259,9 +187,9 @@ const KYCform = () => {
           <h5>Almost done, please follow the remarks below to complete KYC</h5>
           <p>Please upload photo and one of the following documents:</p>
           <ul>
-            <li>Business Registration Certificate</li>
-            <li>Password Size Photo</li>
-            <li>PAN Cart</li>
+            <li>Citizenship Certificate</li>
+            <li>Driving Licence</li>
+            <li>Passport</li>
           </ul>
         </div>
       </div>
@@ -302,151 +230,223 @@ const KYCform = () => {
         {/* Form Content */}
         <div className="mt-8">
           {currentStep === 1 && (
-            <div>
-              <h2 className="text-lg mb-4">1. Personal Information</h2>
-              <label htmlFor="fullName" className="mb-1">
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                className={`border rounded p-2 w-full mb-1 ${hasError('fullName')}`}
-                required
-              />
-              {errors.fullName && <p className="text-red-500 text-sm mb-2">{errors.fullName}</p>}
-
-              <div className="flex flex-col md:flex-row gap-4 mt-3">
-                <div className="flex flex-col w-full">
-                  <label htmlFor="phoneNumber" className="mb-1">
-                    Mobile Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    className={`border rounded p-2 w-full ${hasError('phoneNumber')}`}
-                    required
-                  />
-                  {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
-                </div>
-
-                <div className="flex flex-col w-full">
-                  <label htmlFor="email" className="mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className={`border rounded p-2 w-full ${hasError('email')}`}
-                    required
-                  />
-                  {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-                </div>
-              </div>
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex flex-col w-full mt-3">
-                  <label className="mb-1">Gender</label>
-                  <div className="flex border rounded">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, gender: "Male" }))
-                      }
-                      className={`px-4 py-2 ${
-                        formData.gender === "Male"
-                          ? "bg-green-500 rounded text-white"
-                          : "bg-white"
-                      }`}
-                    >
-                      Male
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, gender: "Female" }))
-                      }
-                      className={`px-4 py-2 ${
-                        formData.gender === "Female"
-                          ? "bg-green-500 rounded text-white"
-                          : "bg-white"
-                      }`}
-                    >
-                      Female
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({ ...prev, gender: "Other" }))
-                      }
-                      className={`px-4 py-2 ${
-                        formData.gender === "Other"
-                          ? "bg-green-500 rounded text-white"
-                          : "bg-white"
-                      }`}
-                    >
-                      Other
-                    </button>
+            <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-sm">
+              {/* Section Header */}
+              <div className="mb-8">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-green-600 font-semibold">1</span>
                   </div>
-                  {errors.gender && <p className="text-red-500 text-sm">{errors.gender}</p>}
+                  <h2 className="text-2xl font-semibold text-gray-800">
+                    Personal Information
+                  </h2>
                 </div>
+                <p className="text-gray-600 ml-11">
+                  Tell us about yourself to get started
+                </p>
+              </div>
 
-                <div className="flex flex-col w-full mt-3">
-                  <label htmlFor="dateOfBirth" className="mb-1">
-                    Birth Date
+              {/* Form Content */}
+              <div className="space-y-6">
+                {/* Full Name */}
+                <div>
+                  <label
+                    htmlFor="fullName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Full Name <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="date"
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    value={formData.fullName}
                     onChange={handleInputChange}
-                    className={`border rounded p-2 w-full ${hasError('dateOfBirth')}`}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    placeholder="Enter your full name"
                     required
                   />
-                  {errors.dateOfBirth && <p className="text-red-500 text-sm">{errors.dateOfBirth}</p>}
                 </div>
 
-                <div className="flex flex-col w-full mt-3">
-                  <h2 className="text-lg">Profile Photo Upload</h2>
-                  <div className="flex flex-col md:flex-row items-center gap-6">
-                    <div className="w-32 h-32 rounded overflow-hidden border border-gray-300">
-                      <img
-                        src={profileImage}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                      />
+                {/* Contact Info Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Mobile Number */}
+                  <div>
+                    <label
+                      htmlFor="phoneNumber"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Mobile Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      placeholder="+977 98XXXXXXXX"
+                      required
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Email Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      placeholder="your@email.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Gender and Birth Date Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Gender */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Gender <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {["Male", "Female", "Other"].map((genderOption) => (
+                        <button
+                          key={genderOption}
+                          type="button"
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              gender: genderOption,
+                            }))
+                          }
+                          className={`py-2.5 px-4 rounded-lg border transition-all ${
+                            formData.gender === genderOption
+                              ? "bg-green-500 text-white border-green-500"
+                              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                          }`}
+                        >
+                          {genderOption}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Birth Date */}
+                  <div>
+                    <label
+                      htmlFor="dateOfBirth"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Birth Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      id="dateOfBirth"
+                      name="dateOfBirth"
+                      value={formData.dateOfBirth}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Profile Photo Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Profile Photo
+                  </label>
+                  <div className="flex flex-col md:flex-row items-center gap-6 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-300 transition-colors">
+                    <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-gray-100 shadow-sm">
+                      {profileImage ? (
+                        <img
+                          src={profileImage}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                          <svg
+                            className="w-12 h-12 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1}
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            />
+                          </svg>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="grid grid-rows-2 gap-4">
-                      <label className="cursor-pointer mt-1">
+                    <div className="flex flex-col gap-3">
+                      <label className="cursor-pointer">
                         <input
                           type="file"
                           accept="image/*"
                           onChange={(e) => handleImageChange(e, "profile")}
                           className="hidden"
                         />
-                        <span className="px-4 py-2 bg-green-500 text-white rounded text-sm">
-                          Upload
+                        <span className="inline-flex items-center px-4 py-2.5 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors">
+                          <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                            />
+                          </svg>
+                          {profileImage ? "Change Photo" : "Upload Photo"}
                         </span>
                       </label>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage("profile")}
-                        className="px-3 py-2 border border-black text-black rounded text-sm hover:bg-green-500 hover:text-white transition"
-                      >
-                        Remove
-                      </button>
+
+                      {profileImage && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage("profile")}
+                          className="inline-flex items-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                        >
+                          <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                          Remove
+                        </button>
+                      )}
+
+                      <p className="text-xs text-gray-500">
+                        JPEG or PNG, max 5MB
+                      </p>
                     </div>
                   </div>
-                  {errors.profilePhoto && <p className="text-red-500 text-sm">{errors.profilePhoto}</p>}
                 </div>
               </div>
             </div>
@@ -465,7 +465,7 @@ const KYCform = () => {
                     name="province"
                     value={formData.province}
                     onChange={handleInputChange}
-                    className={`border rounded p-2 w-full ${hasError('province')}`}
+                    className="border rounded p-2 w-full"
                   >
                     <option value="">Select Province</option>
                     <option value="Province 1">Province 1</option>
@@ -478,7 +478,6 @@ const KYCform = () => {
                       Sudurpashchim Province
                     </option>
                   </select>
-                  {errors.province && <p className="text-red-500 text-sm">{errors.province}</p>}
                 </div>
 
                 <div className="flex flex-col w-full">
@@ -490,7 +489,7 @@ const KYCform = () => {
                     name="district"
                     value={formData.district}
                     onChange={handleInputChange}
-                    className={`border rounded p-2 w-full ${hasError('district')}`}
+                    className="border rounded p-2 w-full"
                   >
                     <option value="">Select District</option>
                     <option value="Kathmandu">Kathmandu</option>
@@ -499,7 +498,6 @@ const KYCform = () => {
                     <option value="Pokhara">Pokhara</option>
                     <option value="Chitwan">Chitwan</option>
                   </select>
-                  {errors.district && <p className="text-red-500 text-sm">{errors.district}</p>}
                 </div>
               </div>
 
@@ -514,9 +512,8 @@ const KYCform = () => {
                     name="municipality"
                     value={formData.municipality}
                     onChange={handleInputChange}
-                    className={`border rounded p-2 w-full ${hasError('municipality')}`}
+                    className="border rounded p-2 w-full"
                   />
-                  {errors.municipality && <p className="text-red-500 text-sm">{errors.municipality}</p>}
                 </div>
 
                 <div className="flex flex-col w-full">
@@ -529,9 +526,8 @@ const KYCform = () => {
                     name="streetAddress"
                     value={formData.streetAddress}
                     onChange={handleInputChange}
-                    className={`border rounded p-2 w-full ${hasError('streetAddress')}`}
+                    className="border rounded p-2 w-full"
                   />
-                  {errors.streetAddress && <p className="text-red-500 text-sm">{errors.streetAddress}</p>}
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-4">
@@ -544,21 +540,6 @@ const KYCform = () => {
                     id="ward"
                     name="ward"
                     value={formData.ward}
-                    onChange={handleInputChange}
-                    className={`border rounded p-2 w-full ${hasError('ward')}`}
-                  />
-                  {errors.ward && <p className="text-red-500 text-sm">{errors.ward}</p>}
-                </div>
-
-                <div className="flex flex-col w-full mt-3">
-                  <label htmlFor="tole" className="mb-1">
-                    Tole / Street
-                  </label>
-                  <input
-                    type="text"
-                    id="tole"
-                    name="tole"
-                    value={formData.tole}
                     onChange={handleInputChange}
                     className="border rounded p-2 w-full"
                   />
@@ -597,9 +578,8 @@ const KYCform = () => {
                     name="citizenshipNumber"
                     value={formData.citizenshipNumber}
                     onChange={handleInputChange}
-                    className={`border rounded p-2 w-full ${hasError('citizenshipNumber')}`}
+                    className="border rounded p-2 w-full"
                   />
-                  {errors.citizenshipNumber && <p className="text-red-500 text-sm">{errors.citizenshipNumber}</p>}
                 </div>
 
                 <div className="flex flex-col w-full">
@@ -612,23 +592,19 @@ const KYCform = () => {
                     name="panNumber"
                     value={formData.panNumber}
                     onChange={handleInputChange}
-                    className={`border rounded p-2 w-full ${hasError('panNumber')}`}
+                    className="border rounded p-2 w-full"
                   />
-                  {errors.panNumber && <p className="text-red-500 text-sm">{errors.panNumber}</p>}
                 </div>
               </div>
               <div className="mt-6">
                 <div className="flex flex-col md:flex-row justify-between gap-6">
                   <div className="flex flex-col gap-4">
-                    <h2 className="text-lg">
-                      Citizen Card Image{" "}
-                      <span className="text-gray-500">(Front)</span>
-                    </h2>
+                    <h2 className="text-lg">Business Registration Image </h2>
                     <div className="flex flex-col md:flex-row items-center gap-6">
                       <div className="w-32 h-32 rounded overflow-hidden border border-gray-300">
-                        {citizenshipFrontImage ? (
+                        {businessRegistrationImagePath ? (
                           <img
-                            src={citizenshipFrontImage}
+                            src={businessRegistrationImagePath}
                             alt="Citizenship Front"
                             className="w-full h-full object-cover"
                           />
@@ -645,7 +621,7 @@ const KYCform = () => {
                             type="file"
                             accept="image/*"
                             onChange={(e) =>
-                              handleImageChange(e, "citizenshipFront")
+                              handleImageChange(e, "businessRegistrationImage")
                             }
                             className="hidden"
                           />
@@ -655,105 +631,18 @@ const KYCform = () => {
                         </label>
                         <button
                           type="button"
-                          onClick={() => handleRemoveImage("citizenshipFront")}
-                          disabled={!citizenshipFrontImage}
+                          onClick={() =>
+                            handleRemoveImage("businessRegistrationImage")
+                          }
+                          disabled={!businessRegistrationImagePath}
                           className="px-3 py-2 border border-black text-black rounded text-sm hover:bg-green-500 hover:text-white transition disabled:opacity-50"
                         >
                           Remove
                         </button>
                       </div>
                     </div>
-                    {errors.citizenshipFrontImage && <p className="text-red-500 text-sm">{errors.citizenshipFrontImage}</p>}
-                  </div>
-
-                  <div className="flex flex-col gap-4">
-                    <h2 className="text-lg">Pan Card Image</h2>
-                    <div className="flex flex-col md:flex-row items-center gap-6">
-                      <div className="w-32 h-32 rounded overflow-hidden border border-gray-300">
-                        {panCardImage ? (
-                          <img
-                            src={panCardImage}
-                            alt="PAN Card"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                            No Image
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="grid grid-rows-2 gap-4">
-                        <label className="cursor-pointer mt-1">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleImageChange(e, "panCard")}
-                            className="hidden"
-                          />
-                          <span className="px-4 py-2 bg-green-500 text-white rounded text-sm">
-                            Upload
-                          </span>
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage("panCard")}
-                          disabled={!panCardImage}
-                          className="px-3 py-2 border border-black text-black rounded text-sm hover:bg-green-500 hover:text-white transition disabled:opacity-50"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                    {errors.panCardImage && <p className="text-red-500 text-sm">{errors.panCardImage}</p>}
                   </div>
                 </div>
-              </div>
-              <div className="mt-6">
-                <h2 className="text-lg mb-4">
-                  Citizen Card Image{" "}
-                  <span className="text-gray-500">(Back)</span>
-                </h2>
-                <div className="flex flex-col md:flex-row items-center gap-6">
-                  <div className="w-32 h-32 rounded overflow-hidden border border-gray-300">
-                    {citizenshipBackImage ? (
-                      <img
-                        src={citizenshipBackImage}
-                        alt="Citizenship Back"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                        No Image
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="grid grid-rows-2 gap-4">
-                    <label className="cursor-pointer mt-1">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          handleImageChange(e, "citizenshipBack")
-                        }
-                        className="hidden"
-                      />
-                      <span className="px-4 py-2 bg-green-500 text-white rounded text-sm">
-                        Upload
-                      </span>
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage("citizenshipBack")}
-                      disabled={!citizenshipBackImage}
-                      className="px-3 py-2 border border-black text-black rounded text-sm hover:bg-green-500 hover:text-white transition disabled:opacity-50"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-                {errors.citizenshipBackImage && <p className="text-red-500 text-sm">{errors.citizenshipBackImage}</p>}
               </div>
             </div>
           )}
@@ -761,7 +650,6 @@ const KYCform = () => {
 
         {/* Navigation Buttons */}
         <div className="text-center p-4 md:p-8">
-          <h4 className="text-green-500 p-2">Have doubts? Worry not!</h4>
           <div className="flex gap-3 justify-center">
             <button
               disabled={currentStep === 1}
@@ -787,6 +675,6 @@ const KYCform = () => {
       <Footer />
     </>
   );
-}
+};
 
 export default KYCform;
