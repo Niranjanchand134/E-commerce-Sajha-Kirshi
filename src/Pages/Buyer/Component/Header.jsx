@@ -201,7 +201,7 @@ const Header = () => {
 
           <div className="buttons d-flex align-items-center text-center gap-3">
             {user !== null ? (
-              <Dropdown overlay={menu} trigger={["hover"]}>
+              <Dropdown overlay={menu} trigger={["click"]}>
                 <a onClick={(e) => e.preventDefault()}>
                   <Space className="text-green-700">
                     <UserOutlined />

@@ -27,8 +27,22 @@ const FarmerAddProduct = () => {
   const [imageUpload, setImageUpload] = useState([]);
   const navigate = useNavigate();
 
+  // Validation errors state
+  const [errors, setErrors] = useState({
+    name: "",
+    category: "",
+    description: "",
+    quantity: "",
+    unitOfMeasurement: "",
+    price: "",
+    minimumOrderQuantity: "",
+    discountPrice: "",
+    deliveryOption: "",
+    images: "",
+  });
+
   // KYC status states
-  const [kycStatus, setKycStatus] = useState(null); // null, 'not_filled', 'pending', 'verified', 'rejected'
+  const [kycStatus, setKycStatus] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
@@ -50,17 +64,117 @@ const FarmerAddProduct = () => {
     expiryDate: "2025-07-30",
   });
 
+  // Validate product info tab
+  const validateProductInfo = () => {
+    const newErrors = {};
+    let isValid = true;
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Product name is required";
+      isValid = false;
+    } else if (formData.name.length > 100) {
+      newErrors.name = "Product name must be less than 100 characters";
+      isValid = false;
+    }
+
+    if (!formData.category) {
+      newErrors.category = "Category is required";
+      isValid = false;
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+      isValid = false;
+    } else if (formData.description.length > 500) {
+      newErrors.description = "Description must be less than 500 characters";
+      isValid = false;
+    }
+
+    if (formData.quantity <= 0) {
+      newErrors.quantity = "Quantity must be greater than 0";
+      isValid = false;
+    }
+
+    if (!formData.unitOfMeasurement) {
+      newErrors.unitOfMeasurement = "Unit of measurement is required";
+      isValid = false;
+    }
+
+    if (formData.price <= 0) {
+      newErrors.price = "Price must be greater than 0";
+      isValid = false;
+    }
+
+    if (formData.minimumOrderQuantity <= 0) {
+      newErrors.minimumOrderQuantity = "Minimum order quantity must be greater than 0";
+      isValid = false;
+    } else if (formData.minimumOrderQuantity > formData.quantity) {
+      newErrors.minimumOrderQuantity = "Cannot exceed available quantity";
+      isValid = false;
+    }
+
+    if (formData.discountPrice < 0) {
+      newErrors.discountPrice = "Discount cannot be negative";
+      isValid = false;
+    } else if (formData.discountPrice > formData.price) {
+      newErrors.discountPrice = "Discount cannot exceed price";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  // Validate delivery tab
+  const validateDeliveryInfo = () => {
+    const newErrors = {};
+    let isValid = true;
+
+    if (!formData.deliveryOption || formData.deliveryOption.length === 0) {
+      newErrors.deliveryOption = "At least one delivery option is required";
+      isValid = false;
+    }
+
+    if (images.length === 0) {
+      newErrors.images = "At least one image is required";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
   };
 
   const handleImageChange = async (e) => {
     const selectedFiles = Array.from(e.target.files);
-    const totalFiles = [...images, ...selectedFiles].slice(0, 5);
+    
+    // Validate file types and sizes
+    const validFiles = selectedFiles.filter(file => {
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        ErrorMessageToast("Only JPG, PNG, and GIF images are allowed");
+        return false;
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        ErrorMessageToast("Image size must be less than 5MB");
+        return false;
+      }
+      return true;
+    });
+
+    const totalFiles = [...images, ...validFiles].slice(0, 5);
     setImages(totalFiles);
 
-    const uploads = selectedFiles.map((file) => {
+    const uploads = validFiles.map((file) => {
       const data = new FormData();
       data.append("file", file);
       data.append("upload_preset", "SajhaKrishi");
@@ -70,6 +184,11 @@ const FarmerAddProduct = () => {
 
     setImageUpload(uploads);
     e.target.value = null;
+    
+    // Clear image error when images are added
+    if (errors.images && totalFiles.length > 0) {
+      setErrors({ ...errors, images: "" });
+    }
   };
 
   const removeImage = (indexToRemove) => {
@@ -77,7 +196,15 @@ const FarmerAddProduct = () => {
     setImages(updatedImages);
   };
 
+  const handleNextTab = () => {
+    if (validateProductInfo()) {
+      setActiveTab("delivery");
+    }
+  };
+
   const handleSubmit = async () => {
+    if (!validateDeliveryInfo()) return;
+
     const uploadPromises = imageUpload.map((uploadData) =>
       fetch("https://api.cloudinary.com/v1_1/dtwunctra/image/upload", {
         method: "POST",
@@ -111,7 +238,7 @@ const FarmerAddProduct = () => {
     }
   };
 
-  // Check KYC status
+  // Check KYC status (unchanged from original)
   const checkKycStatus = async () => {
     setLoading(true);
     try {
@@ -120,7 +247,6 @@ const FarmerAddProduct = () => {
       );
 
       if (response.data && response.data.id) {
-        // KYC exists, check verification status
         if (response.data.verified === true) {
           setKycStatus("verified");
         } else if (response.data.kycStatus === "PENDING") {
@@ -131,7 +257,6 @@ const FarmerAddProduct = () => {
           setKycStatus("pending");
         }
       } else {
-        // KYC not found
         setKycStatus("not_filled");
       }
     } catch (error) {
@@ -153,7 +278,7 @@ const FarmerAddProduct = () => {
     }
   }, [user]);
 
-  // Loading state
+  // Loading state (unchanged from original)
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -165,7 +290,7 @@ const FarmerAddProduct = () => {
     );
   }
 
-  // KYC not filled message
+  // KYC not filled message (unchanged from original)
   if (kycStatus === "not_filled") {
     return (
       <div className="max-w-2xl mx-auto p-6">
@@ -181,7 +306,7 @@ const FarmerAddProduct = () => {
           </p>
           <div className="space-y-3">
             <button
-              onClick={() => navigate("/Farmerlayout/FarmerKYCHome")} // Update with your KYC route
+              onClick={() => navigate("/Farmerlayout/FarmerKYCHome")}
               className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 w-full sm:w-auto"
             >
               Complete KYC Now
@@ -200,7 +325,7 @@ const FarmerAddProduct = () => {
     );
   }
 
-  // KYC pending verification message
+  // KYC pending verification message (unchanged from original)
   if (kycStatus === "pending") {
     return (
       <div className="max-w-2xl mx-auto p-6">
@@ -241,7 +366,7 @@ const FarmerAddProduct = () => {
     );
   }
 
-  // KYC rejected message
+  // KYC rejected message (unchanged from original)
   if (kycStatus === "rejected") {
     return (
       <div className="max-w-2xl mx-auto p-6">
@@ -257,7 +382,7 @@ const FarmerAddProduct = () => {
           </p>
           <div className="space-y-3">
             <button
-              onClick={() => navigate("/farmer/kyc")} // Update with your KYC route
+              onClick={() => navigate("/farmer/kyc")}
               className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 w-full sm:w-auto"
             >
               Resubmit KYC
@@ -276,7 +401,7 @@ const FarmerAddProduct = () => {
     );
   }
 
-  // Error state
+  // Error state (unchanged from original)
   if (kycStatus === "error") {
     return (
       <div className="max-w-2xl mx-auto p-6">
@@ -313,10 +438,6 @@ const FarmerAddProduct = () => {
               </div>
               <h4 className="text-xl font-semibold">Create Product</h4>
             </div>
-            {/* <div className="flex items-center gap-2 text-green-600">
-              <CheckCircleOutlined />
-              <span className="text-sm font-medium">KYC Verified</span>
-            </div> */}
           </div>
 
           {/* Tab Navigation */}
@@ -376,8 +497,13 @@ const FarmerAddProduct = () => {
                         name="name"
                         onChange={handleChange}
                         placeholder="Enter Product Name"
-                        className="border-2 p-2 rounded border-gray-500 focus:outline-none focus:border-gray-500"
+                        className={`border-2 p-2 rounded ${
+                          errors.name ? "border-red-500" : "border-gray-500"
+                        } focus:outline-none focus:border-gray-500`}
                       />
+                      {errors.name && (
+                        <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                      )}
                     </div>
                     <div className="flex flex-col w-full">
                       <label
@@ -392,7 +518,9 @@ const FarmerAddProduct = () => {
                           id="Category"
                           name="category"
                           onChange={handleChange}
-                          className="appearance-none border-2 p-2 pr-10 rounded border-gray-500 focus:outline-none focus:border-gray-500 w-full"
+                          className={`appearance-none border-2 p-2 pr-10 rounded ${
+                            errors.category ? "border-red-500" : "border-gray-500"
+                          } focus:outline-none focus:border-gray-500 w-full`}
                         >
                           <option value="">Select Category</option>
                           <option value="vegetables">Vegetables</option>
@@ -406,6 +534,9 @@ const FarmerAddProduct = () => {
                           <SlTag className="text-gray-500 -rotate-90" />
                         </div>
                       </div>
+                      {errors.category && (
+                        <p className="text-red-500 text-sm mt-1">{errors.category}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col w-full">
@@ -419,9 +550,14 @@ const FarmerAddProduct = () => {
                       id="description"
                       name="description"
                       onChange={handleChange}
-                      className="border-2 p-2 rounded border-gray-500"
+                      className={`border-2 p-2 rounded ${
+                        errors.description ? "border-red-500" : "border-gray-500"
+                      }`}
                       rows="4"
                     ></textarea>
+                    {errors.description && (
+                      <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                    )}
                   </div>
                 </div>
 
@@ -447,8 +583,13 @@ const FarmerAddProduct = () => {
                         name="quantity"
                         onChange={handleChange}
                         placeholder="Enter Quantity"
-                        className="border-2 p-2 rounded border-gray-500 focus:outline-none focus:border-gray-500"
+                        className={`border-2 p-2 rounded ${
+                          errors.quantity ? "border-red-500" : "border-gray-500"
+                        } focus:outline-none focus:border-gray-500`}
                       />
+                      {errors.quantity && (
+                        <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>
+                      )}
                     </div>
                     <div className="flex flex-col w-full">
                       <label
@@ -463,7 +604,9 @@ const FarmerAddProduct = () => {
                           id="unit"
                           name="unitOfMeasurement"
                           onChange={handleChange}
-                          className="appearance-none border-2 p-2 pr-10 rounded border-gray-500 focus:outline-none focus:border-gray-500 w-full"
+                          className={`appearance-none border-2 p-2 pr-10 rounded ${
+                            errors.unitOfMeasurement ? "border-red-500" : "border-gray-500"
+                          } focus:outline-none focus:border-gray-500 w-full`}
                         >
                           <option value="">Select Unit</option>
                           <option value="kg">Kilogram (kg)</option>
@@ -479,6 +622,9 @@ const FarmerAddProduct = () => {
                           <SlTag className="text-gray-500 -rotate-90" />
                         </div>
                       </div>
+                      {errors.unitOfMeasurement && (
+                        <p className="text-red-500 text-sm mt-1">{errors.unitOfMeasurement}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -494,8 +640,13 @@ const FarmerAddProduct = () => {
                         id="Minimumorder"
                         name="minimumOrderQuantity"
                         onChange={handleChange}
-                        className="border-2 p-2 rounded border-gray-500 focus:outline-none focus:border-gray-500"
+                        className={`border-2 p-2 rounded ${
+                          errors.minimumOrderQuantity ? "border-red-500" : "border-gray-500"
+                        } focus:outline-none focus:border-gray-500`}
                       />
+                      {errors.minimumOrderQuantity && (
+                        <p className="text-red-500 text-sm mt-1">{errors.minimumOrderQuantity}</p>
+                      )}
                     </div>
                     <div className="flex flex-col w-full">
                       <label
@@ -509,8 +660,13 @@ const FarmerAddProduct = () => {
                         id="price"
                         name="price"
                         onChange={handleChange}
-                        className="border-2 p-2 rounded border-gray-500 focus:outline-none focus:border-gray-500"
+                        className={`border-2 p-2 rounded ${
+                          errors.price ? "border-red-500" : "border-gray-500"
+                        } focus:outline-none focus:border-gray-500`}
                       />
+                      {errors.price && (
+                        <p className="text-red-500 text-sm mt-1">{errors.price}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col md:w-1/2">
@@ -525,14 +681,19 @@ const FarmerAddProduct = () => {
                       id="Dprice"
                       name="discountPrice"
                       onChange={handleChange}
-                      className="border-2 p-2 mr-4 rounded border-gray-500 focus:outline-none focus:border-gray-500"
+                      className={`border-2 p-2 mr-4 rounded ${
+                        errors.discountPrice ? "border-red-500" : "border-gray-500"
+                      } focus:outline-none focus:border-gray-500`}
                     />
+                    {errors.discountPrice && (
+                      <p className="text-red-500 text-sm mt-1">{errors.discountPrice}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex justify-end">
                   <button
                     className="bg-green-500 mt-4 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
-                    onClick={() => setActiveTab("delivery")}
+                    onClick={handleNextTab}
                   >
                     Next: Delivery & Media
                   </button>
@@ -564,8 +725,13 @@ const FarmerAddProduct = () => {
                         name="deliveryOption"
                         onChange={handleChange}
                         placeholder="Multi-select the delivery option"
-                        className="border-2 p-2 rounded border-gray-500 focus:outline-none focus:border-gray-500"
+                        className={`border-2 p-2 rounded ${
+                          errors.deliveryOption ? "border-red-500" : "border-gray-500"
+                        } focus:outline-none focus:border-gray-500`}
                       />
+                      {errors.deliveryOption && (
+                        <p className="text-red-500 text-sm mt-1">{errors.deliveryOption}</p>
+                      )}
                     </div>
                     <div className="flex flex-col w-full">
                       <label
@@ -643,11 +809,20 @@ const FarmerAddProduct = () => {
                       </div>
                     ))}
                   </div>
+                  {errors.images && (
+                    <p className="text-red-500 text-sm mt-1">{errors.images}</p>
+                  )}
                 </div>
-                <div className="flex justify-end">
+                <div className="flex justify-between mt-4">
+                  <button
+                    onClick={() => setActiveTab("product")}
+                    className="bg-gray-500 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300"
+                  >
+                    Back
+                  </button>
                   <button
                     onClick={handleSubmit}
-                    className="bg-green-500 mt-4 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300 w-full sm:w-auto"
+                    className="bg-green-500 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300"
                   >
                     Submit
                   </button>

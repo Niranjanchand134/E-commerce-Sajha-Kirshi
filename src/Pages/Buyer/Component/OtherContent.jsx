@@ -1,6 +1,36 @@
-
+import { useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 const OtherContent = () => {
+     const [activeIndex, setActiveIndex] = useState(null);
+
+  const toggleQuestion = (index) => {
+    setActiveIndex(activeIndex === index ? null : index);
+  };
+
+  const faqs = [
+    {
+      question: "What is React?",
+      answer: "React is a free and open-source front-end JavaScript library for building user interfaces based on components. It's maintained by Meta and a community of individual developers and companies."
+    },
+    {
+      question: "Why use Tailwind CSS?",
+      answer: "Tailwind CSS is a utility-first CSS framework that allows you to build designs directly in your markup. It provides low-level utility classes that let you build completely custom designs without ever leaving your HTML."
+    },
+    {
+      question: "How do I install Tailwind in a React project?",
+      answer: "You can install Tailwind CSS in your React project by following these steps: 1) Install Tailwind via npm, 2) Configure your template paths, 3) Add the Tailwind directives to your CSS, 4) Start your build process."
+    },
+    {
+      question: "Is this FAQ component responsive?",
+      answer: "Yes, this FAQ component is built with Tailwind CSS which includes responsive modifiers. You can adjust the styling for different screen sizes using Tailwind's responsive prefixes like 'md:', 'lg:', etc."
+    },
+    {
+      question: "Can I customize the animations?",
+      answer: "Absolutely! The transitions in this component use Tailwind's transition utilities. You can modify the duration, timing function, or other properties by changing the transition classes."
+    }
+  ];
     return(
         <>
         {/*cart*/}
@@ -32,6 +62,44 @@ const OtherContent = () => {
         </div>
         </div>
         {/*end cart */}
+
+        {/* FAQ Question set */}
+        <div className=" mx-auto px-4 py-8 ">
+            <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Frequently Asked Questions</h2>
+            
+            <div className="space-y-4">
+                {faqs.map((faq, index) => (
+                <div 
+                    key={index} 
+                    className="border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 bg-[#E9F1EE]"
+                >
+                    <button
+                    className={`w-full px-6 py-4 text-left flex justify-between items-center ${activeIndex === index ? 'bg-gray-50' : 'hover:bg-[#E9F1EE]'}`}
+                    onClick={() => toggleQuestion(index)}
+                    >
+                    <span className="text-lg font-medium text-gray-700">{faq.question}</span>
+                    <span className="text-gray-500 transform transition-transform duration-300">
+                        {activeIndex === index ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                        ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                        )}
+                    </span>
+                    </button>
+                    
+                    <div
+                    className={`px-6 overflow-hidden transition-all duration-300 ease-in-out ${activeIndex === index ? 'max-h-96 pb-4' : 'max-h-0'}`}
+                    >
+                    <p className="text-gray-600">{faq.answer}</p>
+                    </div>
+                </div>
+                ))}
+            </div>
+        </div>
 
         {/*top farmers */}
         {/* <div className="bg-[#E9F1EE] p-4">

@@ -128,28 +128,49 @@ const FarmerDashboard = () => {
 
   return (
     <>
-      <div className="flex justify-center py-8 px-22">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-center">
-          <div className="bg-[#FE9596] w-80 h-48 flex flex-col justify-center items-center rounded-sm shadow-md">
-            <h4 className="text-white">Total Products Listed</h4>
-            <h1 className="w-20 h-20 flex items-center justify-center border-4 border-white rounded-full text-white">
-              50
-            </h1>
-          </div>
-          <div className="bg-[#84C3F7] w-80 h-48 flex flex-col justify-center items-center rounded-sm shadow-md">
-            <h4 className="text-white">Active Orders</h4>
-            <h1 className="w-20 h-20 flex items-center justify-center border-4 border-white rounded-full text-white">
-              50
-            </h1>
-          </div>
-          <div className="bg-[#54DAC6] w-80 h-48 flex flex-col justify-center items-center rounded-sm shadow-md">
-            <h4 className="text-white">Pending Inquiries</h4>
-            <h1 className="w-20 h-20 flex items-center justify-center border-4 border-white rounded-full text-white">
-              50
-            </h1>
-          </div>
-        </div>
+      <div class="w-full bg-gray-50 p-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-6 text-center flex flex-col items-center">
+      <div class="flex items-center mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+        <h3 class="text-gray-500 text-sm font-medium uppercase">Total Orders</h3>
       </div>
+      <p class="text-3xl font-bold mt-2">18</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 text-center flex flex-col items-center">
+      <div class="flex items-center mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-gray-500 text-sm font-medium uppercase">Active Orders</h3>
+      </div>
+      <p class="text-3xl font-bold mt-2">18</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 text-center flex flex-col items-center">
+      <div class="flex items-center mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-gray-500 text-sm font-medium uppercase">Pending Orders</h3>
+      </div>
+      <p class="text-3xl font-bold mt-2">18</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 text-center flex flex-col items-center">
+      <div class="flex items-center mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <h3 class="text-gray-500 text-sm font-medium uppercase">Delivered Orders</h3>
+      </div>
+      <p class="text-3xl font-bold mt-2">18</p>
+    </div>
+  </div>
+</div>
 
       <div className="mt-4 rounded shadow p-4">
         <div className="flex items-center gap-4 mb-4">
