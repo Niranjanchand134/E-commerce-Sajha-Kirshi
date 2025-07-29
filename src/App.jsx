@@ -108,10 +108,7 @@ const App = () => {
           <Route path="/admin" element={<SuperAdminLayout />}>
             <Route index element={<SuperAdminHome />} />
             <Route path="farmer-kyc" element={<SuperAdminFarmer />} />
-            <Route
-              path="/admin/farmer-kyc/:id"
-              element={<SuperAdminFarmer />}
-            />
+            <Route path="farmer-kyc/:id" element={<SuperAdminFarmer />} />
             <Route path="buyer-kyc" element={<SuperAdminBuyer />} />
             <Route path="buyer-kyc/:id" element={<SuperAdminBuyer />} />
           </Route>

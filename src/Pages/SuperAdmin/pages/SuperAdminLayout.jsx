@@ -1,8 +1,6 @@
 import React, { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
 import { Affix, Avatar, Badge, Button, Col, Layout, Row, theme } from "antd";
-// import Logos from "../../components/Logos";
-// import FoodOrderingLogo from "/src/assets/Images/FoodOrderingLogo.png";
 import { useState } from "react";
 import {
   BellOutlined,
@@ -10,14 +8,13 @@ import {
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
 import { Content, Header } from "antd/es/layout/layout";
-// import NotificationDropdown from "../../components/NotificationDropdown";
 import Sider from "antd/es/layout/Sider";
 import SidebarMenulist from "../AdminComponent/SidebarMenulist";
 import ProfileDropdowns from "../../../components/ProfileDropdowns";
 
 const SuperAdminLayout = () => {
   const navigate = useNavigate();
-  const [Collaped, setCollaped] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [dropdownOpen, setdropdownOpen] = useState(false);
 
   const handleModal = () => {
@@ -25,31 +22,34 @@ const SuperAdminLayout = () => {
     setdropdownOpen(true);
   };
 
-  useEffect(()=>{
-  
-    if (localStorage.getItem("role")=== "user"){
-      navigate("/")
+  useEffect(() => {
+    if (localStorage.getItem("role") === "user") {
+      navigate("/");
     }
-     if (localStorage.getItem("role") === "restaurant") {
-       navigate("/restaurant");
-     }
+    if (localStorage.getItem("role") === "restaurant") {
+      navigate("/restaurant");
+    }
   }, []);
 
   return (
     <div>
       <Layout>
         <Affix offsetTop={0}>
-          <Sider
-            collapsed={Collaped}
-            collapsible
-            trigger={null}
-            theme={"light"}
-            className="sidebar"
-            style={{ height: "100vh" }}
-          >
-            <div className="flex">
-              {/* <img src={FoodOrderingLogo} className="w-20" /> */}
-              <p className="text-gray-800 text-lg font-bold mt-6">SajhaKrishi</p>
+          <Sider trigger={null} collapsible collapsed={collapsed} theme="light">
+            <div className="flex flex-col items-center justify-center mt-2">
+              {collapsed ? (
+                <img
+                  src="/assets/BuyersImg/images/logo1.png" // Your small logo path
+                  alt="logo-collapsed"
+                  className="w-10 h-10 mb-2 transition-all duration-300"
+                />
+              ) : (
+                <img
+                  src="/assets/BuyersImg/images/logo.png" // Your full logo path
+                  alt="logo-full"
+                  className="w-32 mb-2 transition-all duration-300"
+                />
+              )}
             </div>
             <SidebarMenulist />
           </Sider>
@@ -69,9 +69,9 @@ const SuperAdminLayout = () => {
               <Col span={20}>
                 <Button
                   className="toggle border-none"
-                  onClick={() => setCollaped(!Collaped)}
+                  onClick={() => setCollapsed(!collapsed)}
                 >
-                  {Collaped ? (
+                  {collapsed ? (
                     <MenuUnfoldOutlined style={{ height: "20px" }} />
                   ) : (
                     <MenuFoldOutlined />
@@ -80,19 +80,14 @@ const SuperAdminLayout = () => {
               </Col>
 
               <Col span={2}>
-                {/* Here i have commented */}
-                {/* <NotificationDropdown>
-                  <Badge count={5} onClick={handleModal}>
-                    <Avatar shape="circle">
-                      <BellOutlined style={{ fontSize: 20, color: "" }} />
-                    </Avatar>
-                  </Badge>
-                </NotificationDropdown> */}
+                <Badge count={5} onClick={handleModal}>
+                  <Avatar shape="circle">
+                    <BellOutlined style={{ fontSize: 20, color: "" }} />
+                  </Avatar>
+                </Badge>
               </Col>
 
-              {/* Here i have commented */}
               <Col span={2}>
-              
                 <ProfileDropdowns logout={true} />
               </Col>
             </Row>

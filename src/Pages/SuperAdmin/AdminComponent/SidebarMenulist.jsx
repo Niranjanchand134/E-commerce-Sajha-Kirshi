@@ -12,10 +12,18 @@ import React from "react";
 import { useNavigate } from "react-router";
 
 
-const SidebarMenulist = () => {
+const SidebarMenulist = ({collapsed}) => {
   const navigate = useNavigate();
 
   const handleMenuClick = (path) => {
+    navigate(path); // Navigate to the specified path
+  };
+
+  const handleBuyerClick = (path) => {
+    navigate(path); // Navigate to the specified path
+  };
+
+  const handleFarmerClick = (path) => {
     navigate(path); // Navigate to the specified path
   };
 
@@ -33,7 +41,7 @@ const SidebarMenulist = () => {
       <Menu.Item
         key="restaurant"
         className="text-base font-medium"
-        onClick={() => handleMenuClick("restaurant")}
+        onClick={() => handleFarmerClick("./farmer-kyc/:id")}
         icon={<ProductOutlined style={{ fontSize: "20px" }} color="#080808" />}
       >
         Farmer Kyc
@@ -41,7 +49,7 @@ const SidebarMenulist = () => {
       <Menu.Item
         key="user"
         className="text-base font-medium"
-        onClick={() => handleMenuClick("users")}
+        onClick={() => handleBuyerClick("./buyer-kyc/:id")}
         icon={< UsergroupDeleteOutlined  style={{ fontSize: "20px" }} color="#080808" />}
       >
         Buyer Kyc

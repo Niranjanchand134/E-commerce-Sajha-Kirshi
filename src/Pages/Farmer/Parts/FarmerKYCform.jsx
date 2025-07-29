@@ -23,6 +23,8 @@ const FarmerKYCform = () => {
   const [image, setImage] = useState(
     "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
   );
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     dateOfBirth: "",
@@ -54,6 +56,80 @@ const FarmerKYCform = () => {
     { step: 3, label: "Identification and Business Info" },
   ];
 
+  const validate = () => {
+    const newErrors = {};
+
+    // Step 1 validation
+    if (currentStep === 1) {
+      if (!form.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
+      if (!form.gender) newErrors.gender = "Gender is required";
+      if (!form.citizenshipNumber)
+        newErrors.citizenshipNumber = "Citizenship number is required";
+      if (!form.citizenshipIssuedDistrict)
+        newErrors.citizenshipIssuedDistrict = "Issued district is required";
+      if (!form.permanentAddress)
+        newErrors.permanentAddress = "Permanent address is required";
+      if (!form.profileImagePath)
+        newErrors.profileImage = "Profile image is required";
+
+      if (
+        form.citizenshipNumber &&
+        !/^\d{1,4}-\d{1,5}-\d{1,5}$/.test(form.citizenshipNumber)
+      ) {
+        newErrors.citizenshipNumber =
+          "Invalid citizenship number format (e.g., 1234-56789-01234)";
+      }
+    }
+
+    // Step 2 validation
+    if (currentStep === 2) {
+      if (!form.province) newErrors.province = "Province is required";
+      if (!form.district) newErrors.district = "District is required";
+      if (!form.municipality)
+        newErrors.municipality = "Municipality is required";
+      if (!form.wardNumber) newErrors.wardNumber = "Ward number is required";
+      if (!form.tole) newErrors.tole = "Tole is required";
+      if (!form.farmName) newErrors.farmName = "Farm name is required";
+      if (!form.farmSize) newErrors.farmSize = "Farm size is required";
+      if (!form.primaryCrops)
+        newErrors.primaryCrops = "Primary crops are required";
+      if (!form.annualProductionCapacity)
+        newErrors.annualProductionCapacity = "Production capacity is required";
+
+      if (form.farmSize && isNaN(form.farmSize)) {
+        newErrors.farmSize = "Farm size must be a number";
+      }
+    }
+
+    // Step 3 validation
+    if (currentStep === 3) {
+      if (!form.yearsOfExperience)
+        newErrors.yearsOfExperience = "Years of experience is required";
+      if (!form.farmingType)
+        newErrors.farmingType = "Farming type is required";
+      if (!form.esewaId) newErrors.esewaId = "eSewa ID is required";
+      if (!form.esewaQrImagePath)
+        newErrors.esewaQrImage = "eSewa QR code is required";
+
+      if (form.yearsOfExperience && isNaN(form.yearsOfExperience)) {
+        newErrors.yearsOfExperience = "Years must be a number";
+      }
+
+      if (form.esewaId && !/^(98|97)\d{8}$/.test(form.esewaId)) {
+        newErrors.esewaId = "Invalid eSewa ID (must be 98/97 followed by 8 digits)";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validate()) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
   const handleImageUpload = async (file, type) => {
     const data = new FormData();
     data.append("file", file);
@@ -82,8 +158,7 @@ const FarmerKYCform = () => {
         }));
       } else if (type === "esewaQr") {
         setForm((prev) => ({ ...prev, esewaQrImagePath: result.url }));
-      } 
-      else if (type === "profileImg") {
+      } else if (type === "profileImg") {
         setForm((prev) => ({ ...prev, profileImagePath: result.url }));
       } else if (type === "certificate") {
         setForm((prev) => ({ ...prev, certifications: result.url }));
@@ -96,8 +171,6 @@ const FarmerKYCform = () => {
     }
   };
 
-
-
   const handleEsewaQrChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -106,13 +179,13 @@ const FarmerKYCform = () => {
     }
   };
 
-   const handleProfileChange = async (e) => {
-     const file = e.target.files[0];
-     if (file) {
-       setProfileImage(URL.createObjectURL(file));
-       await handleImageUpload(file, "profileImg");
-     }
-   };
+  const handleProfileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImage(URL.createObjectURL(file));
+      await handleImageUpload(file, "profileImg");
+    }
+  };
 
   const handleCertificateChange = async (e) => {
     const file = e.target.files[0];
@@ -131,18 +204,24 @@ const FarmerKYCform = () => {
   };
 
   const handleSubmit = async () => {
-    console.log("Submitting form:", form);
-    try {
-      const response = await fillFarmerKyc(form);
-      console.log("KYC submitted successfully:", response);
-      navigate("/");
-      SuccesfulMessageToast("KYC submitted successfully");
-    } catch (error) {
-      console.error("Error submitting KYC:", error);
-      ErrorMessageToast("Error submitting KYC. Please try again.");
+    setIsSubmitting(true);
+    if (validate()) {
+      try {
+        const response = await fillFarmerKyc(form);
+        console.log("KYC submitted successfully:", response);
+        navigate("/");
+        SuccesfulMessageToast("KYC submitted successfully");
+      } catch (error) {
+        console.error("Error submitting KYC:", error);
+        ErrorMessageToast("Error submitting KYC. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      setIsSubmitting(false);
+      ErrorMessageToast("Please fix all errors before submitting");
     }
   };
-
 
   const handleRemove = () => {
     setImage(null);
@@ -367,10 +446,15 @@ const FarmerKYCform = () => {
                         name="number"
                         onChange={handleChange}
                         value={form.number}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.number ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                         style={{ "--tw-ring-color": "#4BAF47" }}
                         placeholder="Enter mobile number"
                       />
+                      {errors.number && (
+                        <p className="text-red-500 text-xs mt-1">{errors.number}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -407,17 +491,24 @@ const FarmerKYCform = () => {
                         name="permanentAddress"
                         onChange={handleChange}
                         value={form.permanentAddress}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.permanentAddress ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                         style={{ "--tw-ring-color": "#4BAF47" }}
                         placeholder="Enter permanent address"
                       />
+                      {errors.permanentAddress && (
+                        <p className="text-red-500 text-xs mt-1">{errors.permanentAddress}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700">
                         Gender
                       </label>
-                      <div className="flex border border-gray-200 rounded-lg overflow-hidden">
+                      <div className={`flex border ${
+                        errors.gender ? "border-red-500" : "border-gray-200"
+                      } rounded-lg overflow-hidden`}>
                         <button
                           type="button"
                           onClick={() =>
@@ -473,6 +564,9 @@ const FarmerKYCform = () => {
                           Other
                         </button>
                       </div>
+                      {errors.gender && (
+                        <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -488,9 +582,14 @@ const FarmerKYCform = () => {
                         name="dateOfBirth"
                         onChange={handleChange}
                         value={form.dateOfBirth}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.dateOfBirth ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                         style={{ "--tw-ring-color": "#4BAF47" }}
                       />
+                      {errors.dateOfBirth && (
+                        <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>
+                      )}
                     </div>
                   </div>
 
@@ -509,10 +608,15 @@ const FarmerKYCform = () => {
                         name="citizenshipNumber"
                         onChange={handleChange}
                         value={form.citizenshipNumber}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.citizenshipNumber ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                         style={{ "--tw-ring-color": "#4BAF47" }}
                         placeholder="Enter citizenship number"
                       />
+                      {errors.citizenshipNumber && (
+                        <p className="text-red-500 text-xs mt-1">{errors.citizenshipNumber}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -527,7 +631,9 @@ const FarmerKYCform = () => {
                         name="citizenshipIssuedDistrict"
                         onChange={handleChange}
                         value={form.citizenshipIssuedDistrict}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.citizenshipIssuedDistrict ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                         style={{ "--tw-ring-color": "#4BAF47" }}
                       >
                         <option value="">Select district</option>
@@ -538,13 +644,18 @@ const FarmerKYCform = () => {
                         <option value="Rupandehi">Rupandehi</option>
                         <option value="Nepalgunj">Nepalgunj</option>
                       </select>
+                      {errors.citizenshipIssuedDistrict && (
+                        <p className="text-red-500 text-xs mt-1">{errors.citizenshipIssuedDistrict}</p>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-3">
                     <label className="text-sm font-medium text-gray-700">
                       Profile Image
                     </label>
-                    <div className="border-2 border-dashed w-[65vh] border-gray-200 rounded-lg p-4 hover:border-green-300 transition-colors duration-200">
+                    <div className={`border-2 border-dashed w-[65vh] ${
+                      errors.profileImage ? "border-red-500" : "border-gray-200"
+                    } rounded-lg p-4 hover:border-green-300 transition-colors duration-200`}>
                       <div className="flex items-center space-x-4">
                         <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
                           {profileImage ? (
@@ -627,11 +738,12 @@ const FarmerKYCform = () => {
                         </div>
                       </div>
                     </div>
+                    {errors.profileImage && (
+                      <p className="text-red-500 text-xs mt-1">{errors.profileImage}</p>
+                    )}
                   </div>
                 </div>
               </div>
-
-              {/* Document Upload Section */}
             </div>
           )}
 
@@ -691,7 +803,9 @@ const FarmerKYCform = () => {
                         name="province"
                         onChange={handleChange}
                         value={form.province}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.province ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                       >
                         <option value="">Select Province</option>
                         <option value="Province 1">Province 1</option>
@@ -712,6 +826,9 @@ const FarmerKYCform = () => {
                           Sudurpashchim Province
                         </option>
                       </select>
+                      {errors.province && (
+                        <p className="text-red-500 text-xs mt-1">{errors.province}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -726,7 +843,9 @@ const FarmerKYCform = () => {
                         name="district"
                         onChange={handleChange}
                         value={form.district}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.district ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                       >
                         <option value="">Select District</option>
                         <option value="Kathmandu">Kathmandu</option>
@@ -736,6 +855,9 @@ const FarmerKYCform = () => {
                         <option value="Rupandehi">Rupandehi</option>
                         <option value="Nepalgunj">Nepalgunj</option>
                       </select>
+                      {errors.district && (
+                        <p className="text-red-500 text-xs mt-1">{errors.district}</p>
+                      )}
                     </div>
                   </div>
 
@@ -753,7 +875,9 @@ const FarmerKYCform = () => {
                         name="municipality"
                         onChange={handleChange}
                         value={form.municipality}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.municipality ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                       >
                         <option value="">Select Municipality</option>
                         <option value="Kathmandu Metropolitan">
@@ -775,6 +899,9 @@ const FarmerKYCform = () => {
                           Biratnagar Metropolitan
                         </option>
                       </select>
+                      {errors.municipality && (
+                        <p className="text-red-500 text-xs mt-1">{errors.municipality}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -790,9 +917,14 @@ const FarmerKYCform = () => {
                         name="wardNumber"
                         onChange={handleChange}
                         value={form.wardNumber}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.wardNumber ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                         placeholder="Enter ward number"
                       />
+                      {errors.wardNumber && (
+                        <p className="text-red-500 text-xs mt-1">{errors.wardNumber}</p>
+                      )}
                     </div>
                   </div>
 
@@ -811,9 +943,14 @@ const FarmerKYCform = () => {
                         name="tole"
                         onChange={handleChange}
                         value={form.tole}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.tole ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                         placeholder="Enter tole name"
                       />
+                      {errors.tole && (
+                        <p className="text-red-500 text-xs mt-1">{errors.tole}</p>
+                      )}
                     </div>
                     <div></div>
                   </div>
@@ -848,20 +985,25 @@ const FarmerKYCform = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label
-                        htmlFor="annualProductionCapacity"
+                        htmlFor="farmName"
                         className="text-sm font-medium text-gray-700"
                       >
                         Farm Name
                       </label>
                       <input
                         type="text"
-                        id="annualProductionCapacity"
+                        id="farmName"
                         name="farmName"
                         onChange={handleChange}
                         value={form.farmName}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.farmName ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                         placeholder="Enter farm name"
                       />
+                      {errors.farmName && (
+                        <p className="text-red-500 text-xs mt-1">{errors.farmName}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <label
@@ -876,9 +1018,14 @@ const FarmerKYCform = () => {
                         name="annualProductionCapacity"
                         onChange={handleChange}
                         value={form.annualProductionCapacity}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.annualProductionCapacity ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                         placeholder="e.g., 2000 KG"
                       />
+                      {errors.annualProductionCapacity && (
+                        <p className="text-red-500 text-xs mt-1">{errors.annualProductionCapacity}</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -894,9 +1041,14 @@ const FarmerKYCform = () => {
                         name="primaryCrops"
                         onChange={handleChange}
                         value={form.primaryCrops}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.primaryCrops ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                         placeholder="e.g., Rice, Wheat, Maize"
                       />
+                      {errors.primaryCrops && (
+                        <p className="text-red-500 text-xs mt-1">{errors.primaryCrops}</p>
+                      )}
                     </div>
                   </div>
 
@@ -912,7 +1064,9 @@ const FarmerKYCform = () => {
                           (in ropani / hectares)
                         </span>
                       </label>
-                      <div className="flex items-center border border-gray-200 rounded-lg focus-within:ring-2 focus-within:ring-green-500 focus-within:border-transparent transition-all duration-200">
+                      <div className={`flex items-center border ${
+                        errors.farmSize ? "border-red-500" : "border-gray-200"
+                      } rounded-lg focus-within:ring-2 focus-within:ring-green-500 focus-within:border-transparent transition-all duration-200`}>
                         <input
                           type="text"
                           id="farmSize"
@@ -935,6 +1089,9 @@ const FarmerKYCform = () => {
                           </select>
                         </div>
                       </div>
+                      {errors.farmSize && (
+                        <p className="text-red-500 text-xs mt-1">{errors.farmSize}</p>
+                      )}
                     </div>
                     <div></div>
                   </div>
@@ -996,9 +1153,14 @@ const FarmerKYCform = () => {
                           name="yearsOfExperience"
                           onChange={handleChange}
                           value={form.yearsOfExperience}
-                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                          className={`w-full px-4 py-2.5 text-sm border ${
+                            errors.yearsOfExperience ? "border-red-500" : "border-gray-200"
+                          } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                           placeholder="e.g., 5"
                         />
+                        {errors.yearsOfExperience && (
+                          <p className="text-red-500 text-xs mt-1">{errors.yearsOfExperience}</p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
@@ -1013,7 +1175,9 @@ const FarmerKYCform = () => {
                           name="farmingType"
                           onChange={handleChange}
                           value={form.farmingType}
-                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                          className={`w-full px-4 py-2.5 text-sm border ${
+                            errors.farmingType ? "border-red-500" : "border-gray-200"
+                          } rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200`}
                         >
                           <option value="">Select farming type</option>
                           <option value="Organic">Organic</option>
@@ -1021,6 +1185,9 @@ const FarmerKYCform = () => {
                           <option value="Commercial">Commercial</option>
                           <option value="Mixed">Mixed</option>
                         </select>
+                        {errors.farmingType && (
+                          <p className="text-red-500 text-xs mt-1">{errors.farmingType}</p>
+                        )}
                       </div>
                     </div>
 
@@ -1154,9 +1321,14 @@ const FarmerKYCform = () => {
                         name="esewaId"
                         onChange={handleChange}
                         value={form.esewaId}
-                        className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        className={`w-full px-4 py-2.5 text-sm border ${
+                          errors.esewaId ? "border-red-500" : "border-gray-200"
+                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                         placeholder="Enter your eSewa mobile number or ID"
                       />
+                      {errors.esewaId && (
+                        <p className="text-red-500 text-xs mt-1">{errors.esewaId}</p>
+                      )}
                     </div>
 
                     {/* eSewa QR code  Upload */}
@@ -1164,7 +1336,9 @@ const FarmerKYCform = () => {
                       <label className="text-sm font-medium text-gray-700">
                         eSewa QR Code
                       </label>
-                      <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors duration-200">
+                      <div className={`border-2 border-dashed ${
+                        errors.esewaQrImage ? "border-red-500" : "border-gray-200"
+                      } rounded-lg p-4 hover:border-blue-300 transition-colors duration-200`}>
                         <div className="flex items-center space-x-4">
                           <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
                             {esewaQrImage ? (
@@ -1246,6 +1420,9 @@ const FarmerKYCform = () => {
                           </div>
                         </div>
                       </div>
+                      {errors.esewaQrImage && (
+                        <p className="text-red-500 text-xs mt-1">{errors.esewaQrImage}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1267,17 +1444,17 @@ const FarmerKYCform = () => {
             </button>
             {currentStep === steps.length ? (
               <button
-                className="bg-[#4BAF47] p-2 w-32 rounded-full text-white text-lg font-bold"
+                className="bg-[#4BAF47] p-2 w-32 rounded-full text-white text-lg font-bold disabled:opacity-75"
                 onClick={handleSubmit}
                 type="submit"
+                disabled={isSubmitting}
               >
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
               </button>
             ) : (
               <button
-                disabled={currentStep === steps.length}
-                onClick={() => setCurrentStep(currentStep + 1)}
-                className="bg-[#4BAF47] p-2 w-32 rounded-full text-white text-lg font-bold disabled:opacity-50"
+                onClick={handleNext}
+                className="bg-[#4BAF47] p-2 w-32 rounded-full text-white text-lg font-bold"
               >
                 Next
               </button>
