@@ -11,12 +11,13 @@ const KYCform = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const {user} = useAuth();
+  const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
 
   // Form state
   const [formData, setFormData] = useState({
-    userId: user.id, // You'll need to get this from authentication/context
+    userId: user.id,
     fullName: "",
     phoneNumber: "",
     email: "",
@@ -50,6 +51,44 @@ const KYCform = () => {
     { step: 3, label: "Identification and Business Info" },
   ];
 
+  // Validation rules for each step
+  const validateStep = (step) => {
+    const newErrors = {};
+    
+    if (step === 1) {
+      if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
+      if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
+      else if (!/^\d{10}$/.test(formData.phoneNumber)) newErrors.phoneNumber = "Invalid phone number (10 digits required)";
+      if (!formData.email.trim()) newErrors.email = "Email is required";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Invalid email format";
+      if (!formData.dateOfBirth) newErrors.dateOfBirth = "Date of birth is required";
+      if (!formData.gender) newErrors.gender = "Gender is required";
+      if (!formData.profilePhotoPath) newErrors.profilePhoto = "Profile photo is required";
+    }
+    
+    if (step === 2) {
+      if (!formData.province) newErrors.province = "Province is required";
+      if (!formData.district) newErrors.district = "District is required";
+      if (!formData.municipality) newErrors.municipality = "Municipality is required";
+      if (!formData.streetAddress) newErrors.streetAddress = "Street address is required";
+      if (!formData.ward) newErrors.ward = "Ward number is required";
+      else if (isNaN(formData.ward) || formData.ward < 1 || formData.ward > 35) {
+        newErrors.ward = "Ward must be between 1-35";
+      }
+    }
+    
+    if (step === 3) {
+      if (!formData.citizenshipNumber) newErrors.citizenshipNumber = "Citizenship number is required";
+      if (!formData.panNumber) newErrors.panNumber = "PAN number is required";
+      if (!formData.citizenshipFrontImagePath) newErrors.citizenshipFrontImage = "Citizenship front image is required";
+      if (!formData.citizenshipBackImagePath) newErrors.citizenshipBackImage = "Citizenship back image is required";
+      if (!formData.panCardImagePath) newErrors.panCardImage = "PAN card image is required";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -57,18 +96,44 @@ const KYCform = () => {
       ...prev,
       [name]: value,
     }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = {...prev};
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   // Handle image uploads
   const handleImageChange = (e, imageType) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type and size
+      if (!file.type.match('image.*')) {
+        ErrorMessageToast("Please upload an image file");
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        ErrorMessageToast("Image size should be less than 2MB");
+        return;
+      }
+
       const imageUrl = URL.createObjectURL(file);
 
       switch (imageType) {
         case "profile":
           setProfileImage(imageUrl);
           setFormData((prev) => ({ ...prev, profilePhotoPath: file.name }));
+          if (errors.profilePhoto) {
+            setErrors(prev => {
+              const newErrors = {...prev};
+              delete newErrors.profilePhoto;
+              return newErrors;
+            });
+          }
           break;
         case "citizenshipFront":
           setCitizenshipFrontImage(imageUrl);
@@ -76,6 +141,13 @@ const KYCform = () => {
             ...prev,
             citizenshipFrontImagePath: file.name,
           }));
+          if (errors.citizenshipFrontImage) {
+            setErrors(prev => {
+              const newErrors = {...prev};
+              delete newErrors.citizenshipFrontImage;
+              return newErrors;
+            });
+          }
           break;
         case "citizenshipBack":
           setCitizenshipBackImage(imageUrl);
@@ -83,10 +155,24 @@ const KYCform = () => {
             ...prev,
             citizenshipBackImagePath: file.name,
           }));
+          if (errors.citizenshipBackImage) {
+            setErrors(prev => {
+              const newErrors = {...prev};
+              delete newErrors.citizenshipBackImage;
+              return newErrors;
+            });
+          }
           break;
         case "panCard":
           setPanCardImage(imageUrl);
           setFormData((prev) => ({ ...prev, panCardImagePath: file.name }));
+          if (errors.panCardImage) {
+            setErrors(prev => {
+              const newErrors = {...prev};
+              delete newErrors.panCardImage;
+              return newErrors;
+            });
+          }
           break;
       }
     }
@@ -100,18 +186,22 @@ const KYCform = () => {
           "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
         );
         setFormData((prev) => ({ ...prev, profilePhotoPath: "" }));
+        setErrors(prev => ({...prev, profilePhoto: "Profile photo is required"}));
         break;
       case "citizenshipFront":
         setCitizenshipFrontImage(null);
         setFormData((prev) => ({ ...prev, citizenshipFrontImagePath: "" }));
+        setErrors(prev => ({...prev, citizenshipFrontImage: "Citizenship front image is required"}));
         break;
       case "citizenshipBack":
         setCitizenshipBackImage(null);
         setFormData((prev) => ({ ...prev, citizenshipBackImagePath: "" }));
+        setErrors(prev => ({...prev, citizenshipBackImage: "Citizenship back image is required"}));
         break;
       case "panCard":
         setPanCardImage(null);
         setFormData((prev) => ({ ...prev, panCardImagePath: "" }));
+        setErrors(prev => ({...prev, panCardImage: "PAN card image is required"}));
         break;
     }
   };
@@ -122,14 +212,10 @@ const KYCform = () => {
     setSubmitMessage("");
 
     try {
-      // Validate required fields
-      if (
-        !formData.fullName ||
-        !formData.phoneNumber ||
-        !formData.email ||
-        !formData.dateOfBirth
-      ) {
-        throw new Error("Please fill in all required fields");
+      // Final validation before submission
+      if (!validateStep(currentStep)) {
+        setIsSubmitting(false);
+        return;
       }
 
       // Convert phone number to integer
@@ -142,21 +228,29 @@ const KYCform = () => {
       const response = await BuyerKycForm(submitData);
       SuccesfulMessageToast("KYC form submitted successfully!");
       navigate("/")
-      // Optionally reset form or redirect
-      // setFormData({...initialFormData});
     } catch (error) {
-      ErrorMessageToast("Failed to save kyc")
+      ErrorMessageToast("Failed to save kyc");
+      setIsSubmitting(false);
     } 
   };
 
   // Navigate to next step or submit
   const handleNext = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      handleSubmit();
+    // Validate current step before proceeding
+    if (validateStep(currentStep)) {
+      if (currentStep < steps.length) {
+        setCurrentStep(currentStep + 1);
+      } else {
+        handleSubmit();
+      }
     }
   };
+
+  // Helper function to check if a field has error
+  const hasError = (fieldName) => {
+    return errors[fieldName] ? "border-red-500" : "";
+  };
+
   return (
     <>
       <Header />
@@ -165,9 +259,9 @@ const KYCform = () => {
           <h5>Almost done, please follow the remarks below to complete KYC</h5>
           <p>Please upload photo and one of the following documents:</p>
           <ul>
-            <li>Citizenship Certificate</li>
-            <li>Driving Licence</li>
-            <li>Passport</li>
+            <li>Business Registration Certificate</li>
+            <li>Password Size Photo</li>
+            <li>PAN Cart</li>
           </ul>
         </div>
       </div>
@@ -219,9 +313,11 @@ const KYCform = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleInputChange}
-                className="border rounded p-2 w-full mb-2"
+                className={`border rounded p-2 w-full mb-1 ${hasError('fullName')}`}
                 required
               />
+              {errors.fullName && <p className="text-red-500 text-sm mb-2">{errors.fullName}</p>}
+
               <div className="flex flex-col md:flex-row gap-4 mt-3">
                 <div className="flex flex-col w-full">
                   <label htmlFor="phoneNumber" className="mb-1">
@@ -233,9 +329,10 @@ const KYCform = () => {
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
+                    className={`border rounded p-2 w-full ${hasError('phoneNumber')}`}
                     required
                   />
+                  {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
                 </div>
 
                 <div className="flex flex-col w-full">
@@ -248,9 +345,10 @@ const KYCform = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
+                    className={`border rounded p-2 w-full ${hasError('email')}`}
                     required
                   />
+                  {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-4">
@@ -268,8 +366,7 @@ const KYCform = () => {
                           : "bg-white"
                       }`}
                     >
-                      {" "}
-                      Male{" "}
+                      Male
                     </button>
                     <button
                       type="button"
@@ -282,8 +379,7 @@ const KYCform = () => {
                           : "bg-white"
                       }`}
                     >
-                      {" "}
-                      Female{" "}
+                      Female
                     </button>
                     <button
                       type="button"
@@ -296,10 +392,10 @@ const KYCform = () => {
                           : "bg-white"
                       }`}
                     >
-                      {" "}
-                      Other{" "}
+                      Other
                     </button>
                   </div>
+                  {errors.gender && <p className="text-red-500 text-sm">{errors.gender}</p>}
                 </div>
 
                 <div className="flex flex-col w-full mt-3">
@@ -312,9 +408,10 @@ const KYCform = () => {
                     name="dateOfBirth"
                     value={formData.dateOfBirth}
                     onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
+                    className={`border rounded p-2 w-full ${hasError('dateOfBirth')}`}
                     required
                   />
+                  {errors.dateOfBirth && <p className="text-red-500 text-sm">{errors.dateOfBirth}</p>}
                 </div>
 
                 <div className="flex flex-col w-full mt-3">
@@ -349,6 +446,7 @@ const KYCform = () => {
                       </button>
                     </div>
                   </div>
+                  {errors.profilePhoto && <p className="text-red-500 text-sm">{errors.profilePhoto}</p>}
                 </div>
               </div>
             </div>
@@ -367,7 +465,7 @@ const KYCform = () => {
                     name="province"
                     value={formData.province}
                     onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
+                    className={`border rounded p-2 w-full ${hasError('province')}`}
                   >
                     <option value="">Select Province</option>
                     <option value="Province 1">Province 1</option>
@@ -380,6 +478,7 @@ const KYCform = () => {
                       Sudurpashchim Province
                     </option>
                   </select>
+                  {errors.province && <p className="text-red-500 text-sm">{errors.province}</p>}
                 </div>
 
                 <div className="flex flex-col w-full">
@@ -391,7 +490,7 @@ const KYCform = () => {
                     name="district"
                     value={formData.district}
                     onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
+                    className={`border rounded p-2 w-full ${hasError('district')}`}
                   >
                     <option value="">Select District</option>
                     <option value="Kathmandu">Kathmandu</option>
@@ -400,6 +499,7 @@ const KYCform = () => {
                     <option value="Pokhara">Pokhara</option>
                     <option value="Chitwan">Chitwan</option>
                   </select>
+                  {errors.district && <p className="text-red-500 text-sm">{errors.district}</p>}
                 </div>
               </div>
 
@@ -414,8 +514,9 @@ const KYCform = () => {
                     name="municipality"
                     value={formData.municipality}
                     onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
+                    className={`border rounded p-2 w-full ${hasError('municipality')}`}
                   />
+                  {errors.municipality && <p className="text-red-500 text-sm">{errors.municipality}</p>}
                 </div>
 
                 <div className="flex flex-col w-full">
@@ -428,8 +529,9 @@ const KYCform = () => {
                     name="streetAddress"
                     value={formData.streetAddress}
                     onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
+                    className={`border rounded p-2 w-full ${hasError('streetAddress')}`}
                   />
+                  {errors.streetAddress && <p className="text-red-500 text-sm">{errors.streetAddress}</p>}
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-4">
@@ -443,8 +545,9 @@ const KYCform = () => {
                     name="ward"
                     value={formData.ward}
                     onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
+                    className={`border rounded p-2 w-full ${hasError('ward')}`}
                   />
+                  {errors.ward && <p className="text-red-500 text-sm">{errors.ward}</p>}
                 </div>
 
                 <div className="flex flex-col w-full mt-3">
@@ -494,8 +597,9 @@ const KYCform = () => {
                     name="citizenshipNumber"
                     value={formData.citizenshipNumber}
                     onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
+                    className={`border rounded p-2 w-full ${hasError('citizenshipNumber')}`}
                   />
+                  {errors.citizenshipNumber && <p className="text-red-500 text-sm">{errors.citizenshipNumber}</p>}
                 </div>
 
                 <div className="flex flex-col w-full">
@@ -508,8 +612,9 @@ const KYCform = () => {
                     name="panNumber"
                     value={formData.panNumber}
                     onChange={handleInputChange}
-                    className="border rounded p-2 w-full"
+                    className={`border rounded p-2 w-full ${hasError('panNumber')}`}
                   />
+                  {errors.panNumber && <p className="text-red-500 text-sm">{errors.panNumber}</p>}
                 </div>
               </div>
               <div className="mt-6">
@@ -558,6 +663,7 @@ const KYCform = () => {
                         </button>
                       </div>
                     </div>
+                    {errors.citizenshipFrontImage && <p className="text-red-500 text-sm">{errors.citizenshipFrontImage}</p>}
                   </div>
 
                   <div className="flex flex-col gap-4">
@@ -599,6 +705,7 @@ const KYCform = () => {
                         </button>
                       </div>
                     </div>
+                    {errors.panCardImage && <p className="text-red-500 text-sm">{errors.panCardImage}</p>}
                   </div>
                 </div>
               </div>
@@ -646,11 +753,11 @@ const KYCform = () => {
                     </button>
                   </div>
                 </div>
+                {errors.citizenshipBackImage && <p className="text-red-500 text-sm">{errors.citizenshipBackImage}</p>}
               </div>
             </div>
           )}
         </div>
-
 
         {/* Navigation Buttons */}
         <div className="text-center p-4 md:p-8">

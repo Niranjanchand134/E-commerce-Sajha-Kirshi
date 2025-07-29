@@ -192,7 +192,7 @@ const MyOrdersPage = () => {
           <p className="mt-2 text-gray-600">No Order Available</p>
           <button
           onClick={handleNavigation}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
           >
             Buy Now
           </button>
@@ -267,7 +267,7 @@ const MyOrdersPage = () => {
                 ? "You haven't placed any orders yet."
                 : `You don't have any ${activeTab} orders.`}
             </p>
-            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-green-700">
               Start Shopping
             </button>
           </div>
@@ -533,7 +533,7 @@ const MyOrdersPage = () => {
               </button>
               <button
                 onClick={cancelOrder}
-                className="px-4 py-2 bg-red-600 rounded-md text-sm font-medium text-white hover:bg-red-700"
+                className="px-4 py-2 bg-green-600 rounded-md text-sm font-medium text-white hover:bg-red-700"
               >
                 Yes, Cancel Order
               </button>
@@ -593,7 +593,7 @@ const MyOrdersPage = () => {
               </button>
               <button
                 onClick={handleSubmitReview}
-                className="px-4 py-2 bg-blue-600 rounded-md text-sm font-medium text-white hover:bg-blue-700"
+                className="px-4 py-2 bg-green-600 rounded-md text-sm font-medium text-white hover:bg-green-700"
               >
                 Submit Review
               </button>

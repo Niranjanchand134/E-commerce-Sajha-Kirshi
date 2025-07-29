@@ -7,11 +7,6 @@ import { FaLaptop, FaUserEdit, FaCheckCircle, FaUsers, FaUserCircle, FaMapMarker
 
 const infoItems = [
   {
-    icon: <FaUsers className="text-3xl text-green-700" />,
-    title: "Family information",
-    description: "Father, mother, grandfather & spouse name",
-  },
-  {
     icon: <FaUserCircle className="text-3xl text-green-700" />,
     title: "Personal information",
     description: "D.O.B, Gender, Occupation",
@@ -61,13 +56,13 @@ const KYChome = () => {
         </div>
         
         <div className="flex flex-col items-center justify-center px-4 py-8">
-            <div className="flex flex-col sm:flex-row justify-center gap-12 text-center">
+            <div className="flex flex-col sm:flex-row justify-center gap-32 text-center">
                 <div className="flex flex-col items-center">
                     <div className="bg-green-100 p-6 rounded-full mb-4">
                         <FaLaptop className="text-green-700 text-4xl" />
                     </div>
                     <h3 className="text-xl font-semibold">Step 1</h3>
-                    <p className="text-gray-600 mt-2">Log in to your Khalti account</p>
+                    <p className="text-gray-600 mt-2">Personal Information</p>
                 </div>
 
                 <div className="flex flex-col items-center">
@@ -75,7 +70,7 @@ const KYChome = () => {
                         <FaUserEdit className="text-green-700 text-4xl" />
                     </div>
                     <h3 className="text-xl font-semibold">Step 2</h3>
-                    <p className="text-gray-600 mt-2">Go to ‘Profile’ option & ‘Edit’.</p>
+                    <p className="text-gray-600 mt-2">Address</p>
                 </div>
 
                 <div className="flex flex-col items-center">
@@ -83,7 +78,7 @@ const KYChome = () => {
                         <FaCheckCircle className="text-green-700 text-4xl" />
                     </div>
                     <h3 className="text-xl font-semibold">Step 3</h3>
-                    <p className="text-gray-600 mt-2">Fill the form, Get verified to enjoy.</p>
+                    <p className="text-gray-600 mt-2">Identification and Business Info</p>
                 </div>
             </div>
 
@@ -116,10 +111,6 @@ const KYChome = () => {
                 <div className=" flex items-center text-white text-2xl font-bold">
                     <button onClick={handleClick} className="bg-[#EFBE44] p-2 w-48 rounded-full">Fill KYC</button>
                 </div>
-            </div>
-            <div className="text-center p-8">
-                <h1 className="text-green-500 p-2">Have doubts? Worry not!</h1>
-                <button onClick={handleClick} className="bg-[#EFBE44] p-2 w-48 rounded-full text-white text-2xl font-bold">Contact Us</button>
             </div>
             <Footer />
         </>
