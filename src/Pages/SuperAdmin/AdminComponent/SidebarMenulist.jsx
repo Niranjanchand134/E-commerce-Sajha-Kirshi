@@ -54,7 +54,6 @@ const SidebarMenulist = ({collapsed}) => {
       >
         Buyer Kyc
       </Menu.Item>
-      
     </Menu>
   );
 };
