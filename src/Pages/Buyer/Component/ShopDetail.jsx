@@ -138,7 +138,9 @@ const ShopDetail = () => {
 
 
       await addToCart(cartItem);
-      navigate("/addcart");
+      navigate("/addcart", {
+        state: { cartItem },
+      });
     } catch (error) {
       console.error("Failed to add to cart:", error);
       ErrorMessageToast(`Failed to add to cart: ${error.message}`);
@@ -393,7 +395,7 @@ const ShopDetail = () => {
         <div className="bg-green-600 rounded w-64 p-4">
           <h4>About</h4>
           <p>
-            {farmer?.description ||
+            {product?.description ||
               "Lorem ipsum is simply free text used by copytyping refreshing."}
           </p>
         </div>
@@ -411,10 +413,10 @@ const ShopDetail = () => {
           <h3 className="text-xl font-semibold mb-4 text-left ml-6">
             Farmer Details
           </h3>
-          <div className="flex items-start gap-6 bg-white p-6 rounded-lg">
+          <div className="flex items-start gap-6 bg-white p-6 rounded-[50px]">
             <img
               src={
-                farmer?.image ||
+                farmer?.profileImagePath ||
                 "https://t4.ftcdn.net/jpg/02/23/50/73/360_F_223507349_F5RFU3kL6eMt5LijOaMbWLeHUTv165CB.jpg"
               }
               alt={farmer?.farmName || "Farmer"}
@@ -428,7 +430,7 @@ const ShopDetail = () => {
                 {farmer?.dateOfBirth || "N/A"}
               </p>
               <p className="text-gray-700">
-                {farmer?.description || "No description available."}
+                {product?.description || "No description available."}
               </p>
             </div>
           </div>

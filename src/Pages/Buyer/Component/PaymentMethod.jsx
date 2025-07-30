@@ -28,12 +28,15 @@ const PaymentMethod = () => {
       id: 1,
       productName: "Mustang ko Apple",
       price: 999,
-      discountPrice: 0,
+      discountPercentage: 0,
       quantity: 1,
       imageUrl:
         "https://www.collinsdictionary.com/images/full/apple_158989157.jpg",
       farmName: "Pratik Farm",
       location: "Shadobato, Road, Lalitpur, Nepal",
+      originalPrice: 999,
+      discountedPrice: 999,
+      totalDiscountAmount: 0,
     },
   ];
 
@@ -125,7 +128,7 @@ const PaymentMethod = () => {
           productId: item.productId || item.id,
           productName: item.productName,
           price: item.price,
-          discountPrice: item.discountPrice || 0,
+          discountPercentage: item.discountPercentage || 0,
           quantity: item.quantity,
           farmName: item.farmName,
           location: item.location,
@@ -155,9 +158,6 @@ const PaymentMethod = () => {
       };
 
       if (selectedMethod === "esewa") {
-        console.log("items", items);
-        
-        console.log("esewa", orderData)
         const response = await initiateEsewaPayment(orderData);
         const paymentRequest = response;
 
@@ -191,7 +191,7 @@ const PaymentMethod = () => {
         form.submit();
       } else {
         const response = await createOrder(orderData);
-        await moveToCheckout(user.id, productIds); // Ensure items are marked for checkout
+        await moveToCheckout(user.id, productIds);
         ErrorMessageToast("Order confirmed with Cash on Delivery!", "success");
         navigate("/order-confirmation", { state: { orderData: response } });
       }
@@ -624,123 +624,73 @@ const PaymentMethod = () => {
             </div>
 
             {/* Right Column - Order Summary */}
-            <div className="lg:w-1/3">
-              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-gray-800">
-                    Order Summary
-                  </h2>
-                  <a
-                    href="/addcart"
-                    className="text-green-600 hover:text-green-700 text-sm font-medium flex items-center"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-1"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                      />
-                    </svg>
-                    Edit
-                  </a>
+            <div className="lg:w-1/3 bg-white rounded-lg shadow-sm p-6 sticky top-6 h-fit">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                Order Summary
+              </h2>
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">
+                    Items ({items.length}{" "}
+                    {items.length === 1 ? "item" : "items"})
+                  </span>
+                  <span className="font-medium">
+                    Rs. {itemTotal.toFixed(2)}
+                  </span>
                 </div>
-
-                {/* Order Items */}
-                <div className="space-y-4 mb-4">
-                  {items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-start border-b border-gray-100 pb-4"
-                    >
-                      <img
-                        src={
-                          item.imageUrl ||
-                          "https://www.collinsdictionary.com/images/full/apple_158989157.jpg"
-                        }
-                        alt={item.productName}
-                        className="w-16 h-16 object-cover rounded mr-4"
-                      />
-                      <div className="flex-1">
-                        <h5 className="font-semibold text-sm">
-                          {item.productName}
-                        </h5>
-                        <p className="text-sm text-gray-600">{item.farmName}</p>
-                        <p className="text-sm text-gray-600">{item.location}</p>
-                        {item.discountPrice > 0 && (
-                          <p className="text-sm text-green-500">
-                            {item.discountPrice}% off
-                          </p>
-                        )}
-                        <p className="text-sm text-gray-600">
-                          Qty: {item.quantity}
-                        </p>
-                        <p className="text-sm font-semibold text-green-500">
-                          Rs.{" "}
-                          {(
-                            (item.price *
-                              item.quantity *
-                              (100 - (item.discountPrice || 0))) /
-                            100
-                          ).toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                {discountAmount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Discount</span>
+                    <span className="font-medium text-green-600">
+                      -Rs. {discountAmount.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="font-medium">
+                    Rs. {(itemTotal - discountAmount).toFixed(2)}
+                  </span>
                 </div>
-
-                {/* Order Totals */}
-                <div className="border-t border-gray-200 pt-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-gray-600">
-                      Items ({items.length} item{items.length > 1 ? "s" : ""})
-                    </p>
-                    <p className="font-medium">Rs. {itemTotal.toFixed(2)}</p>
-                  </div>
-                  {discountAmount > 0 && (
-                    <div className="flex justify-between items-center mb-2">
-                      <p className="text-gray-600">Discount</p>
-                      <p className="font-medium text-green-500">
-                        -Rs. {discountAmount.toFixed(2)}
-                      </p>
-                    </div>
-                  )}
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-gray-600">Delivery Fee</p>
-                    <p className="font-medium">Rs. {deliveryFee.toFixed(2)}</p>
-                  </div>
-                  <div className="flex justify-between items-center mt-4">
-                    <div>
-                      <p className="font-semibold text-gray-800">Total</p>
-                      <p className="text-xs text-gray-500">
-                        All taxes included
-                      </p>
-                    </div>
-                    <p className="text-lg font-bold text-green-600">
-                      Rs. {total.toFixed(2)}
-                    </p>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Delivery Fee</span>
+                  <span className="font-medium">
+                    Rs. {deliveryFee.toFixed(2)}
+                  </span>
                 </div>
-
-                {/* Confirm Order Button */}
-                <button
-                  onClick={handleConfirmOrder}
-                  className={`w-full bg-green-600 text-white px-4 py-2 rounded mt-6 ${
-                    isLoading || !selectedMethod
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-green-700"
-                  }`}
-                  disabled={isLoading || !selectedMethod}
-                >
-                  {isLoading ? "Processing..." : "Confirm Order"}
-                </button>
               </div>
+              <div className="border-t border-gray-200 pt-3 mb-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold text-gray-800">Total</p>
+                    <p className="text-xs text-gray-400">All taxes included</p>
+                  </div>
+                  <p className="text-lg font-bold text-green-600">
+                    Rs. {total.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+              {discountAmount > 0 && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-green-800 font-medium">
+                    🎉 You're saving Rs. {discountAmount.toFixed(2)} with
+                    current discounts!
+                  </p>
+                </div>
+              )}
+              <button
+                onClick={handleConfirmOrder}
+                className={`w-full bg-green-600 text-white px-4 py-3 rounded-lg font-medium transition-colors ${
+                  isLoading || !selectedMethod
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-green-700"
+                }`}
+                disabled={isLoading || !selectedMethod}
+              >
+                {isLoading
+                  ? "Processing..."
+                  : `Confirm Order (${items.length} items)`}
+              </button>
             </div>
           </div>
         </div>
