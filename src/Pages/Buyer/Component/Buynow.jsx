@@ -9,7 +9,13 @@ const Buynow = () => {
   const { state } = useLocation();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { checkoutItems = [] } = state || {};
+  const {
+    checkoutItems = [],
+    itemTotal,
+    discountAmount,
+    deliveryFee,
+    total,
+  } = state || {};
 
   // Fallback data
   const defaultCheckoutItems = [
@@ -17,12 +23,15 @@ const Buynow = () => {
       id: 1,
       productName: "Mustang ko Apple",
       price: 999,
-      discountPrice: 0,
       quantity: 1,
       imageUrl:
         "https://www.collinsdictionary.com/images/full/apple_158989157.jpg",
       farmName: "Pratik Farm",
       location: "Shadobato, Road, Lalitpur, Nepal",
+      discountPercentage: 0,
+      originalPrice: 999,
+      discountedPrice: 999,
+      totalDiscountAmount: 0,
     },
   ];
 
@@ -31,33 +40,6 @@ const Buynow = () => {
   const getFormattedAddress = (location) => {
     return location || "Shadobato, Road, Lalitpur, Near Shadobato Chok";
   };
-
-  // Calculate totals
-  // Calculate totals
-  // const itemTotal = items.reduce(
-  //   (sum, item) =>
-  //     sum +
-  //     (item.discountPrice
-  //       ? (item.price * item.quantity * (100 - item.discountPrice)) / 100
-  //       : item.price * item.quantity),
-  //   0
-  // );
-  const originalTotal = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const discountAmount = items.reduce(
-    (sum, item) =>
-      item.discountPrice
-        ? sum + (item.price * item.quantity * item.discountPrice) / 100
-        : sum,
-    0
-  );
-
-  const itemTotal = originalTotal - discountAmount;
-  const deliveryFee = 135;
-  const total = itemTotal + deliveryFee;
 
   const handleProceedClick = () => {
     if (!user || !user.id) {
@@ -80,32 +62,39 @@ const Buynow = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen py-8">
-        <div className="container flex flex-col lg:flex-row gap-4 px-4">
+      <div className="min-h-screen py-8 bg-gray-50">
+        <div className="container flex flex-col lg:flex-row gap-6 px-4 max-w-6xl">
           {/* Product List */}
-          <div className="lg:w-2/3 bg-white p-4 rounded-lg">
-            <div className="flex justify-between items-center gap-4 bg-[#FAFAFA] p-2 mb-4">
-              <h5 className="font-semibold">Your Order</h5>
-              <a href="/addcart" className="no-underline text-black text-sm">
+          <div className="lg:w-2/3 bg-white rounded-lg shadow-sm p-6">
+            <div className="flex justify-between items-center gap-4 bg-gray-50 p-3 mb-4 rounded">
+              <h5 className="font-semibold text-gray-800">Your Order</h5>
+              <a
+                href="/addcart"
+                className="no-underline text-black text-sm font-medium"
+              >
                 EDIT
               </a>
             </div>
 
             <div className="mb-4">
-              <p className="font-medium">{user?.name || "Guest User"}</p>
-              <p>{getFormattedAddress(items[0]?.location)}</p>
+              <p className="font-medium text-gray-800">
+                {user?.name || "Guest User"}
+              </p>
+              <p className="text-gray-600 text-sm">
+                {getFormattedAddress(items[0]?.location)}
+              </p>
             </div>
 
             <div className="bg-gray-100 h-px mb-4"></div>
 
-            <h5 className="bg-[#FAFAFA] p-3 font-semibold mb-2">
+            <h5 className="bg-gray-50 p-3 font-semibold text-gray-800 mb-4 rounded">
               Package Summary
             </h5>
 
             {items.map((item, index) => (
               <div
                 key={item.id}
-                className="grid grid-cols-1 sm:grid-cols-7 gap-2 mt-4 items-center"
+                className="grid grid-cols-1 sm:grid-cols-7 gap-2 mt-4 items-center border-b pb-4 last:border-b-0"
               >
                 <div className="col-span-1">
                   <img
@@ -114,85 +103,107 @@ const Buynow = () => {
                       "https://www.collinsdictionary.com/images/full/apple_158989157.jpg"
                     }
                     alt={item.productName}
-                    className="w-24 h-24 object-cover rounded"
+                    className="w-20 h-20 object-cover rounded"
                   />
                 </div>
                 <div className="col-span-4">
-                  <h5 className="font-semibold">{item.productName}</h5>
+                  <h5 className="font-semibold text-gray-800">
+                    {item.productName}
+                  </h5>
                   <p className="text-sm text-gray-600">{item.farmName}</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs text-gray-400">
                     {getFormattedAddress(item.location)}
                   </p>
-                  {item.discountPrice > 0 && (
-                    <p className="text-sm text-green-500">
-                      {item.discountPrice}% off
-                    </p>
+                  {item.discountPercentage > 0 && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm text-green-600 font-medium">
+                        {item.discountPercentage}% OFF
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        Rs. {item.originalPrice.toFixed(2)} each
+                      </span>
+                    </div>
                   )}
                 </div>
                 <div className="col-span-2 flex justify-between items-center">
-                  <h5 className="text-green-500 font-semibold">
-                    Rs.{" "}
-                    {(
-                      (item.price *
-                        item.quantity *
-                        (100 - (item.discountPrice || 0))) /
-                      100
-                    ).toFixed(2)}
-                  </h5>
-                  <p className="text-sm">Qty: {item.quantity}</p>
+                  <div className="text-right">
+                    <h5 className="text-green-600 font-semibold">
+                      Rs. {(item.discountedPrice * item.quantity).toFixed(2)}
+                    </h5>
+                    {item.discountPercentage > 0 && (
+                      <div className="text-xs text-green-500">
+                        Save Rs. {item.totalDiscountAmount.toFixed(2)}
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Order Summary */}
-          <div className="lg:w-1/3 bg-white p-4 rounded-lg">
-            <div className="flex justify-between bg-[#FAFAFA] p-2 mb-4">
-              <h5 className="font-semibold">Order Summary</h5>
-              <a href="/addcart" className="no-underline text-black text-sm">
-                EDIT
-              </a>
-            </div>
-
-            {/* // Change items total display to: */}
-            <div className="flex justify-between items-center mb-2">
-              <p>
-                Items Total{" "}
-                <span className="text-gray-500">
-                  ({items.length} item{items.length > 1 ? "s" : ""})
+          <div className="lg:w-1/3 bg-white rounded-lg shadow-sm p-6 sticky top-6 h-fit">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Order Summary
+            </h2>
+            <div className="space-y-3 mb-4">
+              <div className="flex justify-between">
+                <span className="text-gray-600">
+                  Items ({items.length} {items.length === 1 ? "item" : "items"})
                 </span>
-              </p>
-              <h5>Rs. {originalTotal.toFixed(2)}</h5>
+                <span className="font-medium">Rs. {itemTotal.toFixed(2)}</span>
+              </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Discount</span>
+                  <span className="font-medium text-green-600">
+                    -Rs. {discountAmount.toFixed(2)}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-medium">
+                  Rs. {(itemTotal - discountAmount).toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Delivery Fee</span>
+                <span className="font-medium">
+                  Rs. {deliveryFee.toFixed(2)}
+                </span>
+              </div>
             </div>
-            {/* // Add discount display */}
+            <div className="border-t border-gray-200 pt-3 mb-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-semibold text-gray-800">Total</p>
+                  <p className="text-xs text-gray-400">All taxes included</p>
+                </div>
+                <p className="text-lg font-bold text-green-600">
+                  Rs. {total.toFixed(2)}
+                </p>
+              </div>
+            </div>
             {discountAmount > 0 && (
-              <div className="flex justify-between items-center mb-2">
-                <p>Discount</p>
-                <h5 className="text-green-500">
-                  -Rs. {discountAmount.toFixed(2)}
-                </h5>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-green-800 font-medium">
+                  🎉 You're saving Rs. {discountAmount.toFixed(2)} with current
+                  discounts!
+                </p>
               </div>
             )}
-            
-            <div className="flex justify-between items-center mb-2">
-              <p>Delivery Fee</p>
-              <h5>Rs. {deliveryFee.toFixed(2)}</h5>
-            </div>
-            <hr className="my-2" />
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-semibold">Total:</p>
-                <p className="text-sm text-gray-500">All Taxes included</p>
-              </div>
-              <h5 className="text-red-500 text-lg font-bold">
-                Rs. {total.toFixed(2)}
-              </h5>
-            </div>
             <button
               onClick={handleProceedClick}
-              className="bg-green-600 p-2 font-semibold text-white w-full rounded hover:bg-green-700 transition mt-4"
+              className={`w-full bg-green-600 text-white px-4 py-3 rounded-lg font-medium transition-colors ${
+                items.length === 0
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-green-700"
+              }`}
+              disabled={items.length === 0}
             >
-              Proceed to Pay
+              Proceed to Pay ({items.length} items)
             </button>
           </div>
         </div>

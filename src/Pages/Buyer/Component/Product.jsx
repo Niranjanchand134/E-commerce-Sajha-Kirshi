@@ -1,7 +1,16 @@
 import { Link } from "react-router-dom";
-import { CalendarOutlined, ClockCircleOutlined, RightOutlined, ShoppingOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  CalendarOutlined,
+  ClockCircleOutlined,
+  RightOutlined,
+  ShoppingOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { getDetailsByUserId, getProductByfarmer } from "../../../services/farmer/farmerApiService";
+import {
+  getDetailsByUserId,
+  getProductByfarmer,
+} from "../../../services/farmer/farmerApiService";
 import { getAllProduct } from "../../../services/authService";
 import { Avatar } from "antd";
 
@@ -27,9 +36,10 @@ const Product = () => {
 
         // Create a map of userId -> farmer details
         const farmerMap = farmerResponses.reduce((acc, farmer) => {
-          acc[farmer.id] = farmer;
+          acc[farmer.userId] = farmer; // Use userId instead of id
           return acc;
         }, {});
+        console.log("the farmer map is ", farmerMap);
         setFarmerDetails(farmerMap);
       } catch (error) {
         console.log("Error fetching products:", error);
@@ -168,15 +178,15 @@ const Product = () => {
 
                       {/* Farmer Info - Compact */}
                       <div className="flex items-center gap-1.5 pt-1 text-xs">
-                        <div className="w-5 h-5 mb-3 bg-gray-200 rounded-full flex items-center justify-center">
+                        <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center">
                           <UserOutlined style={{ fontSize: 10 }} />
                         </div>
-                        <div className="truncate">
+                        <div className="flex-1 min-w-0">
                           <p className="font-medium m-0 text-gray-700 truncate">
                             {farmerDetails[product.user.id]?.farmName ||
                               "Local Farm"}
                           </p>
-                          <p className="text m-0-gray-500 truncate">
+                          <p className="text-gray-500 m-0 truncate">
                             {farmerDetails[product.user.id]?.municipality ||
                               "Location"}
                           </p>

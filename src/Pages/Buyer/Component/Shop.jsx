@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import Footer from "./Footer";
 import Header from "./Header";
 import { Pagination } from "antd";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { getAllProduct } from "../../../services/authService";
 import { getDetailsByUserId } from "../../../services/farmer/farmerApiService";
-import { UserOutlined } from "@ant-design/icons";
+import { UserOutlined, ShoppingOutlined } from "@ant-design/icons";
 
 const Shop = () => {
   const location = useLocation();
@@ -15,15 +15,12 @@ const Shop = () => {
   const [locationFilter, setLocationFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
-  const [openIndex, setOpenIndex] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProduct] = useState([]);
   const [farmerDetails, setFarmerDetails] = useState({});
 
   const handleLocationChanges = (e) => setLocationFilter(e.target.value);
   const handleStatusChanges = (e) => setStatusFilter(e.target.value);
-  const toggleCategory = (index) =>
-    setOpenIndex(openIndex === index ? null : index);
 
   const productsPerPage = 9;
 
@@ -42,10 +39,10 @@ const Shop = () => {
           ?.toLowerCase()
           .includes(locationFilter.toLowerCase());
 
-      // URL category filter (based on product name)
+      // URL category filter (based on product category)
       const matchesCategory =
         urlCategory === "All" ||
-        product.name.toLowerCase().includes(urlCategory.toLowerCase());
+        product.category.toLowerCase() === urlCategory.toLowerCase();
 
       return matchesSearch && matchesLocation && matchesCategory;
     })
@@ -55,7 +52,7 @@ const Shop = () => {
       } else if (statusFilter === "higher-lower") {
         return b.price - a.price;
       }
-      return 0; // Default sorting (no change)
+      return 0; // Default sorting
     });
 
   const indexOfLast = currentPage * productsPerPage;
@@ -64,22 +61,10 @@ const Shop = () => {
 
   const handlePageChange = (page) => setCurrentPage(page);
 
-  const categories = [
-    { title: "Agriculture", subItems: ["Crops", "Tools", "Irrigation"] },
-    { title: "Farming", subItems: ["Animal Husbandry", "Aquaculture"] },
-    {
-      title: "Fresh Vegetables",
-      subItems: ["Leafy Greens", "Root Vegetables"],
-    },
-    { title: "Harvest", subItems: ["Seasonal", "Storage"] },
-    { title: "Organic Food", subItems: ["Certified", "Non-GMO"] },
-  ];
-
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const productResponse = await getAllProduct();
-        console.log("the response of product..", productResponse);
         setProduct(productResponse);
 
         // Fetch farmer details for each unique user ID
@@ -90,11 +75,10 @@ const Shop = () => {
           getDetailsByUserId(userId)
         );
         const farmerResponses = await Promise.all(farmerPromises);
-        console.log("the farmer details is ", farmerResponses);
 
         // Create a map of userId -> farmer details
         const farmerMap = farmerResponses.reduce((acc, farmer) => {
-          acc[farmer.id] = farmer;
+          acc[farmer.userId] = farmer;
           return acc;
         }, {});
         setFarmerDetails(farmerMap);
@@ -105,7 +89,6 @@ const Shop = () => {
 
     fetchProduct();
   }, []);
-
 
   return (
     <>
@@ -167,42 +150,6 @@ const Shop = () => {
         {/* Content Layout */}
         <div className="p-4 max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-start justify-content-center gap-6">
-            {/* Sidebar Categories */}
-            {/* <aside className="w-full md:w-1/4 bg-white border rounded-lg p-4">
-              <h2 className="text-lg font-semibold mb-4">Categories</h2>
-              <ul className="space-y-2">
-                {categories.map((cat, index) => (
-                  <li key={index}>
-                    <button
-                      onClick={() => toggleCategory(index)}
-                      className="flex items-center justify-between w-full text-left text-gray-700 font-medium hover:text-green-600"
-                    >
-                      {cat.title}
-                      <span
-                        className={`transform transition-transform ${
-                          openIndex === index ? "rotate-90" : ""
-                        }`}
-                      >
-                        ›
-                      </span>
-                    </button>
-                    {openIndex === index && (
-                      <ul className="mt-2 text-sm text-gray-500 space-y-2 text-[16px]">
-                        {cat.subItems.map((item, i) => (
-                          <li
-                            key={i}
-                            className="hover:text-green-600 cursor-pointer"
-                          >
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </aside> */}
-
             {/* Product Grid */}
             <div className="w-full mb-12">
               <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -214,7 +161,7 @@ const Shop = () => {
                         to={`/shopdetail/${product.id}`}
                         className="w-full bg-white rounded-lg border border-gray-200 hover:border-gray-300 shadow-xs hover:shadow-sm transition-all duration-200 no-underline"
                       >
-                        {/* Image Section - More compact */}
+                        {/* Image Section */}
                         <div className="relative w-full aspect-[4/3] bg-gray-50 flex items-center justify-center p-2">
                           <img
                             src={
@@ -241,18 +188,13 @@ const Shop = () => {
 
                             {product.discountPrice && (
                               <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                                {Math.round(
-                                  ((product.price - product.discountPrice) /
-                                    product.price) *
-                                    100
-                                )}
-                                % OFF
+                                {product.discountPrice}% OFF
                               </span>
                             )}
                           </div>
                         </div>
 
-                        {/* Product Info - More compact */}
+                        {/* Product Info */}
                         <div className="p-3 space-y-1.5">
                           <div className="flex justify-between items-start">
                             <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
@@ -263,31 +205,36 @@ const Shop = () => {
                             </span>
                           </div>
 
-                          {/* Pricing - Compact */}
+                          {/* Pricing */}
                           <div className="flex items-center gap-1.5">
-                            <span
-                              className={`font-medium ${
-                                product.discountPrice
-                                  ? "text-red-600"
-                                  : "text-gray-900"
-                              }`}
-                            >
-                              Rs {product.discountPrice || product.price}
-                            </span>
-                            {product.discountPrice && (
-                              <span className="text-xs text-gray-400 line-through">
+                            {product.discountPrice ? (
+                              <>
+                                <span className="text-red-600 font-medium">
+                                  Rs{" "}
+                                  {(
+                                    product.price -
+                                    (product.price * product.discountPrice) /
+                                      100
+                                  ).toFixed(2)}
+                                </span>
+                                <span className="text-gray-500 line-through ml-2">
+                                  Rs {product.price}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-gray-900 font-medium">
                                 Rs {product.price}
                               </span>
                             )}
                           </div>
 
-                          {/* Quantity & Min Order - Single line */}
+                          {/* Quantity & Min Order */}
                           <div className="text-xs text-gray-600">
                             {product.quantity} {product.unitOfMeasurement} • Min{" "}
                             {product.minimumOrderQuantity}
                           </div>
 
-                          {/* Dates - Compact */}
+                          {/* Dates */}
                           <div className="flex items-center text-xs text-gray-500 gap-1.5">
                             <span title="Harvest date">
                               🗓️{" "}
@@ -309,17 +256,17 @@ const Shop = () => {
                             )}
                           </div>
 
-                          {/* Farmer Info - Compact */}
+                          {/* Farmer Info */}
                           <div className="flex items-center gap-1.5 pt-1 text-xs">
-                            <div className="w-5 h-5 mb-3 bg-gray-200 rounded-full flex items-center justify-center">
+                            <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center">
                               <UserOutlined style={{ fontSize: 10 }} />
                             </div>
-                            <div className="truncate">
+                            <div className="flex-1 min-w-0">
                               <p className="font-medium m-0 text-gray-700 truncate">
                                 {farmerDetails[product.user.id]?.farmName ||
                                   "Local Farm"}
                               </p>
-                              <p className="text m-0-gray-500 truncate">
+                              <p className="text-gray-500 m-0 truncate">
                                 {farmerDetails[product.user.id]?.municipality ||
                                   "Location"}
                               </p>
@@ -330,7 +277,7 @@ const Shop = () => {
                     ))
                   ) : (
                     <div className="col-span-full text-center text-gray-600 py-10">
-                      <ShoppingOutlined className="text-4xl mb-2 text-gray-300" />
+                      <ShoppingOutlined className="text-4xl mb-2 mb-2 text-gray-300" />
                       <p>No products available</p>
                     </div>
                   )}
@@ -338,6 +285,18 @@ const Shop = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex justify-center mb-8">
+          <Pagination
+            current={currentPage}
+            total={filteredProducts.length}
+            pageSize={productsPerPage}
+            onChange={handlePageChange}
+            showSizeChanger={false}
+            showQuickJumper={false}
+          />
         </div>
       </div>
       <Footer />

@@ -1,6 +1,6 @@
 import { Space, Table, Button, Dropdown, Menu, Modal } from 'antd';
 import { createStyles } from "antd-style";
-import { FormOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { FormOutlined, DeleteOutlined, ExclamationCircleOutlined, DownOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import { getAllProduct, getAllProductById } from '../../../services/authService';
 import { categoryChanges, searchProduct, StatusChanges, updateProductById } from '../../../services/farmer/farmerApiService';
@@ -8,7 +8,7 @@ import FarmerEditProduct from '../Function/FarmerEditProduct';
 
 // Add your delete API import here
 import { deleteProductById } from '../../../services/farmer/farmerApiService';
-import { SuccesfulMessageToast } from '../../../utils/Tostify.util';
+import { ErrorMessageToast, SuccesfulMessageToast } from '../../../utils/Tostify.util';
 
 const useStyle = createStyles(({ css, token }) => {
   const { antCls } = token;
@@ -45,9 +45,16 @@ const StatusCell = ({ initialStatus, record, onStatusChange }) => {
       await updateProductById(record.id, { status: key });
       setStatus(key);
       onStatusChange(record.id, key);
-      SuccesfulMessageToast(`Status Changed to ${key}`)
+      SuccesfulMessageToast(`Status Changed to ${key}`);
     } catch (error) {
       console.error("Failed to update status:", error);
+
+      // Show specific error message for validation failures
+      if (error.message.includes("Cannot activate product")) {
+        ErrorMessageToast(error.message);
+      } else {
+        ErrorMessageToast("Failed to update status. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -66,15 +73,11 @@ const StatusCell = ({ initialStatus, record, onStatusChange }) => {
   return (
     <Dropdown overlay={menu} trigger={["click"]} disabled={loading}>
       <Button
-        style={{
-          backgroundColor: statusColors[status],
-          color: "white",
-          fontWeight: "600",
-          width: "100%",
-        }}
+        type="text"
+        className={`status-${status.toLowerCase()}`}
         loading={loading}
       >
-        {status}
+        {status} <DownOutlined />
       </Button>
     </Dropdown>
   );
@@ -205,7 +208,12 @@ const FarmerProducts = () => {
           <img
             src={firstImage}
             alt="product"
-            style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 4 }}
+            style={{
+              width: 60,
+              height: 60,
+              objectFit: "cover",
+              borderRadius: 4,
+            }}
             onError={(e) => {
               e.target.src = "https://via.placeholder.com/60x60?text=No+Image";
             }}
@@ -242,14 +250,11 @@ const FarmerProducts = () => {
       render: (qty) => `${qty || 0} kg`,
     },
     {
-      title: "Last Updated",
-      dataIndex: "lastUpdated",
-      key: "lastUpdated",
+      title: "Minimum Order Quantity",
+      dataIndex: "minimumOrderQuantity",
+      key: "minimumOrderQuantity",
       width: 160,
-      render: (timestamp) => {
-        if (!timestamp) return "N/A";
-        return new Date(timestamp).toLocaleString();
-      },
+      render: (qty) => `${qty || 0} kg`,
     },
     {
       title: "Status",
@@ -263,7 +268,9 @@ const FarmerProducts = () => {
           record={record}
           onStatusChange={(id, newStatus) => {
             setFilteredData((prev) =>
-              prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
+              prev.map((item) =>
+                item.id === id ? { ...item, status: newStatus } : item
+              )
             );
           }}
         />
