@@ -111,7 +111,7 @@ const Header = () => {
   return (
     <nav className="sticky top-0 bg-white p-2 shadow-md z-50">
       <div className="max-w-7xl mx-auto flex justify-around items-center">
-        <div className="w-28">
+        <div className="w-28" onClick={() => navigate('/')}>
           <img
             src="/assets/BuyersImg/images/logo.png"
             alt="logo"
