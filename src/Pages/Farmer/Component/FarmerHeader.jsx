@@ -26,12 +26,6 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
     <Menu
       items={[
         {
-          label: "Manage my ad",
-          key: "manage my ads",
-          icon: <FormOutlined />,
-          onClick: () => navigate("/manageAd"),
-        },
-        {
           label: "Profile",
           key: "profile",
           icon: <UserOutlined />,
@@ -99,7 +93,7 @@ const FarmerHeader = ({ collapsed, setCollapsed }) => {
       {/* Right-side icons (desktop only) */}
       <div className="hidden lg:flex items-center space-x-6 gap-6 text-xl text-gray-700">
         {/* Icons */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center ">
           {/* <div
             className="relative inline-block"
             onMouseEnter={() => setShowSearch(true)}

@@ -106,6 +106,7 @@ const Shop = () => {
     fetchProduct();
   }, []);
 
+
   return (
     <>
       <Header />

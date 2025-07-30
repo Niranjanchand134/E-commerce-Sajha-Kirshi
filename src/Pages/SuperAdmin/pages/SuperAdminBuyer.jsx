@@ -137,7 +137,7 @@ const SuperAdminBuyer = () => {
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
             />
-            <Button type="primary" onClick={fetchBuyerKyc}>
+            <Button type="btn btn-outline-danger" onClick={fetchBuyerKyc}>
               Search
             </Button>
           </Space>

@@ -12,11 +12,6 @@ const AccountSidebar = () => {
       label: "My Profile",
       path: "/setting",
     },
-    {
-      icon: <ShoppingBag className="h-5 w-5" />,
-      label: "Order History",
-      path: "/setting/orderHistory",
-    },
   ];
 
   return (

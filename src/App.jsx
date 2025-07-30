@@ -43,7 +43,7 @@ import AboutUs from "./Pages/Buyer/Component/AboutUs";
 import AccountPage from "./Pages/Buyer/Component/AccountPage";
 import AccountProfile from "./Pages/Buyer/Component/AccountProfile";
 import BuyerKycDetail from "./Pages/Buyer/Component/BuyerKycDetail";
-import Contact from "./Pages/Buyer/Component/contact";
+import Contact from "./Pages/Buyer/Component/Contact";
 import MyOrdersPage from "./Pages/Buyer/Component/MyordersPage";
 import ErrorPage_404 from "./Pages/Buyer/Component/ErrorPage_404";
 
@@ -108,10 +108,7 @@ const App = () => {
           <Route path="/admin" element={<SuperAdminLayout />}>
             <Route index element={<SuperAdminHome />} />
             <Route path="farmer-kyc" element={<SuperAdminFarmer />} />
-            <Route
-              path="/admin/farmer-kyc/:id"
-              element={<SuperAdminFarmer />}
-            />
+            <Route path="farmer-kyc/:id" element={<SuperAdminFarmer />} />
             <Route path="buyer-kyc" element={<SuperAdminBuyer />} />
             <Route path="buyer-kyc/:id" element={<SuperAdminBuyer />} />
           </Route>
