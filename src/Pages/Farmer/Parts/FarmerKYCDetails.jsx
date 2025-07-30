@@ -225,7 +225,7 @@ const FarmerKYCDetail = ({ farmerData }) => {
                 flex items-center space-x-3 px-6 py-3 rounded-2xl bg-gradient-to-r ${
                   statusConfig.bgGradient
                 } 
-                shadow-lg hover:shadow-xl transition-all duration-300 ${
+                shadow-lg hover:shadow-xl transition-all duration-800 ${
                   statusConfig.pulse ? "animate-pulse" : ""
                 }
               `}

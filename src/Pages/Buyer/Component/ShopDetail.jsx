@@ -138,7 +138,9 @@ const ShopDetail = () => {
 
 
       await addToCart(cartItem);
-      navigate("/addcart");
+      navigate("/addcart", {
+        state: { cartItem },
+      });
     } catch (error) {
       console.error("Failed to add to cart:", error);
       ErrorMessageToast(`Failed to add to cart: ${error.message}`);
