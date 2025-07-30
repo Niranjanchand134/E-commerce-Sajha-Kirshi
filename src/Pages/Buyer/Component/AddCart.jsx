@@ -66,9 +66,12 @@ const ProductCard = ({
     }
   };
 
-  const discountedPrice = item.discountPrice
-    ? (item.price * (100 - item.discountPrice)) / 100
-    : item.price;
+  // Calculate discounted price using discountPercentage from cart data
+  const originalPrice = item.price;
+  const discountPercentage = item.discountPercentage || 0;
+  const discountedPrice = originalPrice * (1 - discountPercentage / 100);
+  const totalDiscountAmount = (originalPrice - discountedPrice) * count;
+  const totalPrice = discountedPrice * count;
 
   return (
     <div className="flex items-center space-x-4 border-b pb-4 last:border-b-0">
@@ -89,14 +92,29 @@ const ProductCard = ({
       <div className="flex-1">
         <h5 className="font-semibold">{item.productName}</h5>
         <p className="text-sm text-gray-500">{item.description}</p>
-        {item.discountPrice > 0 && (
-          <p className="text-sm text-green-500">{item.discountPrice}% off</p>
+        <p className="text-xs text-gray-400">{item.location}</p>
+        {discountPercentage > 0 && (
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm text-green-600 font-medium">
+              {discountPercentage}% OFF
+            </span>
+            <span className="text-xs text-gray-400 ">
+              Rs. {originalPrice.toFixed(2)} each
+            </span>
+          </div>
         )}
       </div>
       <div className="flex gap-4 items-center">
         <div className="flex flex-col items-center justify-between space-y-2">
-          <div className="text-green-500 font-semibold">
-            Rs. {(discountedPrice * count).toFixed(2)}
+          <div className="text-right">
+            <div className="text-green-600 font-semibold">
+              Rs. {totalPrice.toFixed(2)}
+            </div>
+            {discountPercentage > 0 && (
+              <div className="text-xs text-green-500">
+                Save Rs. {totalDiscountAmount.toFixed(2)}
+              </div>
+            )}
           </div>
           <div className="flex gap-4 items-center text-gray-500 text-xl">
             <button
@@ -114,11 +132,11 @@ const ProductCard = ({
           </div>
         </div>
         <div className="flex items-center space-x-2 text-gray-600 font-semibold text-lg">
-          <button onClick={decrease} className="bg-[#DAF8D9] p-1">
+          <button onClick={decrease} className="bg-[#DAF8D9] p-1 rounded">
             <GrSubtract size={16} />
           </button>
-          <span className="text-xl">{count}</span>
-          <button onClick={increase} className="bg-[#DAF8D9] p-1">
+          <span className="text-xl min-w-[2rem] text-center">{count}</span>
+          <button onClick={increase} className="bg-[#DAF8D9] p-1 rounded">
             <IoMdAdd size={16} />
           </button>
         </div>
@@ -146,12 +164,15 @@ const AddCart = () => {
       setLoading(true);
       const response = await cartService.getCartItems(user.id);
       console.log("Fetched cart items:", response.data);
+
+      // Group items by farmName
       const groupedItems = response.data.reduce((acc, item) => {
         const farm = item.farmName || "Unknown Farm";
         if (!acc[farm]) acc[farm] = [];
         acc[farm].push(item);
         return acc;
       }, {});
+
       setCartItems(
         Object.entries(groupedItems).map(([farm, items]) => ({ farm, items }))
       );
@@ -235,40 +256,20 @@ const AddCart = () => {
         return;
       }
 
-      const checkoutItems = cartItems
-        .flatMap((farm) => farm.items)
-        .filter((item) => selectedItems.includes(item.id))
-        .map((item) => ({
-          ...item,
-          price: item.price, // already discounted
-          discountAmount: item.originalPrice
-            ? (item.originalPrice - item.price) * item.quantity
-            : 0,
-        }));
-
-      const itemTotal = selectedCartItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-      );
-
-      const discountAmount = selectedCartItems.reduce(
-        (sum, item) =>
-          item.originalPrice
-            ? sum + (item.originalPrice - item.price) * item.quantity
-            : sum,
-        0
-      );
-      const deliveryFee = selectedItems.length > 0 ? 135 : 0;
-      const total = itemTotal - discountAmount + deliveryFee;
-
-      const productIds = checkoutItems.map((item) => item.productId || item.id);
-      // await cartService.moveToCheckout(user.id, productIds);
+      const checkoutItems = selectedCartItems.map((item) => ({
+        ...item,
+        originalPrice: item.price,
+        discountedPrice:
+          item.price * (1 - (item.discountPercentage || 0) / 100),
+        totalDiscountAmount:
+          ((item.price * (item.discountPercentage || 0)) / 100) * item.quantity,
+      }));
 
       navigate("/buynow", {
         state: {
           checkoutItems,
-          itemTotal,
-          discountAmount,
+          itemTotal: subtotal,
+          discountAmount: totalDiscountAmount,
           deliveryFee,
           total,
         },
@@ -287,82 +288,126 @@ const AddCart = () => {
     }
   };
 
+  // Get selected cart items
   const selectedCartItems = cartItems
     .flatMap((farm) => farm.items)
     .filter((item) => selectedItems.includes(item.id));
 
-  // Replace existing calculations with:
-  const itemTotal = selectedCartItems.reduce((sum, item) => {
-    const discountedPrice = item.discountPrice
-      ? (item.price * (100 - item.discountPrice)) / 100
-      : item.price;
-    return sum + discountedPrice * item.quantity;
-  }, 0);
+  // Calculate totals more efficiently
+  const calculations = selectedCartItems.reduce(
+    (acc, item) => {
+      const originalPrice = item.price;
+      const discountPercentage = item.discountPercentage || 0;
+      const discountedPrice = originalPrice * (1 - discountPercentage / 100);
+      const itemTotal = discountedPrice * item.quantity;
+      const itemDiscount = (originalPrice - discountedPrice) * item.quantity;
+      const itemSubtotal = originalPrice * item.quantity;
 
-  const discountAmount = selectedCartItems.reduce((sum, item) => {
-    return item.discountPrice
-      ? sum + (item.price * item.quantity * item.discountPrice) / 100
-      : sum;
-  }, 0);
+      return {
+        subtotal: acc.subtotal + itemSubtotal,
+        totalAfterDiscount: acc.totalAfterDiscount + itemTotal,
+        totalDiscountAmount: acc.totalDiscountAmount + itemDiscount,
+      };
+    },
+    { subtotal: 0, totalAfterDiscount: 0, totalDiscountAmount: 0 }
+  );
 
+  const { subtotal, totalAfterDiscount, totalDiscountAmount } = calculations;
   const deliveryFee = selectedItems.length > 0 ? 135 : 0;
-  const total = itemTotal + deliveryFee;
+  const total = totalAfterDiscount + deliveryFee;
 
-  if (loading) return <div className="text-center p-4">Please Login first..</div>;
-  // if (error)
-  //   return <div className="text-center p-4 text-red-500">Error: {error}</div>;
-  // if (!user)
-  //   return (
-  //     <div className="text-center p-4">Please log in to view your cart</div>
-  //   );
+  if (loading) return <div className="text-center p-4">Loading cart...</div>;
+
+  if (!user) {
+    return (
+      <>
+        <Header />
+        <div className="text-center p-8">
+          <h2 className="text-xl font-semibold mb-4">
+            Please log in to view your cart
+          </h2>
+          <button
+            onClick={() => navigate("/Buyer-login")}
+            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+          >
+            Login
+          </button>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
       <Header />
       <div className="flex justify-center items-start min-h-screen bg-gray-50 py-8">
         <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-6 px-4">
-          <div className="lg:w-2/3 space-y-10">
-            {cartItems.map((farm, index) => {
-              const farmItemIds = farm.items.map((item) => item.id);
-              const isFarmSelected = farmItemIds.every((id) =>
-                selectedItems.includes(id)
-              );
+          <div className="lg:w-2/3 space-y-6">
+            {cartItems.length === 0 ? (
+              <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+                <h3 className="text-lg font-semibold mb-2">
+                  Your cart is empty
+                </h3>
+                <p className="text-gray-500 mb-4">
+                  Add some products to get started
+                </p>
+                <button
+                  onClick={() => navigate("/buyer-shop")}
+                  className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+                >
+                  Start Shopping
+                </button>
+              </div>
+            ) : (
+              cartItems.map((farm, index) => {
+                const farmItemIds = farm.items.map((item) => item.id);
+                const isFarmSelected = farmItemIds.every((id) =>
+                  selectedItems.includes(id)
+                );
 
-              return (
-                <div key={index}>
-                  <div className="flex items-center gap-1 mb-2">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox mb-1"
-                      checked={isFarmSelected}
-                      onChange={() => handleSelectFarm(farm.items)}
-                    />
-                    <h2 className="text-green-600 font-semibold text-lg">
-                      {farm.farm}
-                    </h2>
-                    <MdOutlineKeyboardArrowRight
-                      className="text-gray-400 text-xl mb-1"
-                      size={20}
-                    />
+                return (
+                  <div
+                    key={index}
+                    className="bg-white rounded-lg shadow-sm overflow-hidden"
+                  >
+                    <div className="bg-gray-50 px-4 py-3 border-b">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          className="form-checkbox"
+                          checked={isFarmSelected}
+                          onChange={() => handleSelectFarm(farm.items)}
+                        />
+                        <h2 className="text-green-600 font-semibold text-lg">
+                          {farm.farm}
+                        </h2>
+                        <MdOutlineKeyboardArrowRight
+                          className="text-gray-400 text-xl"
+                          size={20}
+                        />
+                      </div>
+                    </div>
+                    <div className="p-4 space-y-4">
+                      {farm.items.map((item) => (
+                        <ProductCard
+                          key={item.id}
+                          item={item}
+                          onUpdate={handleUpdate}
+                          onRemove={handleRemove}
+                          onToggleLike={handleToggleLike}
+                          isSelected={selectedItems.includes(item.id)}
+                          onSelect={handleSelectItem}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <div className="bg-white shadow-md rounded p-4 space-y-4">
-                    {farm.items.map((item) => (
-                      <ProductCard
-                        key={item.id}
-                        item={item}
-                        onUpdate={handleUpdate}
-                        onRemove={handleRemove}
-                        onToggleLike={handleToggleLike}
-                        isSelected={selectedItems.includes(item.id)}
-                        onSelect={handleSelectItem}
-                      />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
-          <div className="lg:w-1/3 bg-white rounded-lg shadow-sm p-6 sticky top-6">
+
+          <div className="lg:w-1/3 bg-white rounded-lg shadow-sm p-6 sticky top-6 h-fit">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
               Order Summary
             </h2>
@@ -372,16 +417,22 @@ const AddCart = () => {
                   Items ({selectedItems.length}{" "}
                   {selectedItems.length === 1 ? "item" : "items"})
                 </span>
-                <span className="font-medium">Rs. {itemTotal.toFixed(2)}</span>
+                <span className="font-medium">Rs. {subtotal.toFixed(2)}</span>
               </div>
-              {discountAmount > 0 && (
+              {totalDiscountAmount > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Discount</span>
-                  <span className="font-medium text-green-500">
-                    -Rs. {discountAmount.toFixed(2)}
+                  <span className="text-gray-600">Total Discount</span>
+                  <span className="font-medium text-green-600">
+                    -Rs. {totalDiscountAmount.toFixed(2)}
                   </span>
                 </div>
               )}
+              <div className="flex justify-between">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-medium">
+                  Rs. {totalAfterDiscount.toFixed(2)}
+                </span>
+              </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Delivery Fee</span>
                 <span className="font-medium">
@@ -400,16 +451,24 @@ const AddCart = () => {
                 </p>
               </div>
             </div>
+            {totalDiscountAmount > 0 && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-green-800 font-medium">
+                  🎉 You're saving Rs. {totalDiscountAmount.toFixed(2)} with
+                  current discounts!
+                </p>
+              </div>
+            )}
             <button
               onClick={handleCheckout}
-              className={`w-full bg-green-600 text-white px-4 py-2 rounded mt-4 ${
+              className={`w-full bg-green-600 text-white px-4 py-3 rounded-lg font-medium transition-colors ${
                 selectedItems.length === 0
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:bg-green-700"
               }`}
-              // disabled={selectedItems.length === 0}
+              disabled={selectedItems.length === 0}
             >
-              Proceed to Checkout
+              Proceed to Checkout ({selectedItems.length} items)
             </button>
           </div>
         </div>
