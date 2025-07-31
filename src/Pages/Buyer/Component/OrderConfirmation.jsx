@@ -36,6 +36,38 @@ const OrderConfirmation = () => {
     fetchOrderDetails();
   }, [orderId, orderData]);
 
+  // Function to determine if order is successful
+  const isOrderSuccessful = () => {
+    // Check URL status parameter first
+    if (status === "success") return true;
+
+    // If no URL status, check orderData
+    if (orderData) {
+      // For COD orders, consider them successful if they have PENDING status
+      // (since COD orders start as PENDING until delivery)
+      if (
+        orderData.payment?.paymentMethod === "COD" &&
+        (orderData.orderStatus === "PENDING" ||
+          orderData.orderStatus === "CONFIRMED")
+      ) {
+        return true;
+      }
+
+      // For other payment methods, check for confirmed/delivered status
+      if (
+        orderData.orderStatus === "CONFIRMED" ||
+        orderData.orderStatus === "DELIVERED" ||
+        orderData.payment?.paymentStatus === "COMPLETED"
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const orderSuccessful = isOrderSuccessful();
+
   return (
     <>
       <Header />
@@ -43,93 +75,251 @@ const OrderConfirmation = () => {
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="bg-white p-6 rounded-lg shadow-md">
             {isLoading ? (
-              <p className="text-center text-gray-600">
-                Loading order details...
-              </p>
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading order details...</p>
+              </div>
             ) : fetchError ? (
-              <p className="text-red-500 text-center">
-                {fetchError}
-                {error && ` Reason: ${error}`}
-              </p>
+              <div className="text-center py-8">
+                <div className="text-red-500 text-6xl mb-4">❌</div>
+                <p className="text-red-500 text-lg font-medium mb-2">
+                  Unable to load order details
+                </p>
+                <p className="text-gray-600">
+                  {fetchError}
+                  {error && ` Reason: ${error}`}
+                </p>
+              </div>
             ) : (
               <>
-                <h4 className="text-2xl font-semibold mb-4 text-center">
-                  {status === "success" ||
-                  orderData?.orderStatus === "CONFIRMED"
-                    ? "Order Confirmed!"
-                    : "Order Failed"}
-                </h4>
-                {status === "success" ||
-                orderData?.orderStatus === "CONFIRMED" ? (
-                  <div className="text-center">
-                    <p className="text-lg text-gray-700 mb-4">
-                      Your order has been successfully placed. Thank you for
-                      shopping with Sajha Krishi!
-                    </p>
-                    {orderData && (
-                      <div className="text-left">
-                        <h5 className="font-semibold text-lg mb-2">
-                          Order Details
-                        </h5>
-                        <p>
-                          <strong>Order ID:</strong> {orderData.id}
+                {/* Order Status Header */}
+                <div className="text-center mb-6">
+                  <div
+                    className={`text-6xl mb-4 ${
+                      orderSuccessful ? "text-green-500" : "text-red-500"
+                    }`}
+                  >
+                    {orderSuccessful ? "✅" : "❌"}
+                  </div>
+                  <h4
+                    className={`text-2xl font-semibold mb-2 ${
+                      orderSuccessful ? "text-green-700" : "text-red-700"
+                    }`}
+                  >
+                    {orderSuccessful ? "Order Confirmed!" : "Order Failed"}
+                  </h4>
+                  <p
+                    className={`text-lg ${
+                      orderSuccessful ? "text-gray-700" : "text-red-600"
+                    }`}
+                  >
+                    {orderSuccessful
+                      ? "Your order has been successfully placed. Thank you for shopping with Sajha Krishi!"
+                      : "Sorry, your payment failed or was cancelled."}
+                    {error && !orderSuccessful && ` Reason: ${error}`}
+                  </p>
+                </div>
+
+                {/* Order Details */}
+                {orderData && orderSuccessful && (
+                  <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                    <h5 className="font-semibold text-lg mb-4 text-gray-800 border-b pb-2">
+                      Order Details
+                    </h5>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      <div className="space-y-2">
+                        <p className="flex justify-between">
+                          <span className="font-medium text-gray-600">
+                            Order ID:
+                          </span>
+                          <span className="text-gray-800">
+                            {orderData.id || "Pending"}
+                          </span>
                         </p>
-                        <p>
-                          <strong>Total:</strong> Rs. {orderData.totalAmount}
+                        <p className="flex justify-between">
+                          <span className="font-medium text-gray-600">
+                            Total Amount:
+                          </span>
+                          <span className="text-green-600 font-semibold">
+                            Rs. {orderData.totalAmount}
+                          </span>
                         </p>
-                        <p>
-                          <strong>Payment Method:</strong>{" "}
-                          {orderData.payment.paymentMethod}
+                        <p className="flex justify-between">
+                          <span className="font-medium text-gray-600">
+                            Payment Method:
+                          </span>
+                          <span className="text-gray-800">
+                            {orderData.payment?.paymentMethod}
+                          </span>
                         </p>
-                        <p>
-                          <strong>Payment Status:</strong>{" "}
-                          {orderData.payment.paymentStatus}
+                        <p className="flex justify-between">
+                          <span className="font-medium text-gray-600">
+                            Payment Status:
+                          </span>
+                          <span
+                            className={`font-medium ${
+                              orderData.payment?.paymentStatus === "COMPLETED"
+                                ? "text-green-600"
+                                : orderData.payment?.paymentStatus === "PENDING"
+                                ? "text-yellow-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {orderData.payment?.paymentStatus}
+                          </span>
                         </p>
-                        {orderData.payment.transactionId && (
-                          <p>
-                            <strong>Transaction ID:</strong>{" "}
-                            {orderData.payment.transactionId}
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="flex justify-between">
+                          <span className="font-medium text-gray-600">
+                            Order Status:
+                          </span>
+                          <span
+                            className={`font-medium ${
+                              orderData.orderStatus === "CONFIRMED" ||
+                              orderData.orderStatus === "DELIVERED"
+                                ? "text-green-600"
+                                : orderData.orderStatus === "PENDING"
+                                ? "text-yellow-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {orderData.orderStatus}
+                          </span>
+                        </p>
+                        {orderData.payment?.transactionId && (
+                          <p className="flex justify-between">
+                            <span className="font-medium text-gray-600">
+                              Transaction ID:
+                            </span>
+                            <span className="text-gray-800 text-sm">
+                              {orderData.payment.transactionId}
+                            </span>
                           </p>
                         )}
-                        <div className="mt-4">
-                          <h6 className="font-semibold">Items:</h6>
-                          {orderData.items.map((item) => (
+                        {orderData.deliveryInfo?.fullName && (
+                          <p className="flex justify-between">
+                            <span className="font-medium text-gray-600">
+                              Delivery To:
+                            </span>
+                            <span className="text-gray-800">
+                              {orderData.deliveryInfo.fullName}
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Items List */}
+                    {orderData.items && orderData.items.length > 0 && (
+                      <div>
+                        <h6 className="font-semibold text-gray-800 mb-3 border-b pb-2">
+                          Items Ordered:
+                        </h6>
+                        <div className="space-y-3">
+                          {orderData.items.map((item, index) => (
                             <div
-                              key={item.id}
-                              className="flex justify-between mt-2"
+                              key={item.id || index}
+                              className="flex justify-between items-center bg-white p-3 rounded border"
                             >
-                              <span>
-                                {item.productName} (x{item.quantity})
-                              </span>
-                              <span>Rs. {item.price * item.quantity}</span>
+                              <div className="flex-1">
+                                <span className="font-medium text-gray-800">
+                                  {item.productName}
+                                </span>
+                                <span className="text-gray-600 ml-2">
+                                  (Qty: {item.quantity})
+                                </span>
+                                {item.farmName && (
+                                  <div className="text-sm text-gray-500 mt-1">
+                                    From: {item.farmName}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                <div className="font-medium text-gray-800">
+                                  Rs. {(item.price * item.quantity).toFixed(2)}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  Rs. {item.price}/unit
+                                </div>
+                              </div>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
+
+                    {/* COD Information */}
+                    {orderData.payment?.paymentMethod === "COD" && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+                        <h6 className="font-semibold text-yellow-800 mb-2">
+                          Cash on Delivery
+                        </h6>
+                        <p className="text-sm text-yellow-700">
+                          Please keep the exact amount ready. Our delivery
+                          person will collect Rs. {orderData.totalAmount} when
+                          your order arrives.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-center text-red-500 mb-4">
-                    Sorry, your payment failed or was cancelled.
-                    {error && ` Reason: ${error}`}
-                    <br />
-                    Please try again.
-                  </p>
                 )}
-                <div className="mt-6 flex justify-center gap-4">
-                  <button
-                    onClick={() => navigate("/addcart")}
-                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-                  >
-                    Back to Cart
-                  </button>
-                  <button
-                    onClick={() => navigate("/")}
-                    className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
-                  >
-                    Continue Shopping
-                  </button>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                  {orderSuccessful ? (
+                    <>
+                      <button
+                        onClick={() => navigate("/buyer-orders")}
+                        className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium"
+                      >
+                        View My Orders
+                      </button>
+                      <button
+                        onClick={() => navigate("/")}
+                        className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-medium"
+                      >
+                        Continue Shopping
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => navigate("/addcart")}
+                        className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium"
+                      >
+                        Back to Cart
+                      </button>
+                      <button
+                        onClick={() => navigate("/")}
+                        className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-medium"
+                      >
+                        Continue Shopping
+                      </button>
+                    </>
+                  )}
                 </div>
+
+                {/* Additional Information */}
+                {orderSuccessful && (
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h6 className="font-semibold text-blue-800 mb-2">
+                      What's Next?
+                    </h6>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>
+                        • You will receive an SMS/email confirmation shortly
+                      </li>
+                      <li>• Track your order status in "My Orders" section</li>
+                      <li>
+                        • Our team will contact you for delivery confirmation
+                      </li>
+                      <li>• For any questions, contact our customer support</li>
+                    </ul>
+                  </div>
+                )}
               </>
             )}
           </div>

@@ -26,7 +26,7 @@ const NotificationPopup = () => {
       setNotifications(data);
       setUnreadCount(data.filter((n) => !n.read).length);
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      // console.error("Error fetching notifications:", error);
       message.error("Failed to load notifications");
     }
   }, [user]);
@@ -49,12 +49,11 @@ const NotificationPopup = () => {
     });
 
     client.onConnect = () => {
-      console.log("Connected to WebSocket");
 
       // Subscribe to user-specific notifications
       client.subscribe(`/user/${user.id}/queue/notifications`, (message) => {
         const newNotification = JSON.parse(message.body);
-        console.log("New notification received:", newNotification);
+        // console.log("New notification received:", newNotification);
 
         setNotifications((prev) => [newNotification, ...prev]);
         setUnreadCount((prev) => prev + 1);
