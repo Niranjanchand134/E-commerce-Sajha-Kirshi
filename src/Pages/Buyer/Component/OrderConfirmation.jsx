@@ -272,13 +272,13 @@ const OrderConfirmation = () => {
                   {orderSuccessful ? (
                     <>
                       <button
-                        onClick={() => navigate("/buyer-orders")}
+                        onClick={() => navigate("/Myorderspage")}
                         className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium"
                       >
                         View My Orders
                       </button>
                       <button
-                        onClick={() => navigate("/")}
+                        onClick={() => navigate("/Buyer-shop")}
                         className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-medium"
                       >
                         Continue Shopping

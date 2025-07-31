@@ -901,7 +901,7 @@ const SuperAdminHome = () => {
             <div className="kyc-header">
               <Avatar
                 size={64}
-                src={selectedKyc.certifications}
+                src={selectedKyc.profilePhotoPath}
                 icon={<UserOutlined />}
               />
               <div className="kyc-title">
@@ -917,6 +917,11 @@ const SuperAdminHome = () => {
                 >
                   {selectedKyc.kycStatus}
                 </Tag>
+                {selectedKyc.verified && (
+                  <Tag color="blue" icon={<CheckCircleOutlined />}>
+                    Verified
+                  </Tag>
+                )}
               </div>
             </div>
 
@@ -942,82 +947,149 @@ const SuperAdminHome = () => {
                     {selectedKyc.citizenshipNumber}
                   </Descriptions.Item>
                   <Descriptions.Item label="PAN Number">
-                    {selectedKyc.panNumber}
+                    {selectedKyc.panNumber || "N/A"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="User ID">
+                    {selectedKyc.userId}
                   </Descriptions.Item>
                   <Descriptions.Item label="Address" span={2}>
-                    {selectedKyc.streetAddress}, {selectedKyc.landmark}
+                    {selectedKyc.streetAddress}
+                    {selectedKyc.landmark && (
+                      <span>, {selectedKyc.landmark}</span>
+                    )}
                     <br />
                     Ward {selectedKyc.ward}, {selectedKyc.municipality}
                     <br />
                     {selectedKyc.district}, {selectedKyc.province}
                   </Descriptions.Item>
-                </Descriptions>
-
-                <div className="document-images" style={{ marginTop: 20 }}>
-                  <h4>Identity Documents</h4>
-                  <Image.PreviewGroup>
-                    <Card
-                      title="Citizenship Front"
-                      style={{
-                        width: 240,
-                        display: "inline-block",
-                        marginRight: 16,
-                      }}
-                    >
-                      <Image
-                        width={200}
-                        src={selectedKyc.citizenshipFrontImagePath}
-                        alt="Citizenship Front"
-                      />
-                    </Card>
-                    <Card
-                      title="Citizenship Back"
-                      style={{
-                        width: 240,
-                        display: "inline-block",
-                        marginRight: 16,
-                      }}
-                    >
-                      <Image
-                        width={200}
-                        src={selectedKyc.citizenshipBackImagePath}
-                        alt="Citizenship Back"
-                      />
-                    </Card>
-                    <Card
-                      title="PAN Card"
-                      style={{ width: 240, display: "inline-block" }}
-                    >
-                      <Image
-                        width={200}
-                        src={selectedKyc.panCardImagePath}
-                        alt="PAN Card"
-                      />
-                    </Card>
-                  </Image.PreviewGroup>
-                </div>
-              </TabPane>
-
-              <TabPane tab="Additional Details" key="2">
-                <Descriptions bordered column={2}>
-                  <Descriptions.Item label="Profile Verified">
+                  <Descriptions.Item label="Verification Status" span={2}>
                     {selectedKyc.verified ? (
-                      <Tag color="green">Verified</Tag>
+                      <Tag color="green" icon={<CheckCircleOutlined />}>
+                        Verified
+                      </Tag>
                     ) : (
                       <Tag color="orange">Not Verified</Tag>
                     )}
                   </Descriptions.Item>
-                  <Descriptions.Item label="User ID">
-                    {selectedKyc.userId}
-                  </Descriptions.Item>
+                </Descriptions>
+
+                {/* Document Images */}
+                <div className="document-images" style={{ marginTop: 20 }}>
+                  <h4>Identity Documents</h4>
+                  <Row gutter={16}>
+                    {/* Profile Photo */}
+                    <Col span={8}>
+                      <Card
+                        title="Profile Photo"
+                        size="small"
+                        cover={
+                          selectedKyc.profilePhotoPath ? (
+                            <Image
+                              width="100%"
+                              height={200}
+                              style={{ objectFit: "cover" }}
+                              src={selectedKyc.profilePhotoPath}
+                              alt="Profile Photo"
+                            />
+                          ) : (
+                            <div
+                              style={{
+                                height: 200,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                background: "#f5f5f5",
+                              }}
+                            >
+                              <UserOutlined
+                                style={{ fontSize: 48, color: "#bfbfbf" }}
+                              />
+                            </div>
+                          )
+                        }
+                      />
+                    </Col>
+
+                    {/* Business Registration Document */}
+                    <Col span={8}>
+                      <Card
+                        title="Business Registration"
+                        size="small"
+                        cover={
+                          selectedKyc.businessRegistrationImagePath ? (
+                            <Image
+                              width="100%"
+                              height={200}
+                              style={{ objectFit: "cover" }}
+                              src={selectedKyc.businessRegistrationImagePath}
+                              alt="Business Registration"
+                            />
+                          ) : (
+                            <div
+                              style={{
+                                height: 200,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                background: "#f5f5f5",
+                                color: "#bfbfbf",
+                              }}
+                            >
+                              No Document
+                            </div>
+                          )
+                        }
+                      />
+                    </Col>
+                  </Row>
+                </div>
+              </TabPane>
+
+              <TabPane tab="KYC Status" key="2">
+                <Descriptions bordered column={2}>
                   <Descriptions.Item label="KYC ID">
                     {selectedKyc.id}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Registration Date">
-                    {new Date().toLocaleDateString()}{" "}
-                    {/* Replace with actual registration date if available */}
+                  <Descriptions.Item label="Current Status">
+                    <Tag
+                      color={
+                        selectedKyc.kycStatus === "PENDING"
+                          ? "orange"
+                          : selectedKyc.kycStatus === "APPROVED"
+                          ? "green"
+                          : "red"
+                      }
+                    >
+                      {selectedKyc.kycStatus}
+                    </Tag>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Profile Verified">
+                    {selectedKyc.verified ? (
+                      <Tag color="green" icon={<CheckCircleOutlined />}>
+                        Yes
+                      </Tag>
+                    ) : (
+                      <Tag color="red">No</Tag>
+                    )}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Application Date">
+                    {/* You can format this date if you have createdAt field */}
+                    {new Date().toLocaleDateString()}
                   </Descriptions.Item>
                 </Descriptions>
+
+                {/* Show rejection reason if status is rejected */}
+                {selectedKyc.kycStatus === "REJECTED" &&
+                  selectedKyc.rejectionReason && (
+                    <div style={{ marginTop: 20 }}>
+                      <Alert
+                        message="KYC Rejected"
+                        description={selectedKyc.rejectionReason}
+                        type="error"
+                        showIcon
+                      />
+                    </div>
+                  )}
               </TabPane>
             </Tabs>
 
@@ -1034,8 +1106,17 @@ const SuperAdminHome = () => {
               .kyc-title {
                 flex: 1;
               }
+              .kyc-title h3 {
+                margin: 0;
+                margin-bottom: 8px;
+              }
               .document-images {
                 margin-top: 20px;
+              }
+              .document-images h4 {
+                margin-bottom: 16px;
+                color: #1890ff;
+                font-weight: 600;
               }
             `}</style>
           </div>
