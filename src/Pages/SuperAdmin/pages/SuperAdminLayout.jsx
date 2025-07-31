@@ -79,17 +79,21 @@ const SuperAdminLayout = () => {
                 </Button>
               </Col>
 
-              <Col span={2}>
-                <Badge count={5} onClick={handleModal}>
-                  <Avatar shape="circle">
-                    <BellOutlined style={{ fontSize: 20, color: "" }} />
-                  </Avatar>
-                </Badge>
-              </Col>
+              <Row align="middle" gutter={[20, 0]} style={{ width: 'auto' }}>
+                  <Col flex="none">
+                    <Badge count={5} onClick={handleModal}>
+                      <Avatar shape="circle" style={{ background: "white" }} >
+                        <BellOutlined style={{ fontSize: 20, color: "black" }} />
+                      </Avatar>
+                    </Badge>
+                  </Col>
 
-              <Col span={2}>
-                <ProfileDropdowns logout={true} />
-              </Col>
+                  <Col flex="none">
+                    <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                      <ProfileDropdowns logout={true} />
+                    </div>
+                  </Col>
+                </Row>
             </Row>
           </Header>
 

@@ -11,24 +11,24 @@ const OtherContent = () => {
 
   const faqs = [
     {
-      question: "What is React?",
-      answer: "React is a free and open-source front-end JavaScript library for building user interfaces based on components. It's maintained by Meta and a community of individual developers and companies."
+      question: "What is Sajha Krishi?",
+      answer: "Sajha Krishi is an online platform that connects farmers and buyers directly to trade fresh agricultural produce like fruits, vegetables, and grains with transparency and trust."
     },
     {
-      question: "Why use Tailwind CSS?",
-      answer: "Tailwind CSS is a utility-first CSS framework that allows you to build designs directly in your markup. It provides low-level utility classes that let you build completely custom designs without ever leaving your HTML."
+      question: "How do I register as a farmer or buyer?",
+      answer: "Click on the Sign Up button and choose your role as either a Farmer or a Buyer. Fill out the required details and complete the KYC process to start using the platform."
     },
     {
-      question: "How do I install Tailwind in a React project?",
-      answer: "You can install Tailwind CSS in your React project by following these steps: 1) Install Tailwind via npm, 2) Configure your template paths, 3) Add the Tailwind directives to your CSS, 4) Start your build process."
+      question: "What documents are required for KYC verification?",
+      answer: "For farmers: Citizenship number, scanned citizenship image, farm details, and bank info. For buyers: Citizenship number and optional business PAN (for shops/businesses)."
     },
     {
-      question: "Is this FAQ component responsive?",
-      answer: "Yes, this FAQ component is built with Tailwind CSS which includes responsive modifiers. You can adjust the styling for different screen sizes using Tailwind's responsive prefixes like 'md:', 'lg:', etc."
+      question: "How do I add a product for sale?",
+      answer: "Log in to your Farmer Dashboard and click on “Add New Product.” Enter the details like product name, price per unit, quantity, and upload a clear photo."
     },
     {
-      question: "Can I customize the animations?",
-      answer: "Absolutely! The transitions in this component use Tailwind's transition utilities. You can modify the duration, timing function, or other properties by changing the transition classes."
+      question: "Can I chat with buyers/farmers before making a deal?",
+      answer: "Yes, Sajha Krishi offers an in-platform chat feature where farmers and buyers can communicate directly regarding product availability, pricing, and delivery."
     }
   ];
     return(
@@ -55,7 +55,7 @@ const OtherContent = () => {
                 <h1 className="text-4xl font-bold ">
                     Be Healthy & Eat Only Fresh <br /> Organic Vegetables
                 </h1>
-                <button className="bg-green-500 px-6 py-2 text-white rounded shadow">
+                <button className="mt-4 bg-green-600 hover:bg-green-500 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300">
                     Shop Now
                 </button>
             </div>

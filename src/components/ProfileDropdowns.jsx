@@ -1,8 +1,6 @@
-import { LogoutOutlined, SettingOutlined } from "@ant-design/icons";
+import { LogoutOutlined, SettingOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Dropdown, Modal } from "antd";
 import React, { useContext, useState } from "react";
-// import Profile from "/src/assets/images/ProfilePic.jpg";
-import { icons } from "antd/es/image/PreviewGroup";
 import { useNavigate } from "react-router";
 // import { UserContext } from "../../Context/User.context";
 
@@ -29,6 +27,7 @@ const items = [
 
 const ProfileDropdowns = (logout) => {
 //   const { _rest, _setRest } = useContext();
+//   const { user } = useContext(UserContext); // Assuming you have user context
 
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,6 +45,7 @@ const ProfileDropdowns = (logout) => {
     navigate("/login");
     console.log("Logout clicked");
   };
+  
   const handleCancel = () => {
     setIsModalOpen(false);
   };
@@ -57,17 +57,33 @@ const ProfileDropdowns = (logout) => {
       setIsModalOpen(true);
     }
   };
+
   return (
-    <div>
-      <Dropdown menu={{ items, onClick: handleMenuClick }}>
-        <Avatar className="profile-dropdown" src={"hl"} />
+    <div className="flex items-center justify-center my-3 transition-all duration-300 cursor-pointer text-green-500 hover:text-green-500">
+      <Dropdown 
+        menu={{ items, onClick: handleMenuClick }}
+        trigger={["hover"]}
+      >
+        <a onClick={(e) => e.preventDefault()} className="no-underline">
+          <div className="flex items-center space-x-2 text-green-500">
+            <UserOutlined className="text-2xl" />
+            <span className="text-base">Profile</span>
+          </div>
+        </a>
       </Dropdown>
+      
       <Modal
         title="Are you sure want to Logout!"
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
-      ></Modal>
+        okButtonProps={{
+          style: {
+            backgroundColor: '#52c41a',
+            borderColor: '#52c41a',
+          }
+        }}
+      />
     </div>
   );
 };

@@ -1,4 +1,16 @@
+import { useNavigate } from 'react-router-dom';
+
 const Footer = () => {
+  const navigate = useNavigate();
+
+  const menuItems = [
+    { name: "About", path: "/aboutUs" },
+    { name: "Products", path: "/shop" },
+    { name: "Login", path: "/Buyer-login" },
+    { name: "Register as Buyer", path: "/Buyer-register" },
+    { name: "Register as Farmer", path: "/Farmer-register" },
+    { name: "Contact", path: "/contact" }
+  ];
   return (
     <>
       <footer className="bg-[#24231D] text-white py-6 px-4 md:px-40">
@@ -22,12 +34,16 @@ const Footer = () => {
             <h5 className="text-lg font-semibold mb-3">Customer Service</h5>
             <img src="/assets/BuyersImg/images/underline.png" className="h-8" alt="underline" />
             <ul className="space-y-3 text-gray-400 mt-2">
-              <li className="flex items-center gap-2"><img src="/assets/BuyersImg/images/leaf.png" className="w-4 h-4" alt="Leaf" />About</li>
-              <li className="flex items-center gap-2"><img src="/assets/BuyersImg/images/leaf.png" className="w-4 h-4" alt="Leaf" />Products</li>
-              <li className="flex items-center gap-2"><img src="/assets/BuyersImg/images/leaf.png" className="w-4 h-4" alt="Leaf" />login</li>
-              <li className="flex items-center gap-2"><img src="/assets/BuyersImg/images/leaf.png" className="w-4 h-4" alt="Leaf" />Register as Buyer</li>
-              <li className="flex items-center gap-2"><img src="/assets/BuyersImg/images/leaf.png" className="w-4 h-4" alt="Leaf" />Register as Farmer</li>
-              <li className="flex items-center gap-2"><img src="/assets/BuyersImg/images/leaf.png" className="w-4 h-4" alt="Leaf" />Contact</li>
+              {menuItems.map((item, index) => (
+                <li 
+                  key={index} 
+                  className="flex items-center gap-2 cursor-pointer hover:text-gray-600"
+                  onClick={() => navigate(item.path)}
+                >
+                  <img src="/assets/BuyersImg/images/leaf.png" className="w-4 h-4" alt="Leaf" />
+                  {item.name}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -44,7 +60,7 @@ const Footer = () => {
         </div>
       </footer>
 
-      <div className="bg-[#1F1E17] text-gray-400 text-sm py-4 px-4 text-center">
+      <div className="bg-[#1F1E17] text-gray-400 text-sm py-2 px-4 text-center">
         <p>© All Copyright 2024 by @ Sajha Krishi</p>
       </div>
     </>

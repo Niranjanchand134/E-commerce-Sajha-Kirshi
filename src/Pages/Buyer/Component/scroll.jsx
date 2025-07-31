@@ -22,7 +22,7 @@ const Scroll = () => {
           <h1 className="text-white font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl w-full max-w-md font-mono leading-tight">
             <span className="text-[#EEC044]">Agriculture</span> & Organic Market
           </h1>
-          <button className="mt-4 bg-green-600 hover:bg-blue-500 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300">
+          <button className="mt-4 bg-green-600 hover:bg-green-500 text-white font-semibold px-6 py-2 rounded shadow-md transition-all duration-300">
             Shop Now
           </button>
         </div>
