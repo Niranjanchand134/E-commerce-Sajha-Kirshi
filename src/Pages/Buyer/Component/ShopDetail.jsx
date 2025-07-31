@@ -169,12 +169,25 @@ const ShopDetail = () => {
         ErrorMessageToast("Please fill the KYC form before proceeding.");
         setError("KYC not found");
         return;
-      }
-      else if (!kycData.verified) {
+      } else if (!kycData.verified) {
         ErrorMessageToast("KYC is not verified. Please Wait for Approval");
         setError("KYC not verified");
         return;
       }
+
+      // Calculate pricing
+      const originalPrice = product.price;
+      const discountPercentage = product.discountPrice || 0;
+      const discountedPrice =
+        discountPercentage > 0
+          ? originalPrice * (1 - discountPercentage / 100)
+          : originalPrice;
+
+      const itemTotal = originalPrice * quantity;
+      const totalDiscountAmount = (originalPrice - discountedPrice) * quantity;
+      const subtotalAfterDiscount = discountedPrice * quantity;
+      const deliveryFee = 135; // Same as in AddCart
+      const total = subtotalAfterDiscount + deliveryFee;
 
       const checkoutItems = [
         {
@@ -182,8 +195,11 @@ const ShopDetail = () => {
           farmerId: parseInt(product.user.id),
           productId: parseInt(productId),
           productName: product.name,
-          price: product.price,
-          discountPrice: product.discountPrice || 0,
+          price: originalPrice,
+          originalPrice: originalPrice,
+          discountPercentage: discountPercentage,
+          discountedPrice: discountedPrice,
+          totalDiscountAmount: (originalPrice - discountedPrice) * quantity,
           quantity: quantity,
           imageUrl: selectedImage,
           farmName: farmer?.farmName || "Unknown Farm",
@@ -192,7 +208,13 @@ const ShopDetail = () => {
       ];
 
       navigate("/buynow", {
-        state: { checkoutItems },
+        state: {
+          checkoutItems,
+          itemTotal,
+          discountAmount: totalDiscountAmount,
+          deliveryFee,
+          total,
+        },
       });
     } catch (error) {
       console.error("Buy Now error:", error);

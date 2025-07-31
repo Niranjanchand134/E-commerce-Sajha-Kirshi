@@ -117,12 +117,12 @@ const ProductCard = ({
             )}
           </div>
           <div className="flex gap-4 items-center text-gray-500 text-xl">
-            <button
+            {/* <button
               onClick={toggleLike}
               className="hover:text-red-500 transition-all duration-200"
             >
               {liked ? <FaHeart className="text-red-500" /> : <FaRegHeart />}
-            </button>
+            </button> */}
             <button
               onClick={handleRemove}
               className="hover:text-red-600 transition-all duration-200"

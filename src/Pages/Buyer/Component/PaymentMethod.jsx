@@ -432,7 +432,7 @@ const PaymentMethod = () => {
                       }
                     />
                   </div>
-                  <div className="md:col-span-2">
+                  {/* <div className="md:col-span-2">
                     <label className="flex items-center">
                       <input
                         type="checkbox"
@@ -537,7 +537,7 @@ const PaymentMethod = () => {
                         )}
                       </div>
                     </>
-                  )}
+                  )} */}
                 </div>
 
                 {/* Payment Method Selection */}
