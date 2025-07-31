@@ -89,11 +89,7 @@ const FarmerSidebar = ({ collapsed }) => {
             label: 'KYC Status',
             onClick: () => navigate('/Farmerlayout/FarmerKYCHome'),
           },
-          {
-            key: '7',
-            icon: <SettingOutlined />,
-            label: 'Setting',
-          },
+          
         ]}
       />
     </Sider>

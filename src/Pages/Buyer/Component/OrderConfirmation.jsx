@@ -55,12 +55,14 @@ const OrderConfirmation = () => {
               <>
                 <h4 className="text-2xl font-semibold mb-4 text-center">
                   {status === "success" ||
-                  orderData?.orderStatus === "CONFIRMED"
+                  orderData?.orderStatus === "CONFIRMED" ||
+                  orderData?.paymentMethod === "COD"
                     ? "Order Confirmed!"
                     : "Order Failed"}
                 </h4>
                 {status === "success" ||
-                orderData?.orderStatus === "CONFIRMED" ? (
+                orderData?.orderStatus === "CONFIRMED" ||
+                orderData?.paymentMethod === "COD" ? (
                   <div className="text-center">
                     <p className="text-lg text-gray-700 mb-4">
                       Your order has been successfully placed. Thank you for
