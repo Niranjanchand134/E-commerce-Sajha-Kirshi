@@ -28,7 +28,7 @@ const SidebarMenulist = ({collapsed}) => {
   };
 
   return (
-    <Menu theme={"light"} mode="inline" className="menu-bar">
+    <Menu trigger={null} theme={"light"} mode="inline" className="menu-bar">
       <Menu.Item
         key="home"
         className="text-base font-medium"

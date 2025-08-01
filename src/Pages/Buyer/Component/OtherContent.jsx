@@ -64,7 +64,7 @@ const OtherContent = () => {
         {/*end cart */}
 
         {/* FAQ Question set */}
-        <div className=" mx-auto px-4 py-8 ">
+        <div className="max-w-3xl mx-auto py-8"> {/* Added max-w-3xl to constrain width */}
             <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Frequently Asked Questions</h2>
             
             <div className="space-y-4">
