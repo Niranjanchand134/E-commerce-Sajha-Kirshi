@@ -8,7 +8,7 @@ import {
   initiateEsewaPayment,
   moveToCheckout,
 } from "../../../services/OtherServices/cartService";
-import { ErrorMessageToast } from "../../../utils/Tostify.util";
+import { ErrorMessageToast, SuccesfulMessageToast } from "../../../utils/Tostify.util";
 
 const PaymentMethod = () => {
   const { state } = useLocation();
@@ -192,7 +192,7 @@ const PaymentMethod = () => {
       } else {
         const response = await createOrder(orderData);
         await moveToCheckout(user.id, productIds);
-        ErrorMessageToast("Order confirmed with Cash on Delivery!", "success");
+        SuccesfulMessageToast("Order confirmed with Cash on Delivery!", "success");
         navigate("/order-confirmation", { state: { orderData: response } });
       }
     } catch (error) {
@@ -432,7 +432,7 @@ const PaymentMethod = () => {
                       }
                     />
                   </div>
-                  <div className="md:col-span-2">
+                  {/* <div className="md:col-span-2">
                     <label className="flex items-center">
                       <input
                         type="checkbox"
@@ -537,7 +537,7 @@ const PaymentMethod = () => {
                         )}
                       </div>
                     </>
-                  )}
+                  )} */}
                 </div>
 
                 {/* Payment Method Selection */}

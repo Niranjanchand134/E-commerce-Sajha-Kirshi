@@ -6,36 +6,87 @@ import { useAuth } from "../../../Context/AuthContext";
 import { ErrorMessageToast } from "../../../utils/Tostify.util";
 
 const Buynow = () => {
-  const { state } = useLocation();
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const {
-    checkoutItems = [],
-    itemTotal,
-    discountAmount,
-    deliveryFee,
-    total,
-  } = state || {};
+   const { state } = useLocation();
+   const { user } = useAuth();
+   const navigate = useNavigate();
 
-  // Fallback data
-  const defaultCheckoutItems = [
-    {
-      id: 1,
-      productName: "Mustang ko Apple",
-      price: 999,
-      quantity: 1,
-      imageUrl:
-        "https://www.collinsdictionary.com/images/full/apple_158989157.jpg",
-      farmName: "Pratik Farm",
-      location: "Shadobato, Road, Lalitpur, Nepal",
-      discountPercentage: 0,
-      originalPrice: 999,
-      discountedPrice: 999,
-      totalDiscountAmount: 0,
-    },
-  ];
+   const {
+     checkoutItems = [],
+     itemTotal: providedItemTotal,
+     discountAmount: providedDiscountAmount,
+     deliveryFee: providedDeliveryFee,
+     total: providedTotal,
+   } = state || {};
 
-  const items = checkoutItems.length > 0 ? checkoutItems : defaultCheckoutItems;
+   // Fallback data
+   const defaultCheckoutItems = [
+     {
+       id: 1,
+       productName: "Mustang ko Apple",
+       price: 999,
+       quantity: 1,
+       imageUrl:
+         "https://www.collinsdictionary.com/images/full/apple_158989157.jpg",
+       farmName: "Pratik Farm",
+       location: "Shadobato, Road, Lalitpur, Nepal",
+       discountPercentage: 0,
+       originalPrice: 999,
+       discountedPrice: 999,
+       totalDiscountAmount: 0,
+     },
+   ];
+
+   const items = checkoutItems.length > 0 ? checkoutItems : defaultCheckoutItems;
+
+
+   const calculateTotals = () => {
+     const calculations = items.reduce(
+       (acc, item) => {
+         const originalPrice = item.originalPrice || item.price;
+         const discountPercentage = item.discountPercentage || 0;
+         const discountedPrice =
+           item.discountedPrice ||
+           originalPrice * (1 - discountPercentage / 100);
+         const itemSubtotal = originalPrice * item.quantity;
+         const itemDiscountAmount =
+           (originalPrice - discountedPrice) * item.quantity;
+
+         return {
+           itemTotal: acc.itemTotal + itemSubtotal,
+           discountAmount: acc.discountAmount + itemDiscountAmount,
+         };
+       },
+       { itemTotal: 0, discountAmount: 0 }
+     );
+
+     const deliveryFee = items.length > 0 ? 135 : 0;
+     const total =
+       calculations.itemTotal - calculations.discountAmount + deliveryFee;
+
+     return {
+       itemTotal: calculations.itemTotal,
+       discountAmount: calculations.discountAmount,
+       deliveryFee,
+       total,
+     };
+   };
+
+    const calculated = calculateTotals();
+    const itemTotal =
+      providedItemTotal !== undefined
+        ? providedItemTotal
+        : calculated.itemTotal;
+    const discountAmount =
+      providedDiscountAmount !== undefined
+        ? providedDiscountAmount
+        : calculated.discountAmount;
+    const deliveryFee =
+      providedDeliveryFee !== undefined
+        ? providedDeliveryFee
+        : calculated.deliveryFee;
+    const total =
+      providedTotal !== undefined ? providedTotal : calculated.total;
+
 
   const getFormattedAddress = (location) => {
     return location || "Shadobato, Road, Lalitpur, Near Shadobato Chok";

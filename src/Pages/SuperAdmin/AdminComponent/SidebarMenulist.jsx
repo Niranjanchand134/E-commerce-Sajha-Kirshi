@@ -41,7 +41,7 @@ const SidebarMenulist = ({collapsed}) => {
       <Menu.Item
         key="restaurant"
         className="text-base font-medium"
-        onClick={() => handleFarmerClick("./farmer-kyc/:id")}
+        onClick={() => handleFarmerClick("./farmer-kyc")}
         icon={<ProductOutlined style={{ fontSize: "20px" }} color="#080808" />}
       >
         Farmer Kyc
@@ -49,7 +49,7 @@ const SidebarMenulist = ({collapsed}) => {
       <Menu.Item
         key="user"
         className="text-base font-medium"
-        onClick={() => handleBuyerClick("./buyer-kyc/:id")}
+        onClick={() => handleBuyerClick("./buyer-kyc")}
         icon={< UsergroupDeleteOutlined  style={{ fontSize: "20px" }} color="#080808" />}
       >
         Buyer Kyc
